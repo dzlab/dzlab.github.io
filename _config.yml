@@ -1,0 +1,31 @@
+# Dependencies
+markdown:         kramdown #redcarpet
+highlighter:      rouge  #pygments
+
+# Permalinks
+permalink:        pretty
+#relative_permalinks: true
+
+# Setup
+title:            All things
+tagline:          'Machie Learning'
+description:      ''
+url:              https://dzlab.github.io
+baseurl:          
+
+author:
+  name:           'bachiirc'
+  url:            https://twitter.com/bachiirc
+
+paginate:         5
+
+# Custom vars
+version:          2.1.0
+
+github:
+  repo:           https://github.com/poole/hyde
+
+plugins:
+  - jekyll-feed
+  - jekyll-gist
+  - jekyll-paginate
