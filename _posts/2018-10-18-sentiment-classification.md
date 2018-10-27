@@ -1,6 +1,8 @@
 ---
 layout: post
+comments: true
 title: Sentiment Classification Task
+categories: jekyll update
 ---
 
 IMDB sentiment: positive/negative folder
@@ -27,6 +29,7 @@ p( class= positive / document) =  (p( d / c=1) * p(c=1)) / P(d) that's bayes rul
 to simplify we divide everything by the case where class is negative.
 
 p(c=1/d) / p(c=0/d) = (p( d / c=1) * p(c=1)) / (p( d / c=0) * p(c=0))
+r = log( (ratio of feature f in positive documents / ratio of feature f in negative documents) )
 
 p(c=1) is the average of the labels, p(c=0) = 1 - p(c=1)
 Naive approach is to consider the probabilities of the words of a document been independent (which is not true), so that we can multiply them together.
@@ -49,4 +52,4 @@ Use regularization:
 Trigrams are super helpful when dealing with order (e.g. not good) when using tokenizer. use max-feature parameter in the logistic regression to limit number of created features.
 
 
-
+{% include disqus.html %}

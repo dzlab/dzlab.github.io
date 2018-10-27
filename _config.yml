@@ -11,7 +11,7 @@ title:            All things
 tagline:          'Machie Learning'
 description:      ''
 url:              https://dzlab.github.io
-baseurl:          
+baseurl:          / 
 
 author:
   name:           'bachiirc'
