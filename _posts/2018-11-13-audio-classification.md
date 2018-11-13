@@ -115,19 +115,51 @@ fnames = sorted(image_train_path); fnames[:5]
 {% endhighlight %}
 
 Now we can have a look at the data which will be piped into the DL model
+**Note**: there is no need to apply any transformation (cropping, flipping, rotating, light, etc.) to the images we will be classiying. In fact, they are spectrogram and will be always generate same way, unlike the images that someone would take with a camera where the condition can change drastically.
+
 {% highlight python %}
 np.random.seed(42)
-# there is no need to apply in transformation as 
 data = ImageDataBunch.from_lists(path, fnames, labels, ds_tfms=None, size=224, bs=bs)
 data.normalize(imagenet_stats)
+data.show_batch(rows=5, figsize=(8,8))
+{% endhighlight %}
+Following is an example of spectrograms with their corresponding labels:
+![audio_spectrogram_batch]({{ "/assets/audio_spectrogram_batch.png" | absolute_url }})
 
-data.classes
+## DeepLearning
+Now the DL part can finally start
 
-data.show_batch(rows=3, figsize=(7,8))
+### Model training
+First, create a pre-trained [ResNet-34](https://arxiv.org/abs/1512.03385) based model, and look for best **learning rate** that we will choose later when training the final layers of this network.
+{% highlight python %}
+learn = create_cnn(data, models.resnet34, metrics=error_rate)
+learn.lr_find()
+learn.recorder.plot()
+{% endhighlight %}
+Plotting the recorded learning rate will give us somethine like this:
+![learning_rate_freezed_net]({{ "/assets/learning_rate_freezed_net.png" | absolute_url }})
 
-data.classes, data.c, len(data.train_ds), len(data.valid_ds)
+Now we can training the FeedFordward last layers with the learning slice that we choosed wisely from the previous plot. Choose the ones that bounds a steep decreasing plot.
+
+{% highlight python %}
+lr=1e-2
+learn.fit_one_cycle(5, slice(lr))
+
+Total time: 36:59
+epoch  train_loss  valid_loss  error_rate
+1      2.573095    1.728513    0.476064    (28:29)
+2      1.685420    1.314066    0.367553    (02:10)
+3      1.244419    1.147185    0.324468    (02:08)
+4      0.924578    1.065614    0.305851    (02:04)
+5      0.744983    1.049067    0.295213    (02:06)
 {% endhighlight %}
 
+
+### Model Interpretation
+{% highlight python %}
+interp = ClassificationInterpretation.from_learner(learn)
+interp.plot_confusion_matrix()
+{% endhighlight %}
 
 Full jupyter notebooks:
 - Audio dataset preprocessing - [notebook](https://github.com/dzlab/deepprojects/blob/master/classification/Freesound_General_Purpose_Audio_Tagging_-_PreProcessing.ipynb)
