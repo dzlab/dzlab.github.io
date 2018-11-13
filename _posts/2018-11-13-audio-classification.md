@@ -154,12 +154,50 @@ epoch  train_loss  valid_loss  error_rate
 5      0.744983    1.049067    0.295213    (02:06)
 {% endhighlight %}
 
+We can keep training the entire net after unfreezing for more epochs as follows:
+{% highlight python %}
+learn.unfreeze()
+learn.fit_one_cycle(10, max_lr=slice(1e-5, 1e-4))
+
+Total time: 23:48
+epoch  train_loss  valid_loss  error_rate
+1      0.692382    1.029194    0.297340    (02:14)
+2      0.616119    0.993735    0.280851    (02:09)
+3      0.497737    0.958199    0.268617    (02:17)
+4      0.342366    0.942322    0.256915    (02:24)
+5      0.221545    0.936434    0.261170    (02:26)
+6      0.143401    0.885661    0.242553    (02:24)
+7      0.091955    0.894207    0.237234    (02:25)
+8      0.062393    0.874940    0.231915    (02:26)
+9      0.051603    0.870887    0.232979    (02:27)
+10     0.046500    0.871038    0.229255    (02:30)
+{% endhighlight %}
+
+The training technique is based on the one cycle policy, here is the original ResNet [paper](https://arxiv.org/abs/1512.03385).
 
 ### Model Interpretation
 {% highlight python %}
 interp = ClassificationInterpretation.from_learner(learn)
-interp.plot_confusion_matrix()
 {% endhighlight %}
+Plot the top losses, i.e. the cases where the model uncorrectly predicted the labels:
+{% highlight python %}
+interp.plot_top_losses(9, figsize=(15,11))
+{% endhighlight %}
+![freesound_top_losses]({{ "/assets/freesound_top_losses.png" | absolute_url }})
+
+Plot the confusion matrix, i.e. for each orginial label the distribution of number of times the model predicted images from this label to be of one fo the rest classes. The best matrix should have zeros except in the diagonal.
+{% highlight python %}
+interp.plot_confusion_matrix(figsize=(15,15), dpi=60)
+{% endhighlight %}
+![freesound_confusion_matrix]({{ "/assets/freesound_confusion_matrix.png" | absolute_url }})
+
+We can perform t-SNE on our model's output vectors. As these vectors are from the final classification, we would expect them to cluster well.
+{% highlight python %}
+probs_trans = manifold.TSNE(n_components=2, perplexity=15).fit_transform(preds)
+prob_df = pd.DataFrame(np.concatenate((probs_trans, y[:,None]), axis=1), columns=['x','y','labels'])
+g = sns.lmplot('x', 'y', data=prob_df, hue='labels', fit_reg=False, legend=False)
+{% endhighlight %}
+![freesound_tsne]({{ "/assets/freesound_tsne.png" | absolute_url }})
 
 Full jupyter notebooks:
 - Audio dataset preprocessing - [notebook](https://github.com/dzlab/deepprojects/blob/master/classification/Freesound_General_Purpose_Audio_Tagging_-_PreProcessing.ipynb)
