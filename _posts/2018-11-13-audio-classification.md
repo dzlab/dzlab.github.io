@@ -26,8 +26,6 @@ Once you downloaded this audio dataset, we can then start playing with
 ### Data PreProcessing
 These audio files are uncompressed PCM 16 bit, 44.1 kHz, mono audio files which make just perfect for a classification based on spectrogram. We will be using the very handy python library [librosa](https://librosa.github.io/librosa/) to generate the spectrogram images from these audio files. Another option will be to use matplotlib [specgram()](https://matplotlib.org/gallery/images_contours_and_fields/specgram_demo.html).
 
-**Note** An alternative for using `spectrogram` images is generating Mel-frequency cepstral coefficients (MFCCs). Here is an example of training on MFCC for audio classification - [link](https://www.analyticsvidhya.com/blog/2017/08/audio-voice-processing-deep-learning/). Here is nice lecture about sound coding - [youtube](https://www.youtube.com/watch?v=a2hhMm4kMeo).
-
 The following snippet converts an audio into a spectrogram image:
 {% highlight python %}
 def plot_spectrogram(audio_path):
@@ -200,6 +198,11 @@ prob_df = pd.DataFrame(np.concatenate((probs_trans, y[:,None]), axis=1), columns
 g = sns.lmplot('x', 'y', data=prob_df, hue='labels', fit_reg=False, legend=False)
 {% endhighlight %}
 ![freesound_tsne]({{ "/assets/freesound_tsne.png" | absolute_url }})
+
+### What's next
+An alternative for using `spectrogram` images is generating Mel-frequency cepstral coefficients (MFCCs). Here is an example of training on MFCC for audio classification - [link](https://www.analyticsvidhya.com/blog/2017/08/audio-voice-processing-deep-learning/).
+
+It is also possible to explore other techniques for coding sound, here is nice lecture about this topic - [youtube](https://www.youtube.com/watch?v=a2hhMm4kMeo).
 
 Full jupyter notebooks:
 - Audio dataset preprocessing - [notebook](https://github.com/dzlab/deepprojects/blob/master/classification/Freesound_General_Purpose_Audio_Tagging_-_PreProcessing.ipynb)
