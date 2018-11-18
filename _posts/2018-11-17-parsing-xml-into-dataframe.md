@@ -2,15 +2,13 @@
 layout: post
 comments: true
 title: Parsing XML into pandas DataFrame
-categories: xml pandas nlp
+categories: nlp
 ---
 
 Markup languages such us XML are handy for storing and exchanging structured data. For NLP tasks (e.g. text classification), however we may want to work with pandas Dataframe as they are more pratical. The following illustrate an example of parsing XML data. In particulary the [Reuters-21578](http://www.daviddlewis.com/resources/testcollections/reuters21578/) collection which appeared on the Reuters newswire in 1987. A detailed description of this dataset can be find in this [link](http://www.daviddlewis.com/resources/testcollections/reuters21578/readme.txt)
 
 ### Downloading the data
 First download the data, un-compressed and have a look to the different files
-
-code does a very simple job of converting an XML file into a Pandas data-frame. It recursively parses every branch in the file creating new columns and storing their value when information is found. It stores not just raw text as variables in the new dataset, but also all of the attributes stored in tags as well.
 
 {% highlight bash %}
 $ curl -O 'http://kdd.ics.uci.edu/databases/reuters21578/reuters21578.tar.gz'
@@ -231,3 +229,5 @@ df = pd.DataFrame(data, columns=data.keys())
 #df = df.astype(dtype= {"date":"datetime64[]"})
 df.head()
 {% endhighlight %}
+
+{% include disqus.html %}
