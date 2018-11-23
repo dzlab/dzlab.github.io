@@ -77,7 +77,7 @@ model = Model(inputs=[users_input, items_input], outputs=[ratings_output])
 ### Training
 The previous snippets are grouped together into a helper class for parsing Reuters dataset.
 {% highlight python %}
-epochs                 = 100
+epochs                 = 10
 batch_size             = 1024
 # compile the model
 model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
