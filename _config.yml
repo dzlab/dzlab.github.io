@@ -14,8 +14,8 @@ url:              https://dzlab.github.io
 baseurl:          / 
 
 author:
-  name:           'bachiirc'
-  url:            https://twitter.com/bachiirc
+  name:           'bachirc'
+  twitter:        https://twitter.com/bachiirc
 
 paginate:         5
 
@@ -23,7 +23,7 @@ paginate:         5
 version:          2.1.0
 
 github:
-  repo:           https://github.com/poole/hyde
+  repo:           https://github.com/dzlab
 
 plugins:
   - jekyll-feed
