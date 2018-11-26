@@ -20,9 +20,9 @@ RNN are the ones been classically used for Timeseries problems, but in the last 
 **CNN**
 1. Transfer learning applied to time series images (ts —> image —> resnet):
 
-    1.1. Single image: 1-3 channel images (an encoder per channel) in a single resnet, @oguiza Pytorch code 2
+    1.1. Single image: 1-3 channel images (an encoder per channel) in a single resnet, [notebook](https://github.com/dzlab/deepprojects/blob/master/timeseries/Timeseries_Earthquakes.ipynb)
 
-    1.2. Multi-image: 1-3 channel images (an encoder per channel) in parallel resnets @mb4310 Pytorch code 4
+    1.2. Multi-image: 1-3 channel images (an encoder per channel) in parallel resnets [notebook]()
 
 2. Training from scratch:
 
