@@ -13,8 +13,10 @@ title: Home
     </h1>
 
     <span class="post-date">{{ post.date | date_to_string }}</span>
-
-    {{ post.content }}
+    {% if post.img_excerpt %}
+       <img src="{{ site.url }}/{{post.img_excerpt}}" style="align:center; width:100%;">
+    {% endif %}
+    <!--{{ post.content }}-->
   </div>
   {% endfor %}
 </div>
