@@ -11,7 +11,7 @@ title:            All things
 tagline:          'Machie Learning'
 description:      ''
 url:              https://dzlab.github.io
-baseurl:          / 
+baseurl:          /
 
 author:
   name:           'bachirc'
@@ -29,3 +29,6 @@ plugins:
   - jekyll-feed
   - jekyll-gist
   - jekyll-paginate
+
+kramdown:
+  parse_block_html: true
