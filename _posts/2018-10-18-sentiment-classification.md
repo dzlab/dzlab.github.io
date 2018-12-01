@@ -12,7 +12,7 @@ https://www.kaggle.com/reiinakano/basic-nlp-bag-of-words-tf-idf-word2vec-lstm
 
 
 IMDB sentiment: positive/negative folder
-term-document matrix: 
+term-document matrix:
 - first create a vocaubarly, the list of all words that appeared (they will be the features),
 - then turn each review into a vector of which words appear and how offten did they appear. This is resulting representation is called bag of word representation, it does not cotain the order of text, it is just a bag of the words (what words in it).
 
@@ -20,10 +20,10 @@ With this matrix we can do math, e.g. logistic regression. Before we will do som
 
 Use sklearn CountVectorizer. Turn text into tokens, also called tokenization. Use a good tokenizer.
 API:
- - fit_transform() to transoform the training text into term-document sparse matrix
- - transform() for the test/validation set to be transformed using the training vocabulary and order
- - get_feature_names() to get the list of vocabularies
- - vocabulary\_[word] to get the index of a word, kind reverse dictionnary
+ - `fit_transform()` to transoform the training text into term-document sparse matrix
+ - `transform()` for the test/validation set to be transformed using the training vocabulary and order
+ - `get_feature_names()` to get the list of vocabularies
+ - `vocabulary\_[word]` to get the index of a word, kind reverse dictionnary
 
 This representation was used for a long time and it worked pretty well, nowadays RNN are mostly used.
 Naive Bayes:
