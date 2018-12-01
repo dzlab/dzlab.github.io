@@ -61,7 +61,14 @@ class SimpleLearner():
                 losses.append(current_loss)
         return losses
 {% endhighlight %}
-As the output of the model is a hot encoded array (with number of classes as second dimension), and depending on the number of classes, we use a Binary Cross Entropy or a Negative Log Likelihood loss for more than two classes.
+As the output of the model is a hot encoded array (with number of classes as second dimension), and depending on the number of classes, we use a **Binary Cross Entropy** (a simple `if/else` statement) which is defined as follows:
+
+$$−(y * \log (\hat{y}) + (1−y) * \log (1−\hat{y}))$$
+
+For more than two classes or a Negative Log Likelihood loss which is known as **Categorical Cross Entropy** and is defined in a general manner by the function:
+
+$$ − \sum_c y_c \log (\hat{y}_c) $$
+
 {% highlight python %}
 loss_func = nn.NLLLoss().cuda()
 {% endhighlight %}

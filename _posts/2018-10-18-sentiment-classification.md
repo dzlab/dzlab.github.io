@@ -4,6 +4,12 @@ comments: true
 title: Sentiment Classification Task
 categories: jekyll update
 ---
+Next step in using Naive Bases Text Classifier https://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf
+Check from this https://medium.com/data-from-the-trenches/text-classification-the-first-step-toward-nlp-mastery-f5f95d525d73
+
+http://nadbordrozd.github.io/blog/2016/05/20/text-classification-with-word2vec/
+https://www.kaggle.com/reiinakano/basic-nlp-bag-of-words-tf-idf-word2vec-lstm
+
 
 IMDB sentiment: positive/negative folder
 term-document matrix: 
@@ -25,16 +31,17 @@ log-count ratio r for each word f.
 The trick is to add one row with all ones in order for the probability so that nothing ever become unfinitely unlikely. 
 
 First calculate the probability for every word, then then calculate the probability, positive is 1 
-p( class= positive / document) =  (p( d / c=1) * p(c=1)) / P(d) that's bayes rule
+$$ p( class = positive / document) =  \frac{p( d / c=1) * p(c=1)}{p(d)} $$ that's bayes rule
 to simplify we divide everything by the case where class is negative.
 
-p(c=1/d) / p(c=0/d) = (p( d / c=1) * p(c=1)) / (p( d / c=0) * p(c=0))
+$$ \frac{p(c=1/d)}{p(c=0/d)} = \frac{p( d / c=1) * p(c=1)}{p( d / c=0) * p(c=0)} $$
+
 r = log( (ratio of feature f in positive documents / ratio of feature f in negative documents) )
 
-p(c=1) is the average of the labels, p(c=0) = 1 - p(c=1)
+$$p(c=1)$$ is the average of the labels, $$p(c=0) = 1 - p(c=1)$$
 Naive approach is to consider the probabilities of the words of a document been independent (which is not true), so that we can multiply them together.
 
-P(d) i.e. probability of getting this movie review
+$$p(d)$$ i.e. probability of getting this movie review
 
 Binarize Naive Bayes, as we don't care much if word 'absurd' appeared more than once use API sign() on document to turn positive number into 1 and negaive to 0
 
@@ -44,8 +51,8 @@ Instead of using those naive parameters (r, b) (theoritical models) why don't we
 Use parameter dual=True for logistic regression.
 
 Use regularization:
- - L1 (i.e. a \|w\|) tends to make things smaller separately
- - L2 (i.e. a w^2) tends to make everything smaller at the same time
+ - L1 (i.e. a $$\|w\|$$) tends to make things smaller separately
+ - L2 (i.e. a $$w^2$$) tends to make everything smaller at the same time
  
  Try regularization and binary.
  
