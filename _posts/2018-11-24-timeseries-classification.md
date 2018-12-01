@@ -66,6 +66,11 @@ Other algorithms:
 ### Multivariate Timeseries Classification
 The previous studies are inconclusive as to best algorithms to use in multivariate TS due to the small number of datasets used. However, FCN, Encoder, and Resnet also seem to work well.
 
+### Libraries
+1. [pyts](https://johannfaouzi.github.io/pyts/) a Python package for time series transformation and classification.
+2. [cesium](https://github.com/cesium-ml/cesium) an open source library that allows users to extract features from raw time series data - [list](http://cesium-ml.org/docs/feature_table.html), build machine learning models from these features, and generate predictions for new data.
+An example illustrating the power of this library - [Epilepsy Detection Using EEG Data 4](http://cesium-ml.org/docs/auto_examples/plot_EEG_Example.html#sphx-glr-auto-examples-plot-eeg-example-py).
+
 ### References
 - The Great Time Series Classification Bake Off: An Experimental Evaluation of Recently Proposed Algorithms. Extended Version (Bagnall, 2016) [paper](https://arxiv.org/abs/1602.01711)
 - Deep Learning for Time-Series Analysis (Gamboa, 2017) [paper](https://arxiv.org/abs/1701.01887)
