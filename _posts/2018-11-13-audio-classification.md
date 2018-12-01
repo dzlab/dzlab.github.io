@@ -207,5 +207,3 @@ It is also possible to explore other techniques for coding sound, here is nice l
 Full jupyter notebooks:
 - Audio dataset preprocessing - [notebook](https://github.com/dzlab/deepprojects/blob/master/classification/Freesound_General_Purpose_Audio_Tagging_-_PreProcessing.ipynb)
 - Audio spectrogram classification - [notebook](https://github.com/dzlab/deepprojects/blob/master/classification/Freesound_General_Purpose_Audio_Tagging.ipynb)
-
-{% include disqus.html %}

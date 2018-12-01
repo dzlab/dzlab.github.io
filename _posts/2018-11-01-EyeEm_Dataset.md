@@ -112,5 +112,3 @@ interp.plot_confusion_matrix()
 Full jupyter notebook - [link](https://github.com/dzlab/deepprojects/blob/master/classification/EyeEm_Image_Dataset_Download.ipynb)
 
 **Note** This work is an adaptation of an original notebook by Jeremey and FastAI team - [link](https://github.com/fastai/course-v3/blob/e38ee7a2682ce6f730501ce55e9af7f98e0d6162/nbs/dl1/lesson2-download.ipynb)
-
-{% include disqus.html %}

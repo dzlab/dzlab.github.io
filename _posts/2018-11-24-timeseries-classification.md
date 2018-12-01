@@ -72,5 +72,3 @@ The previous studies are inconclusive as to best algorithms to use in multivaria
 - Deep learning for time series classification: a review (Fawaz, 2018) [paper](https://arxiv.org/abs/1809.04356) [code](https://github.com/hfawaz/dl-4-tsc)
 - Proximity Forest: An effective and scalable distance-based classifier for time series (Lucas, 2018) [paper](https://arxiv.org/abs/1808.10594)
 - Is rotation forest the best classifier for problems with continuous features? (Bagnall, 2018) [paper](https://arxiv.org/abs/1809.06705)
-
-{% include disqus.html %}

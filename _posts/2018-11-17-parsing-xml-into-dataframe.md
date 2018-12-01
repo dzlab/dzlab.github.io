@@ -229,5 +229,3 @@ df = pd.DataFrame(data, columns=data.keys())
 #df = df.astype(dtype= {"date":"datetime64[]"})
 df.head()
 {% endhighlight %}
-
-{% include disqus.html %}
