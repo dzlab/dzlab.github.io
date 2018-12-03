@@ -4,6 +4,7 @@ comments: true
 title: Fake news detection - Text Classification approach
 categories: nlp
 tags: [dl, lstm, cnn]
+toc: true
 #img_excerpt: assets/20181127-earthquakes_positive.jpg
 ---
 

@@ -29,6 +29,7 @@ plugins:
   - jekyll-feed
   - jekyll-gist
   - jekyll-paginate
+  - jekyll-toc
 
 kramdown:
   parse_block_html: true
