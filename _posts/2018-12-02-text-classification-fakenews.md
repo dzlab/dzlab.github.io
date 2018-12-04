@@ -43,7 +43,7 @@ TextClasDataBunch.load(path)
 {% endhighlight %}
 
 ## Language model
-A language model is a model trained to guess the next word starting from a sequence of words as input. It has a recurrent structure and a hidden state that is updated each time it sees a new word. This hidden state thus contains information about the sentence up to that point.
+A language model is a model trained to guess the next word starting from a sequence of words as input. It has a recurrent structure and a hidden state that is updated each time it sees a new word. This hidden state thus contains information about the sentence up to that point. Check this article for more details on [how to train a language model from scratch](https://dzlab.github.io/nlp/2018/11/22/language-model-training/).
 
 ### Training
 We need to train a model that classifies the news from scratch, starting from a model pretrained on a bigger dataset (wikitext-103 [^3]). This pre-trained model catches a 'knowledge' of the English language which will be useful to our classifier.
