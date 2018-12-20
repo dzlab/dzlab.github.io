@@ -34,7 +34,9 @@ Right from first few seconds of the course Jeremy tries to convince you that you
 The homework for this lesson is to apply the same technique on any image classification problem. I myself applied this same notebook to classify [Flowers](https://github.com/dzlab/deepprojects/blob/master/classification/102_Category_Flower_Dataset.ipynb), [Birds](https://github.com/dzlab/deepprojects/blob/master/classification/Caltech_UCSD_Birds_200_2011.ipynb) and even [Sounds](https://dzlab.github.io/jekyll/update/2018/11/13/audio-classification/).
 
 #### Lesson 2
-In this lesson Jemerey takes us deeper into Computer Vision through a teddy bear classification example, walk us through a detailled explication of the solution. Then explains interactively using a notebook what is the algorith [Stochastic gradient descent ](https://en.wikipedia.org/wiki/Stochastic_gradient_descent), and how it's updates the NN weights and get better and better at classifying images. The lessong ends with the introduction of some technical vocabulary:
+In this lesson Jemerey takes us deeper into Computer Vision through a teddy bear classification example, walk us through a detailled explication of the solution. Then explains interactively using a notebook what is the algorith [Stochastic gradient descent ](https://en.wikipedia.org/wiki/Stochastic_gradient_descent), and how it's updates the NN weights and get better and better at classifying images.
+
+The lessong ends with the introduction of some technical vocabulary:
 - **Learning rate**: a critical number used to by gradient to control the amount to update the weights.
 - **Epoch**: the number of iterations in the trainning phases. In every run, the trainng goes over all the data points (i.e. every image in the dataset). The number of epochs should not be too high, otherwise the training will see the same images many times and may overfitt and not generalize well.
 - **Mini-batch**: A random set of data points that the training algorithm uses to update weights.
@@ -46,17 +48,22 @@ In this lesson Jemerey takes us deeper into Computer Vision through a teddy bear
 - **Regularization**: Regularization techniques help us make sure when we train our model that it's going to work not only well on the data it's seen but on the data it hasn't seen yet.
 - **Validation Set**: at the end of a mini-batch SGD training loop, data from the validation set (i.e. samples not seen during training) are used in the calculation of the loss function and the accuracy to see how good the model is able to generalize.
 
+![learning_rate]({{ "/assets/20181220-learning_rate.gif" | absolute_url }}){: .center-image }
+
 The homework for this lesson is to build an image classification model and deploy it on a web app.
 
 #### Lesson 3
 The lesson takes time explaining the fancy learning rate plot and how you can interpret it.
 It also presents a couple of jupyter notebooks for a variety of Deep Learning problems along with the trick that can be used to get good results:
 - Multilabel dataset (each image has multiple labels).
-- CamVid dataset (segmentation): the difference is in the use of U-Net with ResNet architecture. 
+- CamVid dataset (segmentation): the difference is in the use of U-Net with ResNet architecture.
 - BIWI dataset (regression, i.e. predict a contiguous number): the difference is in the loss function, in classifiation we tend to use cross entropy, for regression use mean square error.
 - IMDB dataset: sentiment classification
 
 #### Lesson 4
+This lesson focuses on Natural Language Processing (NLP) and how to use the idea of transfer learning  instead of starting from random weigths to get better results in text related tasks.
+
+![nlp_transfer_learning]({{ "/assets/20181220-nlp_transfer_learning.png" | absolute_url }}){: .center-image }
 
 #### Lesson 5
 
@@ -65,7 +72,7 @@ It also presents a couple of jupyter notebooks for a variety of Deep Learning pr
 #### Lesson 7
 
 
-![transfert_training]({{ "/assets/20181220-transfer-learning.jpg" | absolute_url }}){: .center-image }
+![transfer_training]({{ "/assets/20181220-transfer-learning.jpg" | absolute_url }}){: .center-image }
 
 By the end of the course, you will understand the fundamental ideas Jeremy cares a lot about, like:
 - [Transfert learning](https://en.wikipedia.org/wiki/Transfer_learning), the reuse of pre-trained neural networks.
