@@ -16,7 +16,7 @@ The following is an attempt to share my takeaways from the lessons.
 
 ![do_deep_learning]({{ "/assets/20181220-do-deep-learning.jpg" | absolute_url }}){: .center-image }
 
-What's very unique about this course is the focus on the practical side of the learning experince. Right from the very few moments of the course, you will see Deep Learning code, at first you won't understand what's it doing, you will not get it unless you're a Deep Learning expert. But you will be impressed how insanely is it simple to write Deep Learning code to solve problems seconds before the course you would have no idea how they can be solve. You will learn how to take that same code and re-apply it to solve similar problems or even different with the use of the underlying ideas.
+What's very unique about this course is the focus on the practical side of the learning experince. Right from the very few moments of the course, you will see Deep Learning code, at first you won't understand what's it doing, you will not get it unless you're a Deep Learning expert. But you will be impressed how insanely is it simple to write Deep Learning code to solve problems seconds before the course you would have no idea how they can be solved. You will learn how to take that same code and re-apply it to solve similar problems or even different with the use of the underlying ideas.
 
 > **Protip**: take as mush notes as you can while watching the video lessons, especially when Jeremy says 'here is the trick' or the other activation word 'homework'.
 
@@ -102,7 +102,7 @@ In the last part of the lesson, Jeremy talks introduces recurrent neural network
 By the end of the course, you will understand the fundamental ideas Jeremy cares a lot about, like:
 - [Transfert learning](https://en.wikipedia.org/wiki/Transfer_learning), the reuse of pre-trained neural networks.
 - ResNet are awesome (According to [DAWNBench](https://dawn.cs.stanford.edu/benchmark/) they give the best results), take any architecture and through a ResNet you will get better results.
-- Speeding up NN learning with [One fit cycle](https://sgugger.github.io/the-1cycle-policy.html), Descrimitive Learning, Momentum, [RMSProp](https://medium.com/100-days-of-algorithms/day-69-rmsprop-7a88d475003b).
+- Speeding up NN learning with [One fit cycle](https://sgugger.github.io/the-1cycle-policy.html), [Cyclical Learning Rate](https://github.com/bckenstler/CLR), Descrimitive Learning, Momentum, [RMSProp](https://medium.com/100-days-of-algorithms/day-69-rmsprop-7a88d475003b).
 - Fine tunning a NN by deleting Layer (usually head) and replace it with ones useful for your problem.
 - Random initialization of weights
 - Gradullay Freezing & unfreezing layers of the architecture.
