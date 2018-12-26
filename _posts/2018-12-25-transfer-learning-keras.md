@@ -110,7 +110,37 @@ ax.imshow(activations_avg, alpha=0.6, extent=(0,224,224,0), interpolation='bilin
 
 ![model1_last_layer_heatmap]({{ "/assets/20181225-model1_last_layer_heatmap.png" | absolute_url }}){: .center-image }
 
+## Further experiment
+As a second experiment with Transfer Learning for image classification, applying the same approach on the [Oxford-IIIT Pet Dataset](http://www.robots.ox.ac.uk/~vgg/data/pets/) which has 37 categories of dogs and cats, with 200 images for each class.
+![pets_dataset]({{ "/assets/20181225-pets_dataset.png" | absolute_url }}){: .center-image }
+
+After only five epochs, we already get pretty good result with our classifier
+```
+Epoch 5/5
+94/94 [==============================] - 64s 685ms/step - loss: 0.1128 - acc: 0.9835 - val_loss: 0.8669 - val_acc: 0.7520
+```
+And looking at the heat map of the activation we can see that the classifier did a pretty good job at locating the important section in the image.
+
+![pets_heat_map]({{ "/assets/20181225-pets_heat_map.png" | absolute_url }}){: .center-image }
+
+One we can also do to have better idea of the dataset is calculating the [Cosine Similarity](https://en.wikipedia.org/wiki/Cosine_similarity) between few of the images. I took two images from each category and calculated the similarity in TensorFlow as follows:
+
+{% highlight python %}
+a = tf.placeholder(tf.float32, shape=[None], name="input_placeholder_a")
+b = tf.placeholder(tf.float32, shape=[None], name="input_placeholder_b")
+normalize_a = tf.nn.l2_normalize(a,0)
+normalize_b = tf.nn.l2_normalize(b,0)
+cos_similarity=tf.reduce_sum(tf.multiply(normalize_a,normalize_b))
+sess = tf.Session()
+cos_sim = sess.run(cos_similarity,feed_dict={a:x1,b:x2})
+{% endhighlight %}
+Displaying the resulting matrix using [Seaborn Heatmap](http://seaborn.pydata.org/generated/seaborn.heatmap.html) gives the following picture:
+![pets_consine_similarity]({{ "/assets/20181225-pets_consine_similarity.png" | absolute_url }}){: .center-image }
+
 ## What's next
 We can take this approach further by automating the process of re-adapting the NN architecture so that a user have to only pass the dataset and the system will infer the architecture.
 
-|Run notebook in Google Colab [![Run in Google Colab](https://www.tensorflow.org/images/colab_logo_32px.png)](https://colab.research.google.com/github/dzlab/deepprojects/blob/master/classification/CV_Transfer_Learning_with_Keras.ipynb)| view notebook on Github [![View source on GitHub](https://www.tensorflow.org/images/GitHub-Mark-32px.png)](https://github.com/dzlab/deepprojects/blob/master/classification/CV_Transfer_Learning_with_Keras.ipynb)|
+## Notebooks
+
+|World Chess Champions|Run notebook in Google Colab [![Run in Google Colab](https://www.tensorflow.org/images/colab_logo_32px.png)](https://colab.research.google.com/github/dzlab/deepprojects/blob/master/classification/CV_Transfer_Learning_with_Keras.ipynb)| view notebook on Github [![View source on GitHub](https://www.tensorflow.org/images/GitHub-Mark-32px.png)](https://github.com/dzlab/deepprojects/blob/master/classification/CV_Transfer_Learning_with_Keras.ipynb)|
+|Oxford-IIIT Pet Dataset|Run notebook in Google Colab [![Run in Google Colab](https://www.tensorflow.org/images/colab_logo_32px.png)](https://colab.research.google.com/github/dzlab/deepprojects/blob/master/classification/CV_Image_Similarity_with_Keras.ipynb)| view notebook on Github [![View source on GitHub](https://www.tensorflow.org/images/GitHub-Mark-32px.png)](https://github.com/dzlab/deepprojects/blob/master/classification/CV_Image_Similarity_with_Keras.ipynb)|
