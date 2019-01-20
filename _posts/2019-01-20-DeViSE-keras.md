@@ -21,12 +21,50 @@ The DeViSE model (as depicted in the following picture) is trained in three phas
 
 ![DeViSE_model]({{ "/assets/20190120-DeViSE_model.png" | absolute_url }}){: .center-image }
 
-In the remaining we will build DeViSE model in [Keras](https://keras.io) by using a pre-trained imagenet classifer (as described [here](https://dzlab.github.io/dl/2018/12/25/transfer-learning-keras/)), and a pre-trained wordnet embedding layer for English from Facebook's [FastText](https://fasttext.cc/docs/en/pretrained-vectors.html).
+In the remaining we will build DeViSE model in [Keras](https://keras.io):
+- For the left model in the picture above, we use a pre-trained imagenet classifer (as described [here](https://dzlab.github.io/dl/2018/12/25/transfer-learning-keras/)).
+- For the right model in the picture above, we use a pre-trained wordnet embedding layer for English from Facebook's [FastText](https://fasttext.cc/docs/en/pretrained-vectors.html).
 
+
+### Data
+
+### Architecture
+
+### Loss function
+The loss function in the DeViSE paper, is defined as follows:
 
 $$ loss(image, label) = \sum_{j \neq label} max[0, margin − \vec{t}_{label} M \vec{v} (image) + \vec{t}_{j} M \vec{v} (image)] $$
 
-The loss function is defined as follows $$  {\displaystyle D_{C}(A,B)=1-S_{C}(A,B)} $$ where $$ {\displaystyle D_{C}} $$ is the Cosine Distance and $$ {\displaystyle S_{C}} $$ is the [Cosine Similarity](https://en.wikipedia.org/wiki/Cosine_similarity).
+- $$\vec{v}(image)$$ denotes the output column vector, for the given image, of the core visual network
+- $$M$$ is the matrix of trainable parameters in the linear transformation layer
+- $$\vec{t}_{label}$$ denotes the learned row embedding vector for the provided text label
+- $$\vec{t}_{j}$$ denotes the embeddings of other text terms
+
+For simplification we use the following formulas $$  {\displaystyle D_{C}(A,B)=1-S_{C}(A,B)} $$ where $$ {\displaystyle D_{C}} $$ is the Cosine Distance and $$ {\displaystyle S_{C}} $$ is the [Cosine Similarity](https://en.wikipedia.org/wiki/Cosine_similarity). While $$A$$ and $$B$$ denotes the embedding vectors for the original and predcited labels (i.e. $$\vec{v}(image)$$). In Tensorflow, the loss function is implemented as:
+{% highlight python %}
+def cosine_loss(y, y_hat):
+    # unit-normalize y and y_hat
+    y = tf.math.l2_normalize(y, axis=1)
+    y_hat = tf.math.l2_normalize(y_hat, axis=1)
+    # cosine distance for normalized tensors
+    loss = tf.losses.cosine_distance(y, y_hat, axis=1)
+    return loss
+{% endhighlight %}
 
 
 Full notebook can be found here - [link](https://github.com/dzlab/deepprojects/blob/master/classification/DeViSE_keras.ipynb)
+
+
+Implementation
+https://github.com/jean4599/DeViSE
+
+
+Summary:
+- https://medium.com/@hyponymous/paper-summary-devise-a-deep-visual-semantic-embedding-model-c5f308d5ff98
+- https://medium.com/@hyponymous/a-month-of-machine-learning-paper-summaries-ddd4dcf6cfa5
+
+
+Left: a visual object categorization network with a softmax output layer; Right: a skip-gram
+language model; Center: our joint model, which is initialized with parameters pre-trained at the lower layers
+of the other two models.
+
