@@ -8,6 +8,8 @@ toc: true
 #img_excerpt: assets/20190120-DeViSE_model.jpg
 ---
 
+# Draft
+
 The image classification problem focus on classifying an image using a fixed set of labels. So they obviously do not scale and Furthermode, if a provided image has nothing to do with the original training set, the classifier will still attribute one or many of those labels to it. E.g. classifying a chicken image as digit five like in this [model](https://emiliendupont.github.io/2018/03/14/mnist-chicken/).
 
 
@@ -15,20 +17,37 @@ The Deep Visual-Semantic Embedding Model or [DeViSE](https://papers.nips.cc/pape
 data to learn semantic relationships between labels, and explicitly maps images into a rich semantic
 embedding space.
 
+In the remaining we will build DeViSE model in [Keras](https://keras.io)
 ![DeViSE_mDeViSE_vs_ImageNet1Kodel]({{ "/assets/20190120-DeViSE_vs_ImageNet1K.png" | absolute_url }}){: .center-image }
-
-The DeViSE model (as depicted in the following picture) is trained in three phases. A skip-gram word2vec model trained on wikipedia for instance. Separately a softmax ImageNet classifier and finally the two are combined into the DeViSE model.
-
-![DeViSE_model]({{ "/assets/20190120-DeViSE_model.png" | absolute_url }}){: .center-image }
-
-In the remaining we will build DeViSE model in [Keras](https://keras.io):
-- For the left model in the picture above, we use a pre-trained imagenet classifer (as described [here](https://dzlab.github.io/dl/2018/12/25/transfer-learning-keras/)).
-- For the right model in the picture above, we use a pre-trained wordnet embedding layer for English from Facebook's [FastText](https://fasttext.cc/docs/en/pretrained-vectors.html).
 
 
 ### Data
 
 ### Architecture
+The DeViSE model (as depicted in the following picture) is trained in three phases. A skip-gram word2vec model trained on wikipedia for instance. Separately a softmax ImageNet classifier and finally the two are combined into the DeViSE model.
+
+![DeViSE_model]({{ "/assets/20190120-DeViSE_model.png" | absolute_url }}){: .center-image }
+
+In our case:
+- For the left model in the picture above, we use a pre-trained imagenet classifer (as described [here](https://dzlab.github.io/dl/2018/12/25/transfer-learning-keras/)).
+- For the right model in the picture above, we use a pre-trained wordnet embedding layer for English from Facebook's [FastText](https://fasttext.cc/docs/en/pretrained-vectors.html).
+
+In Keras, this translates to:
+{% highlight python %}
+# choose a backbone model: ResNet-50 pretrained on imagenet
+backbone = ResNet50(weights='imagenet')
+# replace the backbone head (which 1K classes)
+x = backbone.layers[-3].output                   # shape (bs=None, 7, 7, 2048)
+# in the new head use Dropout/BatchNorm to avoid overfitting
+x = Dropout(rate=0.3)(x)                         # shape (bs=None, 7, 7, 2048)
+x = GlobalAveragePooling2D()(x)                  # shape (bs=None, 2048)
+x = Dense(1024, activation='relu')(x)            # shape (bs=None, 1024)
+x = BatchNormalization()(x)                      # shape (bs=None, 1024)
+# The DeViSE model outputs word2vec dimensions
+y = Dense(word2vec_dims, activation='linear')(x) # shape (bs=None, word2vec_dims)
+# create a new model that will be chained to the output of our base model
+devise = Model(inputs=backbone.input, outputs=y)
+{% endhighlight %}
 
 ### Loss function
 The loss function in the DeViSE paper, is defined as follows:
@@ -62,9 +81,3 @@ https://github.com/jean4599/DeViSE
 Summary:
 - https://medium.com/@hyponymous/paper-summary-devise-a-deep-visual-semantic-embedding-model-c5f308d5ff98
 - https://medium.com/@hyponymous/a-month-of-machine-learning-paper-summaries-ddd4dcf6cfa5
-
-
-Left: a visual object categorization network with a softmax output layer; Right: a skip-gram
-language model; Center: our joint model, which is initialized with parameters pre-trained at the lower layers
-of the other two models.
-
