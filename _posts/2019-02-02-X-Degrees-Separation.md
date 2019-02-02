@@ -47,13 +47,53 @@ for batch in dataloader:
     # avergare over the the last two dimensions
     features_batch = preds.mean(-1).mean(-1)
 {% endhighlight %}
+
 Then to speed up the calculation of distance between each image, apply a [PCA](https://en.wikipedia.org/wiki/Principal_component_analysis) to compress those features into orthogonal feautre vectors. This is done simply as follows:
 {% highlight python %}
 import fbpca
 (U, s, Va) = fbpca.pca(features, k=10, raw=True, n_iter=10)
 features_pca = U
 {% endhighlight %}
+Visualizing those images with t-SNE give somethning like the followings (it clearly shows that those images cannot be grouped into clusters using the given features):
 
+![WikiArt_Features_tSNE]({{ "/assets/20190202-wikiart_features_tsne.png" | absolute_url }}){: .center-image }
 
+### 2) Neighborhood Graph:
+With the PCA features calculated for each image, we try to find the k neighboring images with the smallest cosine distance from it. Using the pretty fast [NMSLIB](https://github.com/nmslib/nmslib), kNN are calculated as follows:
+
+{% highlight python %}
+import nmslib
+# Initializes a new index
+index = nmslib.init(space='angulardist')
+# Add the datapoints to the index
+index.addDataPointBatch(features_pca)
+# Create the index for querying
+index.createIndex()
+# nearest neighborhood on features array
+nn_idxs, nn_dists = zip(*index.knnQueryBatch(features_pca, k=20, num_threads=4))
+{% endhighlight %}
+
+The calculated distances are used to build a graph with the images as nodes and nearest-neighbors as the edges connecting the nodes. Using the [iGraph](https://igraph.org/python/) graph analysis library, this is achieved as follows:
+
+{% highlight python %}
+from igraph import *
+# create graph instance
+g = Graph()
+# create the vertices
+g.add_vertices(dataset_size)
+# create the edges for each element in the kNN distances array
+for i in range(size):
+    for j in range(1, k):
+        g.add_edge(nn_idxs[i][0], nn_idxs[i][j], weight=nn_dists[i][j])
+{% endhighlight %}
+
+### 3) Runtime:
+With the neighborhood graph at hand, we can for each pair of images (present in this graph), try to find a possible path between them. In this path, each consecutive pair of images are connected by a neighborhood connection. Using the iGraph API, finding shortest path is as simple as this:
+{% highlight python %}
+g.get_shortest_paths(src, to=dst, mode=OUT, output='vpath', weights='weight')[0]
+{% endhighlight %}
+
+For instance applying this on two randomly selected images gives the following result:
+![WikiArt_shortest_path]({{ "/assets/20190202-wikiart_shortest_path.png" | absolute_url }}){: .center-image }
 
 Full notebook can be found here - [link](https://github.com/dzlab/deepprojects/blob/master/artistic/X_degrees_of_separation_pytorch.ipynb)
