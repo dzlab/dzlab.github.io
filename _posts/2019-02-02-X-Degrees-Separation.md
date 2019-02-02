@@ -96,4 +96,9 @@ g.get_shortest_paths(src, to=dst, mode=OUT, output='vpath', weights='weight')[0]
 For instance applying this on two randomly selected images gives the following result:
 ![WikiArt_shortest_path]({{ "/assets/20190202-wikiart_shortest_path.png" | absolute_url }}){: .center-image }
 
+## Conclusion
+The advantage of such an approach is that it's straightforward and pretty easy to implement. May be even fast then other approaches at run-time. This simplicity is also a disadvantage, using kNN with threshold doesn't guarantee the existance of a path between every pair of two images. In fact this is why I grapped all neighboors wihtout applying a threshold durign the selection process. Also, in case of unevenly distributed image set, this approach may produce very densely connected clusters. Thus, some regions with high inner similarity can be isolated from the rest of the image space.
+
+I guess more sophisticated approaches (will try to find some) could be used to ensure that edges do not become too long or too short and gurantee a uniform degree of separation between nodes.
+
 Full notebook can be found here - [link](https://github.com/dzlab/deepprojects/blob/master/artistic/X_degrees_of_separation_pytorch.ipynb)
