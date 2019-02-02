@@ -23,8 +23,37 @@ The basic idea behind this tool, is to extract images features from the dataset 
 The following article describes a simple approach to implement X Degrees of Separation with PyTorch.
 
 ## Data
-The data used is a subset from [WikiArt Emotions](http://saifmohammad.com/WebPages/wikiartemotions.html) dataset which is a subset of visual art from the [WikiArt](https://www.wikiart.org/) encyclopedia. The following is a sample from this dataset.
+The data used is a subset from [WikiArt Emotions](http://saifmohammad.com/WebPages/wikiartemotions.html) dataset which is a subset of about 4000 visual arts from the [WikiArt](https://www.wikiart.org/) encyclopedia. The following is a sample from this dataset.
 ![WikiArt_Sample]({{ "/assets/20190202-wikiart_sample.png" | absolute_url }}){: .center-image }
+
+## Strategy
+The approach to the replicate the X Degrees of Separation tool is as follows:
+
+### 1) Feature extraction:
+Extract classification features from each image in the dataset by using an pre-trained model (on imagenet for instance) as follows:
+{% highlight python %}
+# base model: imagenet classifier
+model = models.resnet18(pretrained=True)
+# feature extractor from the base model, up to the layer before average pooling
+feature_modules = list(model.children())[:-2]
+feature_extractor = nn.Sequential(*feature_modules)
+# for every batch in the DataLoader
+for batch in dataloader:
+    # get the input (we don't need the labels)
+    X, y = batch
+    # run the model to get the image features
+    preds = feature_extractor(X)
+    # preds shape is: batch_size, 512, 4, 4 (i.e. output of the last BatchNorm layer)
+    # avergare over the the last two dimensions
+    features_batch = preds.mean(-1).mean(-1)
+{% endhighlight %}
+Then to speed up the calculation of distance between each image, apply a [PCA](https://en.wikipedia.org/wiki/Principal_component_analysis) to compress those features into orthogonal feautre vectors. This is done simply as follows:
+{% highlight python %}
+import fbpca
+(U, s, Va) = fbpca.pca(features, k=10, raw=True, n_iter=10)
+features_pca = U
+{% endhighlight %}
+
 
 
 Full notebook can be found here - [link](https://github.com/dzlab/deepprojects/blob/master/artistic/X_degrees_of_separation_pytorch.ipynb)
