@@ -5,7 +5,7 @@ title: X Degrees of Separation with PyTorch
 categories: dl
 tags: [dl, cnn, pca, tsne]
 toc: true
-img_excerpt: assets/20190202-wikiart_shortest_path.png
+img_excerpt: assets/2019/20190202-wikiart_shortest_path.png
 ---
 
 > What is the connection between a 4000 year old clay figure and Van Gogh's Starry Night? How do you get from Bruegel's Tower of Babel to the street art of Rio de Janeiro? What links an African mask to a Japanese wood cut?
@@ -24,7 +24,7 @@ The following article describes a simple approach to implement X Degrees of Sepa
 
 ## Data
 The data used is a subset from [WikiArt Emotions](http://saifmohammad.com/WebPages/wikiartemotions.html) dataset which is a subset of about 4000 visual arts from the [WikiArt](https://www.wikiart.org/) encyclopedia. The following is a sample from this dataset.
-![WikiArt_Sample]({{ "/assets/20190202-wikiart_sample.png" | absolute_url }}){: .center-image }
+![WikiArt_Sample]({{ "/assets/2019/20190202-wikiart_sample.png" | absolute_url }}){: .center-image }
 
 ## Strategy
 The approach to the replicate the X Degrees of Separation tool is as follows:
@@ -56,7 +56,7 @@ features_pca = U
 {% endhighlight %}
 Visualizing those images with t-SNE give somethning like the followings (it clearly shows that those images cannot be grouped into clusters using the given features):
 
-![WikiArt_Features_tSNE]({{ "/assets/20190202-wikiart_features_tsne.png" | absolute_url }}){: .center-image }
+![WikiArt_Features_tSNE]({{ "/assets/2019/20190202-wikiart_features_tsne.png" | absolute_url }}){: .center-image }
 
 ### 2) Neighborhood Graph:
 With the PCA features calculated for each image, we try to find the k neighboring images with the smallest cosine distance from it. Using the pretty fast [NMSLIB](https://github.com/nmslib/nmslib), kNN are calculated as follows:
@@ -93,8 +93,8 @@ With the neighborhood graph at hand, we can for each pair of images (present in 
 g.get_shortest_paths(src, to=dst, mode=OUT, output='vpath', weights='weight')[0]
 {% endhighlight %}
 
-For instance applying this on two randomly selected images gives the following result:
-![WikiArt_shortest_path]({{ "/assets/20190202-wikiart_shortest_path.png" | absolute_url }}){: .center-image }
+For instance applying this on two randomly selected images gives the following result (path is from left to right with the image to the left is source and the image to the right is the target)):
+![WikiArt_shortest_path]({{ "/assets/2019/20190202-wikiart_shortest_path.png" | absolute_url }}){: .center-image }
 
 ## Conclusion
 The advantage of such an approach is that it's straightforward and pretty easy to implement. May be even fast then other approaches at run-time. This simplicity is also a disadvantage, using kNN with threshold doesn't guarantee the existance of a path between every pair of two images. In fact this is why I grapped all neighboors wihtout applying a threshold durign the selection process. Also, in case of unevenly distributed image set, this approach may produce very densely connected clusters. Thus, some regions with high inner similarity can be isolated from the rest of the image space.
