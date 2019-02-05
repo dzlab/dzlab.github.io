@@ -48,7 +48,9 @@ for batch in dataloader:
     features_batch = preds.mean(-1).mean(-1)
 {% endhighlight %}
 
-Then to speed up the calculation of distance between each image, apply a [PCA](https://en.wikipedia.org/wiki/Principal_component_analysis) to compress those features into orthogonal feautre vectors. This is done simply as follows:
+Then to speed up the calculation of distance between each image, apply a [PCA](https://en.wikipedia.org/wiki/Principal_component_analysis) to compress those features into orthogonal feautre vectors. So instead of a feature vector of 512 per image we end up with smaller vector (says dozen). Also PCA should be good at capturing most of the information in this new space.
+
+The calculation of princial components is done simply as follows:
 {% highlight python %}
 import fbpca
 (U, s, Va) = fbpca.pca(features, k=10, raw=True, n_iter=10)
