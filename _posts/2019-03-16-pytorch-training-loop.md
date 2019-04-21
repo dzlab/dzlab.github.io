@@ -33,6 +33,8 @@ def train(train_dl, model, epochs, optimizer, loss_func):
             optimizer.zero_grad()
 {% endhighlight %}
 
+> Note if we don't zero the gradients, then in the next iteration when we do a backward pass they will be added to the current gradients. This is because pytorch may use multiple sources to calculate the gradients and the way it combines them is throught a `sum`.
+
 For some cases, one may want to do more to control the training loop. For instance, try different:
 - regularization techniques
 - hyperparameter schedules
