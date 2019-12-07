@@ -80,3 +80,5 @@ $ tflite_convert --output-file=model.tflite --keras_model_file=model.h5
 ```
 
 Next optimizing the converted models
+
+{% include disqus.html %}
