@@ -131,3 +131,5 @@ Here is an animation showing how the parameters are being updated based on the o
 It seems that with LAMB we can use high learning rate yet the algorithm converge smoothly to the optimal parameters.
 
 The full notebook can be found [here](https://github.com/dzlab/deepprojects/blob/master/visualization/Optimizers_in_Action.ipynb).
+
+{% include disqus.html %}

@@ -178,3 +178,5 @@ Callbacks are a very handy way to experiment techniques to traing larger model (
 However, a mis use of callbacks can turn into a nightmare called [callback hell](http://callbackhell.com/).
 
 Reference - [link](https://twitter.com/math_rachel/status/1105528663133511680)
+
+{% include disqus.html %}

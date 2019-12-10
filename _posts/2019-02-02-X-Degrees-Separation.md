@@ -104,3 +104,5 @@ The advantage of such an approach is that it's straightforward and pretty easy t
 I guess more sophisticated approaches (will try to find some) could be used to ensure that edges do not become too long or too short and gurantee a uniform degree of separation between nodes.
 
 Full notebook can be found here - [link](https://github.com/dzlab/deepprojects/blob/master/artistic/X_degrees_of_separation_pytorch.ipynb)
+
+{% include disqus.html %}
