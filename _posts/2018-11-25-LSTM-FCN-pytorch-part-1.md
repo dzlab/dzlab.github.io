@@ -106,3 +106,5 @@ class LSTMFCN(nn.Module):
 
 ## Training
 [Part II]() discusses the training setup of the LSTM-FCN architecture using different Datasets.
+
+{% include disqus.html %}

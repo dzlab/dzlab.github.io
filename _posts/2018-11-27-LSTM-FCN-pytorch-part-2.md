@@ -83,3 +83,5 @@ The plot of the losses over batches should look like this
 ![Earthquakes_model_loss.png]({{ "/assets/20181127-earthquakes_model_loss.png" | absolute_url }}){: .center-image }
 
 Full notebook can be found here - [link](https://github.com/dzlab/deepprojects/blob/master/timeseries/LSTM_FCN_pytorch.ipynb)
+
+{% include disqus.html %}

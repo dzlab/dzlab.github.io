@@ -111,3 +111,5 @@ By the end of the course, you will understand the fundamental ideas Jeremy cares
 ![transfer_training]({{ "/assets/20181220-transfer-learning.jpg" | absolute_url }}){: .center-image }
 
 This course is simply full of practical learning opportunities.
+
+{% include disqus.html %}

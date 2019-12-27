@@ -105,3 +105,5 @@ Summary:
 - https://medium.com/@hyponymous/a-month-of-machine-learning-paper-summaries-ddd4dcf6cfa5
 
 - https://towardsdatascience.com/word-embedding-with-word2vec-and-fasttext-a209c1d3e12c
+
+{% include disqus.html %}

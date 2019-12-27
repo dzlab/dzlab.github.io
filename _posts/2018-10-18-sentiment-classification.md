@@ -57,3 +57,5 @@ Use regularization:
  Try regularization and binary.
  
 Trigrams are super helpful when dealing with order (e.g. not good) when using tokenizer. use max-feature parameter in the logistic regression to limit number of created features.
+
+{% include disqus.html %}

@@ -141,3 +141,5 @@ Full notebook can be found here - [link](https://github.com/dzlab/deepprojects/b
 [^1]: V. L. Rubin, Y. Chen, N. J. Conroy, Deception Detection for News: Three Types of Fakes - [paper](https://onlinelibrary.wiley.com/doi/epdf/10.1002/pra2.2015.145052010083)
 [^2]: V.Pérez-Rosas, B. Kleinberg, A. Lefevre, R. Mihalcea, Automatic Detection of Fake News - [paper](https://arxiv.org/abs/1708.07104)
 [^3]: S. Merity, The wikitext long term dependency language modeling dataset - [link](https://einstein.ai/research/blog/the-wikitext-long-term-dependency-language-modeling-dataset)
+
+{% include disqus.html %}

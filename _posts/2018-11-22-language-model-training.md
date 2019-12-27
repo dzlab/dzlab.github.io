@@ -121,3 +121,5 @@ Additional resources:
 - Building Wikipedia text corpus - [link](https://www.kdnuggets.com/2017/11/building-wikipedia-text-corpus-nlp.html)
 - Wikipedia monolingual corpora - [link](https://linguatools.org/tools/corpora/wikipedia-monolingual-corpora/)
 - Wikipedia parallel titles - [link](https://github.com/clab/wikipedia-parallel-titles)
+
+{% include disqus.html %}

@@ -97,3 +97,5 @@ After trainning, print the history of losses and accuracy both available in the 
 ![model_accuracy]({{ "/assets/20181118-movielens_model_accuracy.png" | absolute_url }})
 
 The full jypiter notebook can be found here - [link](https://github.com/dzlab/deepprojects/blob/master/collabfiltering/MovieLens%2BRatings%2B-%2BCollaborative%2BFiltering.ipynb).
+
+{% include disqus.html %}

@@ -144,3 +144,5 @@ We can take this approach further by automating the process of re-adapting the N
 
 |World Chess Champions|Run notebook in Google Colab [![Run in Google Colab](https://www.tensorflow.org/images/colab_logo_32px.png)](https://colab.research.google.com/github/dzlab/deepprojects/blob/master/classification/CV_Transfer_Learning_with_Keras.ipynb)| view notebook on Github [![View source on GitHub](https://www.tensorflow.org/images/GitHub-Mark-32px.png)](https://github.com/dzlab/deepprojects/blob/master/classification/CV_Transfer_Learning_with_Keras.ipynb)|
 |Oxford-IIIT Pet Dataset|Run notebook in Google Colab [![Run in Google Colab](https://www.tensorflow.org/images/colab_logo_32px.png)](https://colab.research.google.com/github/dzlab/deepprojects/blob/master/classification/CV_Image_Similarity_with_Keras.ipynb)| view notebook on Github [![View source on GitHub](https://www.tensorflow.org/images/GitHub-Mark-32px.png)](https://github.com/dzlab/deepprojects/blob/master/classification/CV_Image_Similarity_with_Keras.ipynb)|
+
+{% include disqus.html %}
