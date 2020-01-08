@@ -37,7 +37,7 @@ lower layers of the pre-trained visual object recognition network and re-trainin
 vector representation of the image label text as learned by the language model. These three training
 phases are detailed below.
 
-![DeViSE_word2vec]({{ "/assets/20190120-DeViSE_word2vec.png" | absolute_url }}){: .center-image }
+![DeViSE_word2vec]({{ "/assets/2019/20190120-DeViSE_word2vec.png" | absolute_url }}){: .center-image }
 
 
 ### Architecture
