@@ -21,7 +21,7 @@ In the remaining we will build DeViSE model in [Keras](https://keras.io)
 
 ### Data
 Modern visual recognition systems are often limited in their ability to scale to
-large numbers of object categories. 
+large numbers of object categories.
 
 This limitation is in part due to the increasing difficulty of acquiring sufficient training data in the form of labeled images as the number of object categories grows
 
@@ -96,14 +96,5 @@ For evaluation the plain visual model + softmax was used as a baseline. Addition
 Full notebook can be found here - [link](https://github.com/dzlab/deepprojects/blob/master/classification/DeViSE_keras.ipynb)
 
 
-Implementation
-https://github.com/jean4599/DeViSE
-
-
-Summary:
-- https://medium.com/@hyponymous/paper-summary-devise-a-deep-visual-semantic-embedding-model-c5f308d5ff98
-- https://medium.com/@hyponymous/a-month-of-machine-learning-paper-summaries-ddd4dcf6cfa5
-
-- https://towardsdatascience.com/word-embedding-with-word2vec-and-fasttext-a209c1d3e12c
 
 {% include disqus.html %}
