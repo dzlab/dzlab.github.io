@@ -8,6 +8,5 @@ title: About
 </p>
 
 Thanks for reading!
-<a href="https://stackoverflow.com/users/1269281/bachr">
-<img src="https://stackoverflow.com/users/flair/1269281.png" width="208" height="58" alt="profile for bachr at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for bachr at Stack Overflow, Q&amp;A for professional and enthusiast programmers">
-</a>
+
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/P5P81CBO0)
