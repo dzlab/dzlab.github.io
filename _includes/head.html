@@ -13,6 +13,9 @@
       {{ page.title }} &middot; {{ site.title }}
     {% endif %}
   </title>
+  <meta name="description" content="{{ page.excerpt | default: site.description | strip_html | normalize_whitespace | truncate: 160 | escape }}">
+  <meta name="keywords" content="tensorflow, keras, pytorch, deep-learning, nlp, cv, AI" />
+  <meta name="author" content="dzlab">
 
   <!-- CSS -->
   <link rel="stylesheet" href="{{ site.url }}/public/css/poole.css">
