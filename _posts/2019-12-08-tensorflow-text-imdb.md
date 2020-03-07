@@ -6,6 +6,7 @@ categories: nlp
 tags: [tensorflow, classification]
 toc: true
 img_excerpt: assets/2019/20191208-raggedtensor.png
+img_alt: ragged tensor
 ---
 
 Prior to the introduction of [TensorFlow Text](https://medium.com/tensorflow/introducing-tf-text-438c8552bd5e), text pre-processing steps (cleaning, normalization, tokenization, encoding, etc.) were performed outside of TensorFlow runtime graph. This meant that potentially the pre-processing may differet between training and inference, for instance due to the use of different programming languages and runtimes to handle the task.

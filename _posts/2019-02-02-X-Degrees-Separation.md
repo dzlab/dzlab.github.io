@@ -6,6 +6,7 @@ categories: dl
 tags: [dl, cnn, pca, tsne]
 toc: true
 img_excerpt: assets/2019/20190202-wikiart_shortest_path.png
+img_alt: wikiart shortest path
 ---
 
 > What is the connection between a 4000 year old clay figure and Van Gogh's Starry Night? How do you get from Bruegel's Tower of Babel to the street art of Rio de Janeiro? What links an African mask to a Japanese wood cut?

@@ -6,6 +6,7 @@ categories: dl
 tags: [dl, cnn]
 toc: true
 img_excerpt: assets/2019/20190316-gradient-descent-optimization.gif
+img_alt: gradient descent optimization
 ---
 
 A basic training loop in PyTorch for any deep learning model consits of:
