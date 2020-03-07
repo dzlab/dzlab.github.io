@@ -8,8 +8,8 @@ permalink:        pretty
 
 # Setup
 title:            All things
-tagline:          'Machine Learning'
-description:      'This is a personal blog where I share Deep Learning articles (Natural Laguage Processing, Computer Vision), how-to for TensorFlow, and more.'
+tagline:          'Deep Learning'
+description:      'Natural Laguage Processing, Computer Vision, and more.'
 url:              https://dzlab.github.io
 baseurl:          /
 
