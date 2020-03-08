@@ -3,9 +3,15 @@ layout: page
 title: About
 ---
 
-<p class="message">
-  Hey there! This is Bachir, a Software Engineer with strong industry experience in building enterprise products and services. I used to write [here](http://elsoufy.blogspot.com/), after a long pause I decide to start a new blog to share my hands on experience with deep learning and related stuff (computer vision, nlp, may be also some rl). Most of the articles are based on personal notes on comprehending and implementing research papers.
-</p>
+Hey there! This is Bachir, a Software Engineer with strong industry experience in building enterprise products. I started this blog to share my hands on experience with deep learning and related stuff (computer vision, nlp).
+
+You can subscribe to updates using this [feed]({{ site.url }}/feed.xml).
+
+You can find me and my work:
+* I used to write tech-related articles [here](http://elsoufy.blogspot.com/)
+* I tweet a lot about engineering and machine learning [@bachiirc](https://twitter.com/bachiirc)
+* I write code and raise issues on [GitHub]({{ site.github.repo }})
+* I ask and answer questions on [StackOverflow](https://stackoverflow.com/users/1269281/bachr?tab=profile)
 
 Thanks for reading!
 
