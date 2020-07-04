@@ -14,8 +14,8 @@ img_alt: Spark with Prometheus
 ## Monitoring prior to 3.0
 Prior to Apache Spark 3.0, there were different approaches to expose metrics to Prometheus:
 
-1- Using Spark's JmxSink and Prometheus's [JMXExporter](https://github.com/prometheus/jmx_exporter) (see [Monitoring Apache Spark on Kubernetes with Prometheus and Grafana](https://dzlab.github.io/data/2020/06/08/monitoring-spark-prometheus/))
-* Enable Spark’s built-in JmxSink with `$SPARK_HOMEconf/metrics.properties`
+1- Using Spark's JmxSink and Prometheus's [JMXExporter](https://github.com/prometheus/jmx_exporter) (see [Monitoring Apache Spark on Kubernetes with Prometheus and Grafana]({{ "/data/2020/06/08/monitoring-spark-prometheus/" }}))
+* Enable Spark’s built-in JmxSink with `$SPARK_HOME/conf/metrics.properties`
 * Deploy Prometheus' JMXExporter library and its conﬁg ﬁle
 * Expose JMXExporter port, 9091, to Prometheus Add `-javaagent` option to the target (master/worker/executor/driver)
 ```
