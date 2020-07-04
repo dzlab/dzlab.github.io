@@ -121,6 +121,12 @@ $ $SPARK_HOME/bin/spark-submit \
 
 > Notice the URI of the jar that is being submitted starts with `local://` scheme to refer to a location inside the Docker image.
 
+Configurations used to enable monitoring for the submitted the job are:
+* `spark.ui.prometheus.enabled` set to `true` (see [Part 1]({{ "/bigdata/2020/07/03/spark3-monitoring-1/" }})).
+* `spark.kubernetes.driver.annotation.prometheus.io/scrape` set to `true` an annotation for Prometheus to scrape this endpoint.
+* `spark.kubernetes.driver.annotation.prometheus.io/path` set to `/metrics/executors/prometheus/` an annotation for Prometheus to use this HTTP path to scrape the metrics from.
+* `spark.kubernetes.driver.annotation.prometheus.io/port` set to `4040` an annotation for Prometheus to use this as HTTP port for the metrics endpoint to be scrapped.
+
 ### Spark UI
 With port forwarding to Spark Driver kubernetes service, expose the Spark UI (and the metrics endpoint) on http://localhost:4040 with:
 ```bash
