@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: Spark 3.0 Major Changes for SQL
+title: Spark 3.0 Major Changes for Spark SQL
 categories: bigdata
 tags: [spark]
 toc: true
@@ -98,4 +98,37 @@ Output [3]: [Cabin#645, Embarked#646, max(Fare)#782]
 Input [4]: [Cabin#645, Embarked#646, max(Fare)#782, max(Fare#644)#785]
 ```
 
-To be continued.
+### All type of join hints
+[SPARK-27225](https://issues.apache.org/jira/browse/SPARK-27225) Extend the existing BROADCAST join hint by implementing other join strategy hints corresponding to the rest of Spark's existing join strategies: shuffle-hash, sort-merge, cartesian-product. Broadcast-nested-loop will use BROADCAST hint as it does now.
+
+## Dynamic optimizations
+### Adaptive query execution
+### Dynamic partitioning pruning
+
+## Catalyst improvements
+### Enhanced nested column pruning & pushdown
+### Improved aggregation code generation
+
+## Infrastructure updates
+### New Scala and Java
+
+https://www.slideshare.net/ishizaki/sql-performance-improvements-at-a-glance-in-apache-spark-30?qid=2e4e4b84-a924-4e2d-b992-4d5c8cbb25ea
+
+https://medium.com/cloudzone/apache-spark-3-0-review-what-the-spark-is-all-about-998844e12b3c
+
+https://mungingdata.com/spark-3/array-exists-forall-transform-aggregate-zip_with/
+
+
+Prometheus: https://databricks.com/session_na20/native-support-of-prometheus-monitoring-in-apache-spark-3-0
+
+https://spark.apache.org/releases/spark-release-3-0-0.html
+
+### Shuffle
+- https://issues.apache.org/jira/browse/SPARK-25299
+🔊 Apache Spark Shuffle Metadata Tracking Design
+
+✔️ This document explained on tracking the shuffle data that is stored in these external systems. This is a sub-topic under Remote Storage for Persisting Shuffle Data !
+
+🔕 Shuffle primitive requires #apachespark executors to persist data to the local disk of the worker nodes. If executors crash, the external shuffle service can continue to serve the shuffle data that was written beyond the lifetime of the executor itself.
+
+#dataengineering #bigdata #distributedsystems
