@@ -1,0 +1,102 @@
+---
+layout: post
+comments: true
+title: TensorFlow Distributed Training on Kubeflow
+categories: ml
+tags: [kubeflow, kubernetes, tensorflow, docker]
+toc: true
+#img_excerpt: assets/2019/20190321-cnn-building-blocks-1.png
+---
+
+![kubeflow-training]({{ "/assets/2020/20200718-kubeflow-training-overview.png" | absolute_url }}){: .center-image }
+
+The Kubeflow project is a complex project that aims at simpliying the provisioning of a Machine Learning infrastructure. It is built on top of Kubernetes and thus reuses k8s core components (pods, services, etc.) and adapt them for the ML use cases.
+
+Kubeflow training is a group Kubernetes Operators that add to Kubeflow support for training models using many Machine Learning frameworks, the current release supports:
+- TensorFlow through tf-operator (also know as [TFJob](https://www.kubeflow.org/docs/components/training/tftraining/))
+- PyTorch through pytorch-operator
+- Apache MXNet through mxnet-operator
+- MPI through mpi-operator
+
+See https://www.kubeflow.org/docs/components/training/ for more details.
+
+In this post, we will use:
+* Docker Hub to host a tensorflow-based container image that contains the model training logic.
+* TFJob to describe the processes that will run the training in a distributed fashion.
+
+## Create a training image
+Create a repo on Docker Hub called `tf-dist-mnist-test` and login locally with `docker login`
+
+
+Clone the Kubeflow tf-operator project and navigate to the mnist example
+```
+$ git clone https://github.com/kubeflow/tf-operator
+$ cd tf-operator/examples/v1/dist-mnist
+```
+
+Build the mnist locally
+```
+$ docker build -f Dockerfile -t <DOCKER_HUB_USERNAME>/tf-dist-mnist-test:1.0 ./
+```
+Push the image you just built to Docker Hub
+```
+$ docker push <DOCKER_HUB_USERNAME>/tf-dist-mnist-test:1.0
+The push refers to repository [docker.io/<DOCKER_HUB_USERNAME>/tf-dist-mnist-test]
+3d980aca20f2: Pushed 
+c04a36d9e118: Pushed 
+d964bb768e1a: Pushed 
+db582379df14: Pushed 
+5bb39b263596: Pushed 
+02efdb75efd8: Pushed 
+dee07873361c: Pushed 
+0b029684a0e5: Pushed 
+6f4ce6b88849: Pushed 
+92914665e7f6: Pushed 
+c98ef191df4b: Pushed 
+9c7183e0ea88: Pushed 
+ff986b10a018: Pushed 
+1.0: digest: sha256:28fe6870f37380b065f7cda1d71f9401709c5a2c7d0dca55563cbd1b14d18911 size: 3038
+```
+
+## Submit training job
+A TFJob is a resource with a YAML representation like the one below: (before submitting your job relpace `<DOCKER_HUB_USERNAME>` with your Docker Hub username)
+
+<script src="https://gist.github.com/dzlab/101e8583683117c221262d9496f29447.js?file=mnist-tensorflow-job.yaml"></script>
+
+Each `tfReplicaSpecs` defines a set of TensorFlow processes. Under this spec we define different types of processes, a PS (Parameter Server) and Workers with their respective replication factor and container image.
+
+
+Submit TFJob distributed training job
+```sh
+$ kubectl apply -f mnist-tensorflow-job.yaml
+tfjob.kubeflow.org/mnist-tensorflow-job created
+```
+
+Get all TFJob resources which were previously created:
+```
+$ kubectl get tfjob
+NAME                   STATE       AGE
+mnist-tensorflow-job   Succeeded   3m26s
+```
+
+Check the status of a speific TFJob resource:
+```
+$ kubectl describe tfjob mnist-tensorflow-job
+```
+The output may look like below.
+<script src="https://gist.github.com/dzlab/101e8583683117c221262d9496f29447.js?file=kubectl_describe_tfjob_mnist-tensorflow-job.txt"></script>
+
+Notice that some of the pods were already deleted, in the YAML manifest we set the number of workers to 2 plus a PS (Parameter Server)
+
+Check all the pods created by this TFJob
+```sh
+$ kubectl get pod | grep mnist-tensorflow-job
+mnist-tensorflow-job-worker-0   0/1     Completed   0          5m43s
+```
+
+To get the logs of any of this TFJob pods use the following command:
+```
+$ kubectl get logs mnist-tensorflow-job-worker-0
+```
+
+The next steps would be to actually create own TensorFlow training logic, package the container image as described in this post and submit the job.
