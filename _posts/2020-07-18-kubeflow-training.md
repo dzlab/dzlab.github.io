@@ -16,7 +16,7 @@ Deep learning models are getting larger and larger (over 130 billion parameters)
 Training such models is not possible on one machine, but rather requires a fleet of machines. Distributed training aims to provide answers to this problem with the following possible approaches.
 
 ### Model Parallelism
-In Model Parallelism, the model parameters are distributed accross multiple machines as it does not fit on a single one. Each worker will be responsible on updating the parameters is reponsible for with a fowrard and backward passes. In this paradigm, a worker communicate with the subset of works that hold the layers it depends on during the forward pass and those that depends on during the backward pass.
+In Model Parallelism, the model parameters are distributed across multiple machines as it does not fit on a single one. Each worker will be responsible on updating the parameters is responsible for with a forward and backward passes. In this paradigm, a worker communicates with the subset of works that hold the layers it depends on during the forward pass and those that depend on during the backward pass.
 
 ![model-parallelism]({{ "/assets/2020/20200718-kubeflow-training-model-parallelism.png" | absolute_url }}){: .center-image }
 
