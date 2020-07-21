@@ -10,9 +10,42 @@ toc: true
 
 ![kubeflow-training]({{ "/assets/2020/20200718-kubeflow-training-overview.png" | absolute_url }}){: .center-image }
 
+## Overview
+Deep learning models are getting larger and larger (over 130 billion parameters) and requires more and more data for training in order to achieve higher performance.
+
+Training such models is not possible on one machine, but rather requires a fleet of machines. Distributed training aims to provide answers to this problem with the following possible approaches.
+
+### Model Parallelism
+In Model Parallelism, the model parameters are distributed accross multiple machines as it does not fit on a single one. Each worker will be responsible on updating the parameters is reponsible for with a fowrard and backward passes. In this paradigm, a worker communicate with the subset of works that hold the layers it depends on during the forward pass and those that depends on during the backward pass.
+
+![model-parallelism]({{ "/assets/2020/20200718-kubeflow-training-model-parallelism.png" | absolute_url }}){: .center-image }
+
+### Data Parallelism
+In Data Parallelism, each worker host the whole model but is given a subset of the data which is potentially different from the one given to another worker. In this paradigm, there is no need for workers to communicate with each other, but rather a central worker (usually called a **Parameter Server**) is responsible for:
+* aggregating the losses it receives from every workers' forward pass and
+* replying back to the workers with the updated weights.
+
+![data-parallelism]({{ "/assets/2020/20200718-kubeflow-training-data-parallelism.png" | absolute_url }}){: .center-image }
+
+
+In TensorFlow for instance, one could train a model with the Data Parallelism paradigm easily as illustrated in the following snippet
+```python
+strategy = tf.distribute.MirroredStrategy()
+with strategy.scope():
+  model = tf.keras.Sequential([
+    tf.keras.layers.Conv2D(32, 3, activation='relu', input_shape=(28, 28, 1)),
+    tf.keras.layers.MaxPooling2D(),
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dense(10, activation='sotfmax')
+  ])
+  model.compile(loss='sparse_categorical_crossentropy', optimizer=tf.keras.optimizers.Adam())
+```
+
+## Distributed Training in Kubeflow
 The Kubeflow project is a complex project that aims at simpliying the provisioning of a Machine Learning infrastructure. It is built on top of Kubernetes and thus reuses k8s core components (pods, services, etc.) and adapt them for the ML use cases.
 
-Kubeflow training is a group Kubernetes Operators that add to Kubeflow support for training models using many Machine Learning frameworks, the current release supports:
+Kubeflow training is a group Kubernetes Operators that add to Kubeflow support for distributed training of Machine Learning models using different frameworks, the current release supports:
 - TensorFlow through tf-operator (also know as [TFJob](https://www.kubeflow.org/docs/components/training/tftraining/))
 - PyTorch through pytorch-operator
 - Apache MXNet through mxnet-operator
@@ -20,11 +53,11 @@ Kubeflow training is a group Kubernetes Operators that add to Kubeflow support f
 
 See https://www.kubeflow.org/docs/components/training/ for more details.
 
-In this post, we will use:
+Rest of this post, we will use:
 * Docker Hub to host a tensorflow-based container image that contains the model training logic.
 * TFJob to describe the processes that will run the training in a distributed fashion.
 
-## Create a training image
+### Create a training image
 Create a repo on Docker Hub called `tf-dist-mnist-test` and login locally with `docker login`
 
 
@@ -58,7 +91,7 @@ ff986b10a018: Pushed
 1.0: digest: sha256:28fe6870f37380b065f7cda1d71f9401709c5a2c7d0dca55563cbd1b14d18911 size: 3038
 ```
 
-## Submit training job
+### Submit training job
 A TFJob is a resource with a YAML representation like the one below: (before submitting your job relpace `<DOCKER_HUB_USERNAME>` with your Docker Hub username)
 
 <script src="https://gist.github.com/dzlab/101e8583683117c221262d9496f29447.js?file=mnist-tensorflow-job.yaml"></script>
