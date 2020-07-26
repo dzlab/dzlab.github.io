@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: Spark on Kubernetes the Operator way
+title: Spark on Kubernetes the Operator way - part 1
 categories: ml
 tags: [spark, monitoring, mlflow]
 toc: true
