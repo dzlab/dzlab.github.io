@@ -35,8 +35,8 @@ As an example, assuming that in our ML project we need to download data, process
 
 * `download.py` will download raw data (e.g. CSV files) and save it into the artifact store.
 * `process.py` will process the raw data (e.g. CSV files) produced by the previous step into a more training friendly format, e.g. pickle or TFRecords. It may also perform other data processing tasks like cleaning. The generated data will be put back into the artifact store.
-* `train.py` will build a model (e.g. Keras model) and train it on the data produced by the previous task. Once training finish the model is put in the artifact store for later use, e.g. serving.
-* `main.py` is the entry point of the pipeline and will be orchecstrating the previous steps.
+* `train.py` will build a model (e.g. Keras model) and train it on the data produced by the previous task. Once training finishes the model is put in the artifact store for later use, e.g. serving.
+* `main.py` is the entry point of the pipeline and will be orchestrating the previous steps.
 
 We need to tell MLflow the structure of our project by declaring the steps and the required dependencies through the following YAML files.
 
@@ -66,7 +66,7 @@ entry_points:
       input1: {type: int, default: 1000000}
     command: "python main.py --input1 {input1}"
 ```
-* `conda.yaml` is another special file that can be used to delared the conda environment needed to run the steps in this pipeline.
+* `conda.yaml` is another special file that can be used to declare the conda environment needed to run the steps in this pipeline.
 
 ```yaml
 name: multistep
