@@ -37,6 +37,8 @@ This translates to an MLflow project with the following steps:
 
 The resulting `MLproject` file looks like this
 ```yaml
+# MLproject
+
 name: HyperparameterTF
 
 conda_env: conda.yaml
@@ -71,6 +73,8 @@ entry_points:
 The `conda.yaml` file referenced in the `MLproject` is simply used to declare all the needed dependencies, it may look like this:
 
 ```yaml
+# conda.yaml
+
 name: hyperparam_tensorflow
 channels:
   - defaults
@@ -92,6 +96,8 @@ The train step is implemented by the `train.py` where the hyperprameters are use
 The `train.py` looks like this:
 
 ```python
+# train.py
+
 import pandas as pd
 import tensorflow as tf
 import mlflow.tensorflow
@@ -143,6 +149,8 @@ In the `main` step is where most of the interesting stuff happening and the actu
 The `search.py` file implements the logic for the `main` step and look this this:
 
 ```python
+# search.py
+
 from hyperopt import fmin, hp, tpe, rand
 
 import mlflow.projects
@@ -201,6 +209,8 @@ if __name__ == '__main__':
 The definition of the `train_fn` where the call to the `train` step is perfomed looks like this:
 
 ```python
+# search.py
+
 def train_fn(epochs, null_train_loss, null_valid_loss):
   # Actual training function
   def train(params):
