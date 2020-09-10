@@ -74,9 +74,9 @@ example_gen = CsvExampleGen(input_base=examples)
 ```
 
 ### StatisticsGen
-StatisticsGen generates usefull statistics that helps diving into the data and understanding its characteristics. It also comes with visualization tools.
+StatisticsGen generates useful statistics that help diving into the data and understanding its characteristics. It also comes with visualization tools.
 
-For instance, in the following example the column `trip_start_hour` seems to have a time window between 5am and 6am where data is missing. Such histogram helps determine the area we need to focus on to fix any data related problems. In this we need to get more data, otherwise the inference for 6am data will be overgeneralized.
+For instance, in the following example the column `trip_start_hour` seems to have a time window between 5 am and 6 am where data is missing. Such a histogram helps determine the area we need to focus on to fix any data-related problems. In this we need to get more data, otherwise, the inference for 6 am data will be overgeneralized.
 
 ![TFX-components-StatisticsGen-viz]({{ "assets/2020/09/20200908-tfx-components-StatisticsGen-viz.png" | absolute_url }}){: .center-image }
 
@@ -127,7 +127,7 @@ outputs[_transformed_name(_LABEL_KEY)] = tf.where(
 ```
 
 ### Trainer
-Trainer performs the training of the model. It uses TensorBoard to log performance metrics which helps understanding the training process and comparing execution runs.
+Trainer performs the training of the model. It uses TensorBoard to log performance metrics which helps to understand the training process and comparing execution runs.
 
 ```python
 trainer = Trainer(module_file=taxi_module_file,
@@ -139,7 +139,7 @@ trainer = Trainer(module_file=taxi_module_file,
 ```
 
 ### Evaluator
-Evaluator is a tool that let's us not only looking at top level metrics (`RMSE`, `AUC`) but also looking at individual slices of the dataset and slices of features within the dataset. Things like Fairness becomes very manageable with this component.
+Evaluator is a tool that lets us not only looking at top-level metrics (`RMSE`, `AUC`) but also looking at individual slices of the dataset and slices of features within the dataset. Things like Fairness becomes very manageable with this component.
 
 ```python
 model_analyzer = Evaluator(
@@ -150,7 +150,7 @@ model_analyzer = Evaluator(
 ```
 
 ### ModelValidator
-This component helps comparing between different version of a model, e.g. a production model against a new model which is in current developpement using different validation modes:
+This component helps to compare the different version of a model, e.g. a production model against a new model which is in current development using different validation modes:
 * Validate using current eval data
 * "Next-day eval", validate using unseen data
 
@@ -162,9 +162,8 @@ model_validator = ModelValidator(
   )
 ```
 
-
 ### Pusher
-This component is reponsible of pushing the trained (and validated) model different deployment options:
+This component is responsible for pushing the trained (and validated) model different deployment options:
 * Filesystem (TensorFlow Lite, TensorFlow JS)
 * TensorFlow Serving
 
@@ -184,7 +183,7 @@ BulkInferrer performs offline batch inference over inference examples. It output
 
 It can be configured to block the inference on a model validation outcome. AlsoL
 * Choose the inference examples from example gen's output.
-* Choose the signatures and tags of inference model.
+* Choose the signatures and tags of the inference model.
 
 ```python
 bulk_inferrer = BulkInferrer(
