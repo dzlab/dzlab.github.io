@@ -10,20 +10,20 @@ img_excerpt: assets/2020/09/20200908-tfx-components.png
 
 ![TFX-much-more]({{ "assets/2020/09/20200908-tfx-much-more.png" | absolute_url }}){: .center-image }
 
-When we think about ML we tend to focus on the model training part. But when we move to production we realize that there many other pieces which are very important for the model to be available and robust over its lifetime.
+When we think about ML we tend to focus on the model training part. But when we move to production we realize that there many other pieces that are very important for the model to be available and robust over its lifetime.
 
-A production solution requires so much more to be able to deal with all issues that we face during ML developpement:
-- Labeled data (how to get it) I may have terabytes of data but I need label for them
+A production solution requires so much more to be able to deal with all issues that we face during ML development:
+- Labeled data (how to get it) I may have terabytes of data but I need a label for them
 - Feature space coverage: does my data cover the feature space when I'm going to run inference on them
 - Minimal dimensionality: is my dimensionality minimized or can I do more to simplify my feature set/vector to make the model more efficient
-- Maximum predictive data: how to get the predictive information in the data i'm choosing
-- Fairness: are we serving all customers fairly no matter where they are, what religion, what language they speak, what demographic they may be. You want to serve those people as well as you can, you don't want disadvantage people.
+- Maximum predictive data: how to get the predictive information in the data I'm choosing
+- Fairness: Are we serving all customers fairly no matter where they are, what religion, what language they speak, what demographic they may be. You want to serve those people as well as you can, you don't want disadvantaged people.
 - Rare conditions: especially in things like healthcare, we make a prediction that's very important to someone's life on a condition that occurs very rarely
 - Data lifecycle management: understanding this is important, once you have trained a model and put it in production this is the starting point, how are we going to maintain that over the lifetime as the world changes, data changes, things in your domain changes.
 
 
 ## Introduction
-TFX is a flexible ML platform that let users build ML pipelines, using different orchestrators and different underlying execution engines. It also implements some best practices to standardise ML models lifecycle management:
+TFX is a flexible ML platform that lets users build ML pipelines, using different orchestrators and different underlying execution engines. It also implements some best practices to standardize ML models lifecycle management:
 - Python-based classes for components definition
 - Strongly-typed artifacts (i.e. components input/output)
 - Metadata storage backed by MySQL for artifact and execution tracking
@@ -36,34 +36,34 @@ TFX is a flexible ML platform that let users build ML pipelines, using different
 
 Conceptually, TFX has a layered architecture to coordinate the execution of its components. The layers are:
 - Metadata storage: storage for artifacts produced by the components, it enables performing comparison across months/years and see how things change
-- Job orchestration: responsible of orchestrating the execution of the flow of components in a TFX pipeline.
+- Job orchestration: responsible for orchestrating the execution of the flow of components in a TFX pipeline.
 - Configuration framework: powers the configuration of TFX components
 
 
 ## Terminology
 ### Metadata Store
 At the heart of TFX is the Metadata Store which is responsible for containing:
-- Strongly typed definitions of artifacts (trained models, datasets or other objects) and their properties
-- Execution records of component and pipeline runs
+- Strongly typed definitions of artifacts (trained models, datasets, or other objects) and their properties
+- Execution records of component and pipeline run
 - Workflow provenance across all executions
 - Grouping of artifact and execution records (e.g. Pipeline Run, Experiment Session)
 
 ### Components
-A TFX component is responsible of performing a specific task, for instance data ingestion, model training with TensorFlow or serving with TF Serving. Every component in TFX has three building blocks:
+A TFX component is responsible for performing a specific task, for instance, data ingestion, model training with TensorFlow, or serving with TF Serving. Every component in TFX has three building blocks:
 * A **driver** consumes artifact and the execution of the component
-* A **publisher** takes the output of the component and put it back to the Metadata store.
-* An **Executor** is where the work is done and is the part that you can change, take an existent component overrides it to create a new .
+* A **publisher** takes the output of the component and put it back to the Metadata Store.
+* An **Executor** is where the work is done and is the part that you can change, take an existent component overrides it to create a new.
 
 ### Pipeline
-When TFX components are connected to each others they form a pipeline through which data will flow, e.g. from ingestion data to serving models. The communication happen over the metadata store, each component read its dependencies from it and write back its output/artifact.
+When TFX components are connected they form a pipeline through which data will flow, e.g. from ingestion data to serving models. The communication happens over the metadata store, each component read its dependencies from it and write back its output/artifact.
 
 
 ## Standard Components
-There is a set of standard components which are shipped with TFX, which we can build/extend upon them in a couple different way.
+There is a set of standard components which are shipped with TFX, which we can build/extend upon them in a couple of different ways.
 
 ![TFX-Canonical Pipeline]({{ "assets/2020/09/20200908-tfx-canonical-pipeline.png" | absolute_url }}){: .center-image }
 
-At the left we ingest data, we flow through, calculate some statistics about it, then we make sure there is no problem with the data, understand what type of feature we have, do feature engineering, we train, check the metrics, and then the question should I push this new model to production (if the new model outperform existent one). Along with that we also have the ability to do bulk inference.
+At the left we ingest data, we flow through, calculate some statistics about it, then we make sure there is no problem with the data, understand what type of feature we have, do feature engineering, we train, check the metrics, and then the question should I push this new model to production (if the new model outperforms existent one). Along with that we also have the ability to do bulk inference.
 
 ### ExampleGen
 This component takes raw data as input and generates TensorFlow examples, it can take many input formats (e.g. CSV, TF Record). It also does split the examples for you into Train/Eval. It then passes the result to the StatisticsGen component.
@@ -105,7 +105,7 @@ validate_stats = ExampleValidator(
 ### Transform
 Transform takes data generated by the ExampleGen component and the schema generated by the SchemaGen to implement arbitrary complex logic, depending on the need of the dataset and model, e.g. to perform features engineering.
 
-Note that the logic within this component cannot be eagerly exectued as it will be turned into a graph that will be prepanded to the model. This means that we will be doing same feature engineering with same code during both training and production which elimanates the training-serving skew.
+Note that the logic within this component cannot be eagerly executed as it will be turned into a graph that will be prepended to the model. This means that we will be doing the same feature engineering with the same code during both training and production which eliminates the training-serving skew.
 
 ```python
 transform = Transform(
@@ -200,7 +200,7 @@ context.run(bulk_inferrer)
 
 ## TFX Pipeline
 The previous standard components can be used together to create a pipeline. The following code snippet illustrates how to create a TFX pipeline:
-* Define the components, their input and output
+* Define the components, their input, and output
 * Create a runner (e.g. Airflow) that will execute the pipeline
 * Pass the list of components to the runner to initiate the pipeline execution
 
