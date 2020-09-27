@@ -30,7 +30,7 @@ context = InteractiveContext(
   )
 ```
 
-## Using local files
+## Using local data
 
 ### Generating TFRecord from CSV files
 The basic example of using the `ExampleGen` component to generate TFRecords is with local CSV files as inputs:
@@ -186,10 +186,55 @@ This can be achieved as follows:
 
 ```python
 from tfx.components import ImportExampleGen
-from tfx.utils.dsl_utils import external_input
+from tfx.utils import dsl_utils
 
-examples = external_input('tfrecord_data')
+examples = dsl_utils.external_input('tfrecord_data')
 example_gen = ImportExampleGen(input=examples)
 
 context.run(example_gen)
+```
+
+## Using remote data
+
+### Generating TFRecord from cloud storage
+In addition to reading local files of differnet format, the `ExampleGen` component can be used to read files stored on a cloud storage service (e.g. AWS or GCP).
+
+```python
+# read from Google storage
+examples = dsl_utils.external_input("gs://bucket/path/to/data")
+example_gen = CsvExampleGen(input=examples)
+
+# read from AWS S3
+examples = dsl_utils.external_input("s3://bucket/path/to/data")
+example_gen = CsvExampleGen(input=examples)
+```
+
+Note: to access a private bucket valid credentials of the cloud provider are required.
+For instance, to access private bucket on GCP you can set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the location of GCP account credential file (see [documentation](https://cloud.google.com/docs/authentication/getting-started)).
+
+### Generating TFRecord from databases
+The `ExampleGen` component has specific implementations for reading from files, currently only BigQuery through and Presto db are supported.
+
+For generating TFRecord examples from Big Query use `BigQueryExampleGen` component as follows (for testing try [public datasets](https://console.cloud.google.com/marketplace/browse?filter=solution-type:dataset))
+
+```python
+from tfx.extensions.google_cloud_big_query.example_gen.component import BigQueryExampleGen
+
+query = "SELECT * FROM <project_id>.<database>.<table_name>"
+example_gen = BigQueryExampleGen(query=query)
+```
+Note: you will need to set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+
+
+Similarly, to read from a Presto database use `PrestoExampleGen` as follows
+```python
+# Import PrestoExampleGen and config class PrestoConnConfig
+from tfx.examples.custom_components.presto_example_gen.proto.presto_config_pb2 import PrestoConnConfig
+from tfx.examples.custom_components.presto_example_gen.presto_component.component import PrestoExampleGen
+
+# Create a config object with Presto DB connection information
+presto_config = PrestoConnConfig(host='localhost', port=8080)
+# Create an example generator for a query
+query = "SELECT * FROM <table_name>"
+example_gen = PrestoExampleGen(presto_config, query=query)
 ```
