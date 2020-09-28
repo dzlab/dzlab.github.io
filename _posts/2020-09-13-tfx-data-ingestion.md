@@ -12,7 +12,7 @@ img_excerpt:
 
 
 The first step in a ML pipeline is data ingestion which consists of reading data from raw format and formatting it into a binary format suitable for ML (e.g. [TFRecord]({{ "dltips/en/tensorflow/tfrecord/" | absolute_url }})).
-TFX provides a standard component called `ExampleGen` which is responsible for generating training examples from different data sources. This article will explain usage of this component in different scenarios:
+TFX provides a standard component called [ExampleGen](https://www.tensorflow.org/tfx/guide/examplegen) which is responsible for generating training examples from different data sources. This article will explain usage of this component in different scenarios:
 - How to write data in TFRecords (the default data format for TensorFlow)
 - How to split data into multiple subsets (e.g. training and evaluation)
 - How to merge multiple subsets of data (e.g. hourly data) into one concise dataset
@@ -229,12 +229,131 @@ Note: you will need to set the `GOOGLE_APPLICATION_CREDENTIALS` environment vari
 Similarly, to read from a Presto database use `PrestoExampleGen` as follows
 ```python
 # Import PrestoExampleGen and config class PrestoConnConfig
-from tfx.examples.custom_components.presto_example_gen.proto.presto_config_pb2 import PrestoConnConfig
+from tfx.examples.custom_components.presto_example_gen.proto import presto_config_pb2
 from tfx.examples.custom_components.presto_example_gen.presto_component.component import PrestoExampleGen
 
 # Create a config object with Presto DB connection information
-presto_config = PrestoConnConfig(host='localhost', port=8080)
+presto_config = presto_config_pb2.PrestoConnConfig(host='localhost', port=8080)
 # Create an example generator for a query
 query = "SELECT * FROM <table_name>"
 example_gen = PrestoExampleGen(presto_config, query=query)
+```
+
+The prestodb component requires a special package `tfx-presto-example-gen` to be installed (learn more [here](https://github.com/tensorflow/tfx/tree/master/tfx/examples/custom_components/presto_example_gen))
+```sh
+$ git clone https://github.com/tensorflow/tfx
+$ cd tfx/tfx/examples/custom_components/presto_example_gen
+$ pip install -e .
+```
+
+## Advanced configuration
+The `ExampleGen` component provides two parameters that control how input data should be expected (with `input_config` parameter) and how the output data should look like (with `output_config` parameter). For instance, for incremental data we could use `input_config`, and for train/eval splits we would use `output_config`.
+
+### Splitting
+With a `SplitConfig` we can specify in how many parts the data have to be splits, in the following example we split the input data into TFRecords with a ration of 8:1:1 between training, evaluation and test set.
+```python
+from tfx.components import CsvExampleGen
+from tfx.proto import example_gen_pb2
+from tfx.utils.dsl_utils import external_input
+
+output = example_gen_pb2.Output(
+    split_config=example_gen_pb2.SplitConfig(splits=[
+        example_gen_pb2.SplitConfig.Split(name='train', hash_buckets=8),
+        example_gen_pb2.SplitConfig.Split(name='eval', hash_buckets=1),
+        example_gen_pb2.SplitConfig.Split(name='test', hash_buckets=1)
+    ]))
+
+examples = dsl_utils.external_input('data')
+example_gen = CsvExampleGen(input=examples, output_config=output)
+
+context.run(example_gen)
+```
+
+The resulting TFRecods data would have a structure that looks like this with a dedicated folder per split (i.e. `eval`, `test` and `train`):
+```
+CsvExampleGen/
+└── examples
+    └── 1
+        ├── eval
+        │   └── data_tfrecord-00000-of-00001.gz
+        ├── test
+        │   └── data_tfrecord-00000-of-00001.gz
+        └── train
+            └── data_tfrecord-00000-of-00001.gz
+
+5 directories, 3 files
+```
+
+Note: TFX uses a default split of ratio 2:1 between train and eval outpout if no output configuration is provided.
+
+We can also preserve an existent input data split using `Input.Split` config which we pass to the component `input_config` parameter as follows:
+```python
+from tfx.components import CsvExampleGen
+from tfx.proto import example_gen_pb2
+from tfx.utils.dsl_utils import external_input
+
+input = example_gen_pb2.Input(splits=[
+  example_gen_pb2.Input.Split(name='train', pattern='train/*'),
+  example_gen_pb2.Input.Split(name='eval', pattern='eval/*'),
+  example_gen_pb2.Input.Split(name='test', pattern='test/*')
+])
+
+examples = external_input('data')
+example_gen = CsvExampleGen(input=examples, input_config=input)
+```
+
+### Spanning
+There are cases where the input data arrives periodically and is supposed to be used to train a model incrementally. For example, in the following folder strucutre each `input-{SPAN}` folder represents a subset of the dataset that is created periorically and have to be ingested as it comes.
+
+```
+└── data
+    ├── input-0
+    │   └─ data.csv
+    ├── input-1
+    │   └─ data.csv
+    └── input-2
+        └─ data.csv
+...
+```
+The `ExampleGen` provides a feature called spanning that can be used for this use case. We can configure the `input_config` parameter so that it takes `Input.Split` with the pattern of the input data as follows:
+```python
+input = example_gen_pb2.Input(splits=[
+  example_gen_pb2.Input.Split(pattern='input-{SPAN}/*')
+])
+
+examples = external_input('data')
+example_gen = CsvExampleGen(input=examples, input_config=input)
+context.run(example_gen)
+```
+
+If the input data comes with a train/eval split, we can ingest it as follows by just updating the data folders pattern:
+```python
+input_cfg = example_gen_pb2.Input(splits=[
+  example_gen_pb2.Input.Split(name='train', pattern='input-{SPAN}/train/*'),
+  example_gen_pb2.Input.Split(name='eval', pattern='input-{SPAN}/eval/*')
+])
+...
+```
+
+If the data folders contain date information, we can use `{YYYY}` to match years, `{MM}` to match months and `{DD}` to match dates. For instance, to ingest data from folders like `input-2020-01-01` we can use the following span configuration:
+```python
+input = example_gen_pb2.Input(splits=[
+  example_gen_pb2.Input.Split(name='train', pattern='input-{YYYY}-{MM}-{DD}/train/*'),
+  example_gen_pb2.Input.Split(name='eval', pattern='input-{YYYY}-{MM}-{DD}/eval/*')
+])
+
+examples = external_input('data')
+example_gen = CsvExampleGen(input=examples, input_config=input)
+```
+
+### Versioning
+In addition to the span and date information, the input data can be versioned and TFX provides a pattern the properly handle with using `{VERSION}`. Here is an configuration example that can be used to ingestion `train`/`eval` data with shpae like `root-folder/span-1/version-0`:
+```python
+input = example_gen_pb2.Input(splits=[
+  example_gen_pb2.Input.Split(name='train', pattern='span-{SPAN}/version-{VERSION}/train/*'),
+  example_gen_pb2.Input.Split(name='eval', pattern='span-{SPAN}/version-{VERSION}/eval/*')
+])
+
+examples = external_input('data')
+example_gen = CsvExampleGen(input=examples, input_config=input)
 ```
