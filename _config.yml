@@ -20,6 +20,9 @@ author:
 paginate:         10
 
 google_analytics: UA-128961990-1
+analytics :
+  mixpanel :
+    token : '8d4b86545e94224d0e94429ea0bdd997'
 
 # Custom vars
 version:          2.1.0
