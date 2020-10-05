@@ -8,7 +8,7 @@ toc: true
 img_excerpt:
 ---
 
-![tfx-components]({{ "assets/2020/09/20200913-tfx-components.png" | absolute_url }}){: .center-image }
+![tfx-components]({{ "assets/2020/09/20200913-tfx-components.svg" | absolute_url }}){: .center-image }
 
 
 The first step in a ML pipeline is data ingestion which consists of reading data from raw format and formatting it into a binary format suitable for ML (e.g. [TFRecord]({{ "dltips/en/tensorflow/tfrecord/" | absolute_url }})).
