@@ -27,12 +27,12 @@ Alpakka supports Source and Sink for many data stores through tons of modules, i
 * AMQP
 * Elasticsearch
 
-One would ask yhy use Alpakka to write or read from Elasticsearch instead of using a more standard approach. Alpakka leverages the Akka Streams toolkit which provides low latency complex event processing streaming semantics all built on top of the highly concurrent Akka actor system. This gives Alpakka the ability to:
+One would ask why to use Alpakka to write or read from Elasticsearch instead of using a more standard approach. Alpakka leverages the Akka Streams toolkit which provides low latency complex event processing streaming semantics all built on top of the highly concurrent Akka actor system. This gives Alpakka the ability to:
 
 * Build back-pressure aware integrations: If a data store is under high load, it automatically reduces the throughput.
 * Build Complex Event Processing (CEP) using a plethora of operators (map, flatMap, filter, groupBy, mapAsync, and so on)
-* Have Modular approach as Sources and Sinks can be replaced to read and write to different data stores without massive code refactoring.
-* Have low memory footprint as data streams from the Source to the Sink.
+* Have a modular approach as Sources and Sinks can be replaced to read and write to different data stores without massive code refactoring.
+* Have a low memory footprint as data streams from the Source to the Sink.
 * Be easily dockerized and deployed on a Kubernetes cluster for large scale ETL.
 
 ![elasticsearch-alpakka-scenario]({{ "assets/2020/10/20201013-elasticsearch-alpakka-scenario.svg" | absolute_url }}){: .center-image }
@@ -97,7 +97,7 @@ In the above settings example we use:
 * `withRetryLogic(logic:RetryLogic)`: to set the retry policies. In this case we used the `RetryAtFixedRate` implementation that will allow 5 max retries at a fixed 1 second retry interval.
 
 
-At last, create the actual pipeline that will read from a CSV Source, for every line, it will create a message and ingest it to a destiation Elastisearch index throughout the Elasticsearch Sink. For instance:
+At last, create the actual pipeline that will read from a CSV Source, for every line, it will create a message and ingest it to a destination Elastisearch index throughout the Elasticsearch Sink. For instance:
 ```scala
 val graph = Source.single(ByteString(Resource.getAsString("data.csv")))
   .via(CsvParsing.lineScanner())
@@ -114,7 +114,7 @@ As the pipeline runs asynchronously, we may want (at least in this toy example) 
 Await.result(graph, Duration.Inf)
 ```
 
-In the previous pipeline, we ued a function to transform the raw instances of our Data class into instances of `WriteMessage`. This is because Elasticsearch Sink or Flow accepts only objects with type `WriteMessage[T, PT]`, where `T` is the type of the message and `PT` is a possible `PassThrough` type. We would use the later for instance in case we wanted to pass a Kafka offset and commit it after the Elasticsearch write response.
+In the previous pipeline, we used a function to transform the raw instances of our Data class into instances of `WriteMessage`. This is because Elasticsearch Sink or Flow accepts only objects with type `WriteMessage[T, PT]`, where `T` is the type of the message and `PT` is a possible `PassThrough` type. We would use the later for instance in case we wanted to pass a Kafka offset and commit it after the Elasticsearch writes a response.
 
 To create objects of type `WriteMessage` we would need to use of its factory methods:
 * `createIndexMessage[T](source: T)`: to create an index action
