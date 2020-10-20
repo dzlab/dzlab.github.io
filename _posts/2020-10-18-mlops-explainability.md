@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: Explainability and Trustworthy AI in production
+title: Explainable and Trustworthy AI in production
 categories: ml
 tags: [mlops, monitoring]
 toc: true
@@ -40,7 +40,9 @@ Explanation techniques based on [influence functions](https://christophm.github.
 Such techniques allow the user to check whether the most impactful training data
 contain relevant features compared to the instance we are trying to explaine in production.
 
-![influential-point](https://christophm.github.io/interpretable-ml-book/images/influential-point-1.png){: .center-image }
+
+|![influential-point](https://christophm.github.io/interpretable-ml-book/images/influential-point-1.png){: .center-image }|
+|A linear model with one feature. Trained once on the full data and once without the influential instance. Removing the influential instance changes the fitted slope (weight/coefficient) drastically - [source](https://christophm.github.io/interpretable-ml-book/influential.html).|
 
 ### Feature importance
 One way to check for Feature importance is by trying to find which features are key in the final model prediction for a given instance regardless of the values of the other features using [Anchor explanations](https://christophm.github.io/interpretable-ml-book/anchors.html).
@@ -59,9 +61,24 @@ As described earlier, not all Explainabilily techniques were created equals. Som
 
 The latter techniques are more convinient to a production deployement as the model to explain is usually deployed in isolation as a service with a well defined API (e.g. URL, request/reponse bodies).
 
+The way one would use a **Black-box** to explain a model deployed in production is by repeatedly querying the model with a slighlty perturbated version of the original input instance so that it creates an approximation of model inference behavior. The way the queries are constructed depends on the input instances and their perturbated versions, as well as the explanation output of the **Black-box** explainer.
+
+In a production environemnt, such setup can be deployed by having two different endpoints:
+* `/prediction` endpoint which receives data requests to generate a prediction responses.
+* `/explaination` endpoint which receives data requests but instead of generating predictions, it will implement the explanation algorithm and forward requests with multiple modified versions of the original input to the `/prediction` endpoint and then approximate an explanation response.
+
+For scale reasons, it is advisable that:
+* The `/prediction` endpoint should be duplicated so that actual prediction requests are forwarded to a separate instance than explanation requests (which have a lower priority).
+* Also, due to the nature of prediction requests which usually requires low latency and have to be handled in real time vs the explanation requests which can have higher latency, the latter can be served asynchronously.
+
+The following sequence diagram illustrates such deployment and interactions between the endpoints.
+
+
+![explainability-seqdiagram]({{ "assets/2020/10/20201018-explainability-seqdiagram.svg" | absolute_url }}){: .center-image }
+
+Notice in the explanation loop, how the explainer tried to perturb the original input data **xyz** that using the **?** charachter (e.g. modified version **x?z**) until the model predict a different label **def** than the original one **abc**.
+
+
 ## References
 * Interpretable Machine Learning by Christoph Molnar - [link](https://christophm.github.io/interpretable-ml-book/).
 * Explainability in Neural Networks by Prasad Chalasani - [link](https://deep.ghost.io/simple-feature-attribution/)
-
-
-To be continued.
