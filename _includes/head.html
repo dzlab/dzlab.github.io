@@ -3,6 +3,17 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
+  <!-- Open Graph data -->
+  <meta property="og:title" content="{% if page.title %}{{ page.title | escape }}{% else %}{{ site.title | escape }}{% endif %}" />
+  <meta property="og:type" content="website" />
+  {% if page.img_excerpt %}
+    <meta property="og:image" content="{{ site.url }}/{{ page.img_excerpt }}" />
+  {% else %}
+    <meta property="og:image" content="{{ site.url }}/assets/images/share-fb.png" />
+  {% endif %}
+  <meta property="og:description" content="{{ page.excerpt | default: site.description | strip_html | normalize_whitespace | truncate: 160 | escape }}" />
+  <meta property="og:site_name" content="{% if page.title %}{{ page.title | escape }}{% else %}{{ site.title | escape }}{% endif %}" />
+
   <!-- Enable responsiveness on mobile devices-->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
 
