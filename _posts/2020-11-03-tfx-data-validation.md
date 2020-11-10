@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: Data Validation with TensorFlow eXtended (TFX)
-description: Learn how to use TFDV to generate statistics about your data and turn them into something actionable.
+excerpt: Learn how to use TFDV to generate statistics about your data and turn them into something actionable.
 categories: ml
 tags: [tensorflow, tfx]
 toc: true
