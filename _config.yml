@@ -14,7 +14,7 @@ url:              https://dzlab.github.io
 baseurl:          /
 
 author:
-  name:           'bachirc'
+  name:           'dzlab'
   twitter:        https://twitter.com/bachiirc
 
 paginate:         10

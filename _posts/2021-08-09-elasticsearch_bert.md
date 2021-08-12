@@ -11,7 +11,7 @@ img_excerpt:
 
 Elasticsearch query DSL provides the possibility to use custom logic for calculating the score for the returned documents using [script_score](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-script-score-query.html) query. In this article, we will leverage this functionality along with [Sentence Transformers](https://huggingface.co/sentence-transformers/bert-base-nli-mean-tokens#usage-sentence-transformers) to improve search result.
 
-First, load Sentence Transformers model and use it to calculate the embeddings of each document in the corpus. In this case, we are loading documents from a JSON file and processing each one individually
+First, we load Sentence Transformers model and use it to calculate the embeddings of each document in the corpus. In this case, we are loading documents from a JSON file and processing each one individually:
 ```python
 f = open('data.json',)
 documents = json.load(f)
@@ -21,7 +21,7 @@ for doc in documents:
     embeddings = model.encode(text)
     doc['embeddings'] = embeddings.tolist()
 ```
-> Note: we covert the embeddings into list of double in order to serialize later back to json and sending it as payload for Elasticsearch index API.
+> Note: we covert the embeddings into list of double in order to serialize it later back to json and sending it as payload for Elasticsearch index API.
 
 Second, we sotre the documents along with the calculating embeddings into the `test` index:
 ```python
@@ -33,7 +33,7 @@ for idx, doc in enumerate(documents):
     res = es.index(index="test", id=idx+1, body=doc)
 ```
 
-Now we are reading to search, we first calculate the search query embeddings the same way we did for each indexed documents:
+Now we are ready to call the search API. But first we need to calculate the embeddings for search query the same way we did for each indexed documents:
 ```python
 query = "..."
 query_vector = model.encode(text).tolist()
