@@ -16,5 +16,3 @@ You can find me and my work:
 Thanks for reading!
 
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/P5P81CBO0)
-
-<a class="twitter-timeline" href="https://twitter.com/bachiirc?ref_src=twsrc%5Etfw">Tweets by bachiirc</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
