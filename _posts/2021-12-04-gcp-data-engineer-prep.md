@@ -27,11 +27,11 @@ BigQuery takes big chunk of the exam, lot questions are around how to design you
 - Moving BigQuery data between locations - [link](https://cloud.google.com/bigquery/docs/locations#moving-data)
 - Partitioning tables. Based on what are they partitioned — ingestion time, timestamp, date. How are they named? How are they then accessed in queries? Using `_PARTITIONTIME`. - [link](https://cloud.google.com/bigquery/docs/partitioned-tables)
 - How to cluster parititioned tables - [link](https://cloud.google.com/bigquery/docs/clustered-tables)
-- User defined functions in BigQuery - [link](https://cloud.google.com/bigquery/docs/reference/standard-sql/user-defined-functions
-- https://cloud.google.com/bigquery/docs/gis-intro)
+- User defined functions in BigQuery - [link](https://cloud.google.com/bigquery/docs/reference/standard-sql/user-defined-functions)
+- Geospatial data analytics in BigQuery - [link](https://cloud.google.com/bigquery/docs/gis-intro)
 - Accessing historical data using time travel - [link](https://cloud.google.com/bigquery/docs/time-travel)
-- How to manage BigQuery flat-rate slots within a project https://cloud.google.com/blog/products/data-analytics/how-to-manage-bigquery-flat-rate-slots-within-a-project
-- SQL MERGE examples https://cloud.google.com/bigquery/docs/reference/standard-sql/dml-syntax#merge_statement
+- How to manage BigQuery flat-rate slots within a project - [link](https://cloud.google.com/blog/products/data-analytics/how-to-manage-bigquery-flat-rate-slots-within-a-project)
+- SQL `MERGE` examples - [link](https://cloud.google.com/bigquery/docs/reference/standard-sql/dml-syntax#merge_statement)
 - Bigquery. Know what a federated table is. While you are at it, learn also about clustered tables. - [link](https://cloud.google.com/bigquery/external-data-sources)
 - BigQuery + GCS. Know how to link tables between GCS and BigQuery as permanent tables and temporary tables. - [link](https://cloud.google.com/bigquery/external-data-cloud-storage)
 - BigQuery query plan. BigQuery allows you to see the query plan and execution profile for queries that you run. Know the phases, difference between average and max time, why there can be skew in the plan, and how to optimize for it. - [link](https://cloud.google.com/bigquery/query-plan-explanation)
