@@ -9,6 +9,9 @@ toc: true
 img_excerpt:
 ---
 
+![intel-analytics-zoo](https://raw.githubusercontent.com/intel-analytics/analytics-zoo/master/docs/docs/Image/logo.jpg){: .center-image }
+
+
 Add a dependency to Intel's Analytics Zoo library which will bring in the jvm deep learning library BigDL.
 ```scala
 libraryDependencies += "com.intel.analytics.zoo" % "analytics-zoo-bigdl_0.12.1-spark_3.0.0" % "0.9.0",
