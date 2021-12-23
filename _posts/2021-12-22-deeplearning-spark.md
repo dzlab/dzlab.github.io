@@ -9,47 +9,62 @@ toc: true
 img_excerpt:
 ---
 
-![intel-analytics-zoo](https://raw.githubusercontent.com/intel-analytics/analytics-zoo/master/docs/docs/Image/logo.jpg){: .center-image }
+<center><img alt="intel analytics zoo" src='https://raw.githubusercontent.com/intel-analytics/analytics-zoo/master/docs/docs/Image/logo.jpg' width='200' height='200'></center>
 
+[Analytics Zoo](https://github.com/intel-analytics/analytics-zoo) is an open source Deep Learning library. Along with [BigDL](https://bigdl-project.github.io/), it allows to train and run Deep Learning workloads on Spark and Ray. Furthermore, this library has a Keras API which make using it very similar to using plain Keras API. This articles shows how to use the Keras API to train and evaluate a classification model on the [iris dataset](https://archive.ics.uci.edu/ml/datasets/iris).
 
-Add a dependency to Intel's Analytics Zoo library which will bring in the jvm deep learning library BigDL.
+1. Add a dependency to Intel's Analytics Zoo library which will bring in the jvm deep learning library BigDL.
 ```scala
 libraryDependencies += "com.intel.analytics.zoo" % "analytics-zoo-bigdl_0.12.1-spark_3.0.0" % "0.9.0",
 ```
 
-Create a SparkSession and initialize Analytics Zoo context
+2. create a SparkSession and initialize Analytics Zoo context
 ```scala
 val spark = SparkSession.builder().appName("analytics-zoo-demo").master("local[*]").getOrCreate()
 val sc = NNContext.initNNContext(spark.sparkContext.getConf)
 ```
 
-Read the raw data (in this case a CSV file containing the Iris dataset) into a Spark DataFrame
+3. Read the raw data (in this case a CSV file containing the Iris dataset) into a Spark DataFrame
 ```scala
 val path = getClass.getClassLoader.getResource("iris.csv").toString
 
 val df = spark.read.option("header", true).option("inferSchema", true).csv(path)
 ```
 
-Create a training dataset from the raw DataFrame, this step consists of transforming each row into a `Sample` instance with:
+4. Create a training dataset from the raw DataFrame
+
+4.1. Define a helper function to transform each row into a `Sample` instance with:
 - a tensor for the raining features `"sepal_len", "sepal_wid", "petal_len", "petal_wid"` and
 - another tensor for the label `class`.
 
 ```scala
-val labels = Array("Iris-setosa", "Iris-versicolor", "Iris-virginica")
-val labelCol = "class"
-val labelIndex = columns.indexOf("class")
-val featureCols = Array("sepal_len", "sepal_wid", "petal_len", "petal_wid")
-val featureIndexes = featureCols.map(columns.indexOf)
-val trainDS = df.rdd.map{row =>
-    val features = featureIndexes.map(row.getDouble(_).toFloat)
-    val featureTensor = Tensor[Float](features, Array(dimInput))
-    val labelTensor = Tensor[Float](1)
-    labelTensor(Array(1)) = labels.indexOf(row.getString(labelIndex)) + 1
-    Sample[Float](featureTensor, labelTensor)
+def prepareDataset(df: DataFrame, labelColumn: String, featureColumns: Array[String]): RDD[Sample[Float]] = {
+    val columns = trainDF.columns
+    val labelIndex = columns.indexOf(labelColumn)
+    val featureIndices = featureColumns.map(fc => df.columns.indexOf(fc))
+    val dimInput = featureColumns.length
+    df.rdd.map{row =>
+      val features = featureIndices.map(row.getDouble(_).toFloat)
+      val featureTensor = Tensor[Float](features, Array(dimInput))
+      val labelTensor = Tensor[Float](1)
+      labelTensor(Array(1)) = labels.indexOf(row.getString(labelIndex)) + 1
+      Sample[Float](featureTensor, labelTensor)
+    }
 }
 ```
 
-Create the model architecture by definining the list of layers and their respective activation functions.
+4.2. Apply the helper function on the training and validation datasets
+
+```scala
+val labels = Array("Iris-setosa", "Iris-versicolor", "Iris-virginica")
+val labelCol = "class"
+val featureCols = Array("sepal_len", "sepal_wid", "petal_len", "petal_wid")
+val (trainDF, evalDF) = dataset.randomSplit(Array(0.8, 1 - 0.8), 31)
+val trainRDD = prepareDatasetForFitting(trainDF, labelCol, featureCols)
+val evalRDD = prepareDatasetForFitting(evalDF, labelCol, featureCols)
+```
+
+5. Create the model architecture by definining the list of layers and their respective activation functions.
 ```
 val dimInput = 4
 val dimOutput = 3
@@ -82,11 +97,11 @@ Non-trainable params: 0
 ------------------------------------------------------------------------------------------------------------------------
 ```
 
-Compile and initiate the model training
+6. Compile and initiate the model training
 ```scala
 model.compile(
     optimizer = new SGD[Float](learningRate = 0.01),
-    loss = SoftmaxWithCriterion[Float]()
+    loss = CrossEntropyCriterion[Float]()
 )
 model.fit(data, batchSize = batchSize, nbEpoch = maxEpoch)
 ```
@@ -102,3 +117,14 @@ During training the library will output something like this
 2021-12-22T09:43:56.202-0800 level=INFO thread=main logger=com.intel.analytics.bigdl.optim.DistriOptimizer$
 [Epoch 10 160/150][Iteration 50][Wall Clock 2.115638134s] Epoch finished. Wall clock time is 2119.552539 ms
 ```
+
+7.  Evaluate the model against a hold up dataset
+
+```scala
+val evalResult = model.evaluate(evalRDD, 8)
+val evalMetrics = evalResult.map{case (result: ValidationResult, method: ValidationMethod[Float]) =>
+    (method.toString(), result.result()._1.toDouble)
+}.toMap
+```
+
+Printing the evaluation metrics with `println(evalMetrics)` will return something like `Map(Loss -> 1.0945806503295898)`.
