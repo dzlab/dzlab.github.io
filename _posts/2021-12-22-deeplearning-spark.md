@@ -14,17 +14,20 @@ img_excerpt:
 [Analytics Zoo](https://github.com/intel-analytics/analytics-zoo) is an open source Deep Learning library. Along with [BigDL](https://bigdl-project.github.io/), it allows to train and run Deep Learning workloads on Spark and Ray. Furthermore, this library has a Keras API which make using it very similar to using plain Keras API. This articles shows how to use the Keras API to train and evaluate a classification model on the [iris dataset](https://archive.ics.uci.edu/ml/datasets/iris).
 
 1. Add a dependency to Intel's Analytics Zoo library which will bring in the jvm deep learning library BigDL.
+
 ```scala
 libraryDependencies += "com.intel.analytics.zoo" % "analytics-zoo-bigdl_0.12.1-spark_3.0.0" % "0.9.0",
 ```
 
 2. create a SparkSession and initialize Analytics Zoo context
+
 ```scala
 val spark = SparkSession.builder().appName("analytics-zoo-demo").master("local[*]").getOrCreate()
 val sc = NNContext.initNNContext(spark.sparkContext.getConf)
 ```
 
 3. Read the raw data (in this case a CSV file containing the Iris dataset) into a Spark DataFrame
+
 ```scala
 val path = getClass.getClassLoader.getResource("iris.csv").toString
 
@@ -65,6 +68,7 @@ val evalRDD = prepareDatasetForFitting(evalDF, labelCol, featureCols)
 ```
 
 5. Create the model architecture by definining the list of layers and their respective activation functions.
+
 ```
 val dimInput = 4
 val dimOutput = 3
@@ -78,6 +82,7 @@ model.add(Dense[Float](dimOutput, activation = "softmax").setName("fc_3"))
 > Note: we define the shape of the input only for the first layer, BigDL will infer the input shape for the reamining layers.
 
 Prining the model with `model.summary()` gives something like this:
+
 ```
 Model Summary:
 ------------------------------------------------------------------------------------------------------------------------
@@ -98,6 +103,7 @@ Non-trainable params: 0
 ```
 
 6. Compile and initiate the model training
+
 ```scala
 model.compile(
     optimizer = new SGD[Float](learningRate = 0.01),
@@ -107,6 +113,7 @@ model.fit(data, batchSize = batchSize, nbEpoch = maxEpoch)
 ```
 
 During training the library will output something like this
+
 ```
 2021-12-22T09:43:56.136-0800 level=INFO thread=main logger=com.intel.analytics.bigdl.optim.DistriOptimizer$
 [Epoch 10 96/150][Iteration 48][Wall Clock 2.051005411s] Trained 32.0 records in 0.026512474 seconds. Throughput is 1206.979 records/second. Loss is 1.0808454. Sequential908171a5's hyper parameters: Current learning rate is 0.01. Current dampening is 1.7976931348623157E308.  
