@@ -175,6 +175,8 @@ TensorBoard 2.7.0 at http://localhost:6006/ (Press CTRL+C to quit)
 
 Then, visit TensorBoard UI at http://localhost:6006/ 
 
+![spark-bigdl-tensorboard]({{ "assets/2021/20211230-spark-bigdl-tensorboard.png" | absolute_url }}){: .center-image }
+
 **8.** Evaluate the model against a hold up dataset
 
 ```scala
