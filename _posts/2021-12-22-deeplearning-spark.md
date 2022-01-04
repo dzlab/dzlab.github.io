@@ -64,8 +64,9 @@ def prepareDataset(df: DataFrame, labelColumn: String, featureColumns: Array[Str
 val labels = Array("Iris-setosa", "Iris-versicolor", "Iris-virginica")
 val labelCol = "class"
 val featureCols = Array("sepal_len", "sepal_wid", "petal_len", "petal_wid")
-val (trainDF, evalDF) = dataset.randomSplit(Array(0.8, 1 - 0.8), 31)
+val (trainDF, validDF, evalDF) = dataset.randomSplit(Array(0.8, 0.1, 0.1), 31)
 val trainRDD = prepareDatasetForFitting(trainDF, labelCol, featureCols)
+val validRDD = prepareDatasetForFitting(validDF, labelCol, featureCols)
 val evalRDD = prepareDatasetForFitting(evalDF, labelCol, featureCols)
 ```
 
@@ -122,7 +123,7 @@ model.setTensorBoard("logdir", "iris-example")
 Now we can start the model training
 
 ```scala
-model.fit(data, batchSize = batchSize, nbEpoch = maxEpoch)
+model.fit(trainRDD, batchSize, maxEpoch, validRDD)
 ```
 
 During training the library will output something like this
@@ -138,8 +139,6 @@ During training the library will output something like this
 [Epoch 10 160/150][Iteration 50][Wall Clock 2.115638134s] Epoch finished. Wall clock time is 2119.552539 ms
 ```
 
-
-
 **7.** Analyze training logs with TensorBoard
 
 After the training finishes, TensorBoard logs will be availabile 
@@ -147,10 +146,12 @@ After the training finishes, TensorBoard logs will be availabile
 $ tree logdir/          
 logdir/
 └── iris-example
-    └── train
-        └── bigdl.tfevents.1641251780.dzlab-2.local
+    ├── train
+    │   └── bigdl.tfevents.1641256264.dzlab-2.local
+    └── validation
+        └── bigdl.tfevents.1641256270.dzlab-2.local
 
-2 directories, 1 file
+3 directories, 2 files
 ```
 
 Make sure TensorBoard is available in your system or install it with
