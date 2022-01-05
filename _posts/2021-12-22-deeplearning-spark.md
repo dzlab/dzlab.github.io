@@ -188,3 +188,20 @@ val evalMetrics = evalResult.map{case (result: ValidationResult, method: Validat
 ```
 
 Printing the evaluation metrics with `println(evalMetrics)` will return something like `Map(Loss -> 1.0945806503295898)`.
+
+**9.** Save to disk
+
+We can save the model and its parameters in a binary format locally, on HDFS or on S3 simply
+
+```scala
+model.saveModule("/path/to/model", overWrite = true)
+```
+
+**10.** Load the model from disk
+
+A saved model can be loaded again and used to run predictions
+
+```scala
+val model2 = Module.loadModule[Float]("/path/to/model")
+val predictions = model2.predict(evalData, 4)
+```
