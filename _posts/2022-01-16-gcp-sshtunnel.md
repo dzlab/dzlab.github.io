@@ -24,7 +24,7 @@ $ gcloud compute instances create databases --machine-type n1-standard-2 --zone 
 
 From the Google Console, Create a Firewall rule that will enable remote access to Postgres port.
 
-<center><img alt="gcp firewall rule" src='https://i.stack.imgur.com/F0MC1.png' width='200' height='200'></center>
+<center><img alt="gcp firewall rule" src='https://i.stack.imgur.com/F0MC1.png'></center>
 
 
 Once the VM is running, connect to it via SSH from Google Console and then create a user (e.g. `myadmin` with password `mypass`).
@@ -96,7 +96,7 @@ Type "help" for help.
 
 postgres=# GRANT ALL PRIVILEGES ON DATABASE database01 TO myadmin;
 GRANT
-postgres=# ALTER USER c3admin WITH PASSWORD 'mypass';
+postgres=# ALTER USER myadmin WITH PASSWORD 'mypass';
 ALTER ROLE
 ```
 
