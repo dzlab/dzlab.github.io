@@ -32,6 +32,7 @@ plugins:
   - jekyll-gist
   - jekyll-toc
   - jekyll-paginate
+  - jekyll-sitemap
 
 kramdown:
   parse_block_html: true
