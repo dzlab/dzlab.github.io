@@ -3,8 +3,8 @@ layout: post
 comments: true
 title: GDG Fremont DevFest 2020 Talk on TensorFlow Text
 excerpt: My talk during GDG Fremont DevFest 2020 on Text preprocessing with TensorFlow Text.
-categories: certification
-tags: [tensorflow,devfest,nlp]
+categories: tensorflow
+tags: [tensorflow,gdg,devfest,nlp]
 toc: true
 img_excerpt:
 ---
