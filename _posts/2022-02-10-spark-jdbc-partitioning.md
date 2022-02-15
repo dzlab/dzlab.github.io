@@ -33,6 +33,7 @@ You can confirm this by checking the Spark UI and you will notice that the load 
 
 ![spark read no partitioning]({{ "assets/2022/02/20220210-spark-read-no-partitioning.png" | absolute_url }}){: .center-image }
 
+## Partitioning on numeric or date or timestamp columns
 Luckily, Spark provides few parameters that can be used to control how the table will be partitioned and how many tasks Spark will create to read the entire table.
 
 You can check all the options Spark provide for while using JDBC drivers in the documentation page - [link](https://spark.apache.org/docs/latest/sql-data-sources-jdbc.html). The options specific to partitioning are as follows:
@@ -88,8 +89,56 @@ val upperBound = values(0)("max_value")
 
 On the other hand, setting an appropriate value for `numPartitions` is not that straightforward and you need to know in front how big is the table and have an estimate on how do you spread the data over multiple partitions in Spark.
 
-https://developpaper.com/read-and-write-millions-of-data-of-spark-sql-to-mysql-in-batches/
+## Partitioning on string columns
+Unfortunately, the previous partitioning support that Spark provides out of the box does not work with columns of type string.
 
-https://jozef.io/r926-spark-jdbc-partitioning/
+One way to address this is to calculate the integer division of the `hash` value of the column over the number of partitions and pass this in a `where`, this will assign each row to a partition identified as `partitionId`. The SQL query would look like this
+```sql
+select * from test_table where hash(partitionColumn) % numPartitions = partitionId
+```
 
-https://medium.com/@radek.strnad/tips-for-using-jdbc-in-apache-spark-sql-396ea7b2e3d3
+We can easily do this with one of the overloaded of the `jdbc` API in Spark's `DataFrameReader` that accepts an array of SQL `where` clauses. We just need to create one `where` clause for each partition and use the hashing trick as follows:
+
+```scala
+val predicateFct = (partition: Int) => s"""hash("$partitionColumn") % $numPartitions = $partition"""
+val predicates = (0 until numPartitions).map{partition => predicateFct(partition)}.toArray
+```
+
+Then we can simply use those predicates to create partitions when Spark loads the table as follows:
+
+```scala
+val df = spark.read
+  .format("jdbc")
+  .option("driver", "org.postgresql.Driver")
+  .option("dbtable", "test_table")
+  .jdbc(url, "test_table", predicates, jdbcProperties)
+```
+
+Putting everything together, the logic for partitioning on string columns can be achieved with the following snippet:
+
+```scala
+val numPartitions = 10
+val partitionColumn = "partitionColumn"
+
+// Define JDBC properties
+val url = "jdbc:postgresql://localhost:5432/testdb"
+val jdbcProperties = new java.util.Properties()
+properties.put("url", url)
+properties.put("user", "username")
+properties.put("password", "password")
+
+// Define the where clauses to assign each row to a partition
+val predicateFct = (partition: Int) => s"""hash("$partitionColumn") % $numPartitions = $partition"""
+val predicates = (0 until numPartitions).map{partition => predicateFct(partition)}.toArray
+
+// Load the table into Spark
+val df = spark.read
+  .format("jdbc")
+  .option("driver", "org.postgresql.Driver")
+  .option("dbtable", "test_table")
+  .jdbc(url, "test_table", predicates, jdbcProperties)
+```
+
+> Note: You need to make sure the database you're trying to read from support hash functions. In fact, the support for hashing may differt from a database to another. For instance MySQL support hashing functions like `md5` other databases may not.
+
+Feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc)
