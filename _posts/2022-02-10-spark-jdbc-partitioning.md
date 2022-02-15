@@ -68,6 +68,25 @@ As you can imagine this approach will provide much more scalability then the ear
 
 ![spark read partitioning]({{ "assets/2022/02/20220210-spark-read-partitioning.png" | absolute_url }}){: .center-image }
 
+Getting the values for `lowerBound` and `upperBound` should be straightforward, either set them to specific values or use actual min and max values in the table with a query like this:
+
+```scala
+val url = "jdbc:postgresql://localhost:5432/testdb"
+val connection = DriverManager.getConnection(url)
+val stmt = connection.createStatement()
+val query = s"select count($partitionColumn) as count_value, min($partitionColumn) as min_value, max($partitionColumn) as max_value from $table"
+val resultSet = stmt.executeQuery(query)
+
+var rows = ListBuffer[Map[String, String]]()
+while (resultSet.next()) {
+  rows += columns.map(column => (column, resultSet.getString(column))).toMap
+}
+val values = rows.toList
+val lowerBound = values(0)("min_value")
+val upperBound = values(0)("max_value")
+```
+
+On the other hand, setting an appropriate value for `numPartitions` is not that straightforward and you need to know in front how big is the table and have an estimate on how do you spread the data over multiple partitions in Spark.
 
 https://developpaper.com/read-and-write-millions-of-data-of-spark-sql-to-mysql-in-batches/
 
