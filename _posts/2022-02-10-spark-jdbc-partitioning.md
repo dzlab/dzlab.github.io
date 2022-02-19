@@ -141,4 +141,6 @@ val df = spark.read
 
 > Note: You need to make sure the database you're trying to read from support hash functions. In fact, the support for hashing may differt from a database to another. For instance MySQL support hashing functions like `md5` other databases may not.
 
+## That's all folks
+
 Feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc)
