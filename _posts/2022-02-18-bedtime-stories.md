@@ -9,9 +9,12 @@ toc: true
 img_excerpt:
 ---
 
+<a href="https://anchor.fm/exmachina"><img align="center" src="https://s3-us-west-2.amazonaws.com/anchor-generated-image-bank/production/podcast_uploaded400/21867213/21867213-1645211956325-1bbf9673035b3.jpg" /><a/>
+<br/>
+
 While I was reading on [Hacker News](https://news.ycombinator.com/item?id=29428910) I stumbled upon this article ([link](https://www.stavros.io/posts/making-ai-podcast/)) where the article describes how he used OpenAI's GPT-s API to generate random stories and then use Microsoft Cognitive service to narrate the story. All those are great services, but at the end of day you just to pay to use them and they just works. So I thought why not try to build something similar using TensorFlow pre-trained models, and here we are today telling how it all come throught.
 
-## GPT-Neo
+## Enter GPT-Neo
 
 To generate the stories for the podcast, I used a freely available 1.3B parameters pre-trained model called GPT-Neo which is an implementation of a GPT-3-style model that uses the [mesh-tensorflow library](https://github.com/tensorflow/mesh) for training. This model was developped and pre-trained by [EleutherAI](https://www.eleuther.ai/), which seems to be working on an even bigger model with 20 B parameters pre-trained on a massiveee 800 Gb corpus.
 
@@ -61,7 +64,7 @@ In another case, the model generated what it seems to be extact copy of text it 
 \n\nThe shelter is closed on Wednesday mornings between 12:00 and 16:00, so those who would like to stay there can, as long as we are at the venue, and then go to the nearby supermarket to buy a package of food.\n\nIt would also be great if we could get a place with all the facilities of the shelter so that we could start our preparation.\n\nTo follow our Facebook “I am a Victim” page you can:\n\nhttps://www.facebook.com/pages/IAMAWITHAVICTIM/42651820851097\n\nAnd to sign up for our newsletter you can:\n\nhttps://www.facebook.com/groups/IAMAWITHAVICTIM/\n\nAnd to sign up for our newsletter you can:\n\nhttps://www.facebook.com/groups/IAMAWITHAVICTIM/\n\nAnd for more information you can:\n\nhttp://www.imawithacheap.com\n\nhttps://www.facebook.com/groups/IAMAWITHAVICTIM/\n\nhttps://plus.google.com/+IAMAWITHACHOP/\n\nThanks very much for your help, all those who are ready to help me to stay warm and dry in Naples! And thanks to everyone who signed up for our newsletter.\n\nPlease visit our website:\n\nhttps://www.imawithacheap.com/\n\nAnd our Facebook page:\n\nhttps://www.facebook.com/pages/IAMAWITHAVICTIM/\n\nAnd our Twitter page:\n\nhttps://twitter.com/IAMAWITHAVP\n\nWe will do our best to try to keep that shelter open.\n\nI am very happy that my shelter is not closed. In fact, the weather is not the best, but so far everything is fine.\n\nI am thankful to the people who have already arrived.
 ```
 
-## TensorFlowTTS
+## Enter TensorFlowTTS
 Once the story is generated, the next step is speech synthesis. I found a great repository calleed [TensorFlowTTS](https://github.com/TensorSpeech/TensorFlowTTS). It hosts the implementations of many Text to Speech algorithms in TensorFlow and also provide ready to use pre-trained models. One caveat is the only available voice is one female voice. Hence the idea of naming the narrator **Ex Machina**.
 
 This libray is easy to use, it can be install as follows:
@@ -162,6 +165,6 @@ add_background_track('voice.mp3', 'background.mp3', 'episode.mp3')
 ```
 
 ## That's all folks
-You can give the podcast a try, all episodes are pulished here https://anchor.fm/exmachina
+You can give the podcast a try, all episodes are pulished here [https://anchor.fm/exmachina](https://anchor.fm/exmachina)
 
 I would love to head any feedack, suggestions or ideas for improvement. So feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc)
