@@ -167,4 +167,4 @@ add_background_track('voice.mp3', 'background.mp3', 'episode.mp3')
 ## That's all folks
 You can give the podcast a try, all episodes are pulished here [https://anchor.fm/exmachina](https://anchor.fm/exmachina)
 
-I would love to head any feedack, suggestions or ideas for improvement. So feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc)
+I would love to hear any feedack, suggestions or ideas for improvement. So feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc)
