@@ -14,7 +14,7 @@ img_excerpt:
 
 
 
-Google Storage provide access thorugh different ways, one of the interesting access patterns is to considered as an S3 endpoint and access it through one of the S3 SDKs (See interoperability documentation - [link](https://cloud.google.com/storage/docs/interoperability)).
+Google Storage provide access thorugh different ways, one of the interesting access patterns is to considered as an S3 endpoint and access it through one of the S3 SDKs (See interoperability documentation - [link](https://cloud.google.com/storage/docs/interoperability)). This is very convinient in case you have an application that currently runs against AWS S3 and you are in the process to migrate it to GS.
 
 In this, article we will see how to access Google Storage using the Java S3 SDK (for Python you can refer to this article [link](https://vamsiramakrishnan.medium.com/a-study-on-using-google-cloud-storage-with-the-s3-compatibility-api-324d31b8dfeb)).
 
@@ -76,6 +76,31 @@ To initiate multi-part uploads we can simply use S3's `initiateMultipartUpload`
 val multipartUploadRequest = new InitiateMultipartUploadRequest(bucket, key)
 client.initiateMultipartUpload(multipartUploadRequest).getUploadId
 ```
+
+## S3 Hadoop FileSystem
+Similar to how we can use the S3 Java SDK to interact with Google Storage, we can also use the S3 Hadoop FileSystem API to interact with Google Storage from Apache Spark or any other Hadoop application.
+
+Before anything, we need to make sure that the Spark configuration is updated with GS endpoint, and region, credentials.
+```scala
+val sparkSession: SparkSession = ...
+val sc = sparkSession.sparkContext
+sc.hadoopConfiguration.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+sc.hadoopConfiguration.set("fs.s3a.endpoint", "https://storage.googleapis.com");
+sc.hadoopConfiguration.set("fs.s3a.path.style.access", "true")
+sc.hadoopConfiguration.set("fs.s3a.endpoint.region", "GS_BUCKET_REGION")
+spark.conf.set("fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider")
+spark.conf.set("fs.s3a.access.key","<<HMAC_ACCESS_KEY>>");
+spark.conf.set("fs.s3a.secret.key","<<HMAC_SECRET_KEY>>");
+```
+
+Then we can simply read as if we are reading an S3 path, e.g. reading a CSV file
+```scala
+val path = s"s3a://$GS_BUCKET/$GS_KEY"
+sparkSession.read.format("csv").option("inferSchema", "true").load(path)
+```
+
+> Note: we can use any of of `s3a` urls either `s3a://<<BUCKET>>/<<FOLDER>>/<<FILE>>` or `s3a://<<ACCESS_KEY>>:<<SECRET_KEY>>@<<BUCKET>>/<<FOLDER>>/<<FILE>>`
+
 
 ## That's all folks
 
