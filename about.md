@@ -8,10 +8,11 @@ Hey there! This is Bachir, a Software Engineer with strong industry experience i
 You can subscribe to updates using this [feed]({{ site.url }}/feed.xml).
 
 You can find me and my work:
-* I used to write tech-related articles [here](http://elsoufy.blogspot.com/)
-* I tweet a lot about engineering and machine learning [@bachiirc](https://twitter.com/bachiirc)
-* I write code and raise issues on [GitHub]({{ site.github.repo }})
-* I ask and answer questions on [StackOverflow](https://stackoverflow.com/users/1269281/bachr?tab=profile)
+* On [Google Dev Library](https://devlibrary.withgoogle.com/authors/bachiirc)
+* On my old blog [here](http://elsoufy.blogspot.com/)
+* On Twitter [@bachiirc](https://twitter.com/bachiirc)
+* On GitHub [here]({{ site.github.repo }})
+* On StackOverflow [here](https://stackoverflow.com/users/1269281/bachr?tab=profile)
 
 Thanks for reading!
 
