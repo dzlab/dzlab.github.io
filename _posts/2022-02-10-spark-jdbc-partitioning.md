@@ -48,7 +48,10 @@ You can check all the options Spark provide for while using JDBC drivers in the 
 
 > Note if the parition column is numeric then the values of `lowerBound` and `upperBound` has to be covertable to long or spark will through a `NumberFormatException`.
 
-Now, when using those options the logic to read a table with Spark become something like this
+
+### Using a table for partitioning
+
+Now, when using those options and having a `dbtable` option set, the logic to read a table with Spark become something like this
 
 ```scala
 val df = spark.read
@@ -69,6 +72,27 @@ As you can imagine this approach will provide much more scalability then the ear
 
 ![spark read partitioning]({{ "assets/2022/02/20220210-spark-read-partitioning.png" | absolute_url }}){: .center-image }
 
+
+### Using a query for partitioning
+We can also use a `query` instead of a `table` for partitioing, this is actually strightforward as we just need to convert the query (e.g. `select a, b, from table`) to something like `(select a, b, from table) as subquery` then use it in the `dbtable` option.
+
+```scala
+val df = spark.read
+  .format("jdbc")
+  .option("url", "jdbc:postgresql://localhost:5432/testdb")
+  .option("user", "username")
+  .option("password", "password")
+  .option("driver", "org.postgresql.Driver")
+  .option("dbtable", "(select a, b, from table) as subquery")
+  .option("partitionColumn", "test_column")
+  .option("numPartitions", "10")
+  .option("lowerBound", "0")
+  .option("upperBound", "100")
+  .load()
+```
+
+### How to get the boundaries
+
 Getting the values for `lowerBound` and `upperBound` should be straightforward, either set them to specific values or use actual min and max values in the table with a query like this:
 
 ```scala
@@ -88,6 +112,7 @@ val upperBound = values(0)("max_value")
 ```
 
 On the other hand, setting an appropriate value for `numPartitions` is not that straightforward and you need to know in front how big is the table and have an estimate on how do you spread the data over multiple partitions in Spark.
+
 
 ## Partitioning on string columns
 Unfortunately, the previous partitioning support that Spark provides out of the box does not work with columns of type string.
