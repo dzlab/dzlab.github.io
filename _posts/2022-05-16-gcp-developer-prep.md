@@ -109,7 +109,64 @@ You need to know basic SQL syntax to use BigQuery, for instance the different ty
 | RIGHT [OUTER] JOIN | A RIGHT OUTER JOIN (or simply RIGHT JOIN) is similar and symmetric to that of LEFT OUTER JOIN. | `FROM A RIGHT OUTER JOIN B ON A.w = B.y` |
 
 ## Compute
-Choosing a Google Cloud compute option - [link](https://cloud.google.com/blog/topics/developers-practitioners/where-should-i-run-my-stuff-choosing-google-cloud-compute-option)
+GCP offers many ways to run application logic, from Cloud Compute that offers lot of freedom and control to AppEngine or Cloud Functions that offer less flexibility but takes care of operations complexity.
+
+<a href="https://cloud.google.com/blog/topics/developers-practitioners/where-should-i-run-my-stuff-choosing-google-cloud-compute-option"><img align="center" src="https://storage.googleapis.com/gweb-cloudblog-publish/images/CvKvRvF_v10-07-21.max-2000x2000.jpg" width="1000" /></a>
+<br/>
+
+
+### AppEngine
+AppEngine is one of the earliest services in GCP, it let you build monolithic applications or websites in a range of development languages and takes care of scaling it for you.
+
+- You need to read the overview of the service - [link](https://cloud.google.com/appengine)
+- You need to know App Engine standard environment and when to use it - [link](https://cloud.google.com/appengine/docs/standard)
+- You need to know App Engine flexible environment and when to use it - [link](https://cloud.google.com/appengine/docs/flexible)
+- You need to know how traffic splitting works and how to use to deploy new versions of your applications - [link](https://cloud.google.com/appengine/docs/flexible/python/splitting-traffic)
+
+### Compute Engine
+Compute Engine is the Infrastructure as a Service (IaaS) offering in GCP. It is a hosted service that lets you create and run virtual machines on Google infrastructure.
+
+- You need to read the general overview of the service - [link](https://cloud.google.com/compute/docs/)
+- Know the how/when to use [Preemptible](https://cloud.google.com/compute/docs/instances/preemptible) and [Spot](https://cloud.google.com/compute/docs/instances/spot) instances
+- Know how to connect to the VMs to troubleshoot or copy files - [link](https://cloud.google.com/compute/docs/instances/ssh)
+- How and when to configure startup scripts and troubleshoot startup issues - [link](https://cloud.google.com/compute/docs/instances/startup-scripts)
+- Know how/when to use Managed Instance Group, how to monitor them and configure auto-scaling - [link](https://cloud.google.com/compute/docs/instance-groups/creating-groups-of-managed-instances#monitoring_groups)
+
+### Cloud Functions
+Cloud Function is the functions as a service (FaaS) offering on GCP. It lets you run code without having to manage servers or containers. It is best suited for event driven services, and let you scale the number of functions to handle load increase.
+
+- Read the product overview - [link](https://cloud.google.com/functions)
+- Know when to use Cloud Functions and the fact that is event-driven and is not meant for long-running tasks.
+- Know how to develop, test, build and deploy cloud functions - [link](https://cloud.google.com/functions/docs/how-to)
+- Know the different types of function: [HTTP](https://cloud.google.com/functions/docs/writing/http), [Background](https://cloud.google.com/functions/docs/writing/background), [CloudEvent](https://cloud.google.com/functions/docs/writing/cloudevents)
+- Know how the diffent function triggers and their limitations/constraints - [link](https://cloud.google.com/functions/docs/calling)
+- Know how to access resources (e.g. Storage bucket/object) from a different project
+
+### Cloud Run
+Cloud Run is a serverless service that let you run containers on GCP without having to manage any infrastructure.
+
+- Read the product overview - [link](https://cloud.google.com/run/docs/)
+- Understand the use cases suitable for Cloud Run - [link](https://cloud.google.com/run/docs/fit-for-run)
+- Know how to deploy new verions of your container and how to route traffic - [link](https://cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration)
+- Know the diffent ways to trigger a Cloud Run - [link](https://cloud.google.com/run/docs/triggering/https-request)
+
+### Kubernetes Engine
+Google Kubernetes Engine (GKE) is the hosted kubernetes service offering on GCP
+- Read the product overview - [link](https://cloud.google.com/kubernetes-engine/docs)
+- Know how to migrate monolithic applications to GKE - [link](https://cloud.google.com/solutions/migrating-a-monolithic-app-to-microservices-gke)
+- Know how to troubleshooting GKE - [link](https://cloud.google.com/kubernetes-engine/docs/troubleshooting)
+- Know how to use Workload Identity - [link](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
+
+
+#### Auto-scaling
+Auto-scaling in GKE is an important topic
+
+- Read the overview of auto-scaling in GKE - [link](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler)
+- Know to scale applications on GKE - [link1](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-autoscaler) [link2](https://cloud.google.com/kubernetes-engine/docs/how-to/scaling-apps)
+- Know how to use custom and external metrics - [link](https://cloud.google.com/kubernetes-engine/docs/concepts/custom-and-external-metrics)
+- Know when to choose Horizontal Pod auto-scaling - [link](https://cloud.google.com/kubernetes-engine/docs/concepts/horizontalpodautoscaler)
+- Know when to choose Vertical Pod auto-scaling - [link](https://cloud.google.com/kubernetes-engine/docs/concepts/verticalpodautoscaler)
+
 
 ## Certification SWAG
 After passing the exam, you can choose one of the official certification swags:
