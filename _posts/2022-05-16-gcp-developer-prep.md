@@ -167,6 +167,37 @@ Auto-scaling in GKE is an important topic
 - Know when to choose Horizontal Pod auto-scaling - [link](https://cloud.google.com/kubernetes-engine/docs/concepts/horizontalpodautoscaler)
 - Know when to choose Vertical Pod auto-scaling - [link](https://cloud.google.com/kubernetes-engine/docs/concepts/verticalpodautoscaler)
 
+### Anthos
+- Read the Anthos introduction - [link](https://cloud.google.com/anthos)
+- Learn how to use Anthos to modernize applications - [link](https://cloud.google.com/solutions/modernize-apps-with-anthos)
+
+- Know the different Migration types - [link](https://cloud.google.com/architecture/migration-to-gcp-getting-started)
+  - Lift and shift: you move workloads from a source environment to a target environment with minor or no modifications or refactoring.
+  - Improve and move: modernize the workload while migrating it.
+  - Remove and replace (or rip and replace): you decommission an existing app and completely redesign and rewrite it as a cloud-native app.
+
+- Know what migration tools you can use to move applications to GCP
+  - [Kf](https://cloud.google.com/migrate/kf/docs/2.9/getting-started) offers developers the Cloud Foundry experience while empowering operators to adopt declarative Kubernetes practice. It makes migrating Cloud Foundry workloads to Kubernetes straightforward, and most importantly, avoids major changes to developer workflows.
+
+
+## Networking
+- Read the product overview - [link](https://cloud.google.com/vpc/docs/vpc)
+- Read best practices for desining VPCs - [link](https://cloud.google.com/architecture/best-practices-vpc-design)
+- Understand what is VPN Peering - [link](https://cloud.google.com/vpc/docs/vpc-peering)
+- Know how/when to use Firewalls - [link](https://cloud.google.com/vpc/docs/firewalls)
+
+### Cloud Interconnect
+Cloud Interconnect extends your on-premises network to Google's network through a highly available, low latency connection. You can use Dedicated Interconnect to connect directly to Google or use Partner Interconnect to connect to Google through a supported service provider.
+
+- Read the product overview - [link](https://cloud.google.com/network-connectivity/docs/interconnect)
+- Learn about the different Interconnect products - [link](https://cloud.google.com/network-connectivity/docs/how-to/choose-product)
+- Learn how to choose connection points - [link](https://cloud.google.com/network-connectivity/docs/interconnect/concepts/choosing-colocation-facilities)
+
+
+|Solution|Capacity|Description|Connectivity|
+|-|-|-|-|
+|Dedicated Interconnect|10-Gbps or 100-Gbps circuits with flexible VLAN attachment capacities from 50 Mbps to 50 Gbps.|A direct connection to Google, must meet Google's network in colocation facility |not through the public internet.|
+|Partner Interconnect|Flexible capacities from 50 Mbps to 50 Gbps.| connectivity through one of our supported service providers.|not through the public internet.|
 
 ## Certification SWAG
 After passing the exam, you can choose one of the official certification swags:
@@ -174,7 +205,7 @@ After passing the exam, you can choose one of the official certification swags:
 ![developer-certification-swags]({{ "assets/2022/05/20220520-gc-dev-certif-swags.png" | absolute_url }}){: .center-image }
 
 ## That's all folks
-Check my the following preparation tips for passing other Google certifications:
+Check the following preparation tips for passing other Google certifications:
 - Data Engineer certification - [link](https://dzlab.github.io/certification/2021/12/04/gcp-data-engineer-prep/) and
 - Machine Learning Engineer certification - [link](https://dzlab.github.io/certification/2022/01/08/gcp-ml-engineer-prep/).
 
