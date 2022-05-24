@@ -210,13 +210,11 @@ Container Registry is a hosted service for securely storing and managing Docker 
 Cloud Build is a hosted Continuous Integration service, it lets you continuously build, test, and deploy applications.
 
 - Read the product overview - [link](https://cloud.google.com/build/docs)
+- Know to create a basic build pipeline - [link](https://cloud.google.com/build/docs/configuring-builds/create-basic-configuration)
+- Understand the structure of a build configuration file - [link](https://cloud.google.com/build/docs/build-config)
+- Know how to configure the steps order in a build pipeline - [link](https://cloud.google.com/build/docs/configuring-builds/configure-build-step-order)
 
-- https://cloud.google.com/build/docs/configuring-builds/configure-build-step-order
-- https://cloud.google.com/build/docs/configuring-builds/create-basic-configuration
-- https://cloud.google.com/build/docs/build-config
-- https://cloud.google.com/solutions/continuous-delivery/
 
-- Know how - [link](https://cloud.google.com/blog/products/application-development/release-with-confidence-how-testing-and-cicd-can-keep-bugs-out-of-production)
 
 #### Good to know
 There is a persistent file system that is shared between steps in a Cloud Build. We change the story to be:
@@ -226,10 +224,6 @@ There is a persistent file system that is shared between steps in a Cloud Build.
 4. Test the content of the file.
 Since step 2 can now never fail, step 3 is executed and step 4 defines the outcome of the build as a whole.
 
-### Cloud Debugger
-- https://cloud.google.com/source-repositories/docs/debug-overview
-- https://cloud.google.com/source-repositories/docs/debug-snapshots
-- https://cloud.google.com/debugger/docs/source-options#github
 
 
 ### Logging
@@ -257,18 +251,14 @@ You can route logs to Cloud Storage, BigQuery, and Pub/Sub. Using filters, you c
 
 
 
-
-### Performance
-- https://www.atlassian.com/software/clover
-- https://jmeter.apache.org/
-- https://snyk.io/blog/secure-code-review/
-
-
 ### Monitoring
+It is very important to put in place a monitoring strategy before pushing an application live to production. GCP offers a set of suite to help monitoring like Cloud Trace, Cloud Profiler and Cloud Debugger.
 
-- Introduction to Prometheus https://cloud.google.com/stackdriver/docs/solutions/gke/prometheus
-- Introduction to OpenTelemetry https://cloud.google.com/learn/what-is-opentelemetry
+Also good to know about alternative open-source services that can be used
+- Introduction to Prometheus - [link](https://cloud.google.com/stackdriver/docs/solutions/gke/prometheus)
+- Introduction to OpenTelemetry - [link](https://cloud.google.com/learn/what-is-opentelemetry)
 
+The following video provides good summary of the different services offered on GCP for monitoring applications:
 <div align="center">
 <iframe width="560" height="315" src="https://www.youtube.com/embed/CjGv1bDy9rI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
@@ -282,10 +272,6 @@ The following picture depicts how traces are visualized in Clout Trace
 <img align="center" src="https://cloud.google.com/trace/images/quickstart-waterfall-example.png" width="1000" />
 <br/>
 
-
-
-
-
 ### Cloud Profiler
 Cloud Profiler is a statistical, low-overhead profiler that continuously gathers CPU usage and memory-allocation information from your production applications. It attributes that information to the application's source code, helping you identify the parts of the application consuming the most resources, and otherwise illuminating the performance characteristics of the code.
 
@@ -295,6 +281,12 @@ The following picture depicts how provide are visualized in application stacktra
 <img align="center" src="https://cloud.google.com/profiler/docs/images/profiler-quickstart-filtered.png" width="1000" />
 <br/>
 
+### Cloud Debugger
+Cloud Debugger is a hosted service that makes debugging live application very easy. The service seems to be depreacated but it's still possible to see a question on it during the exam.
+- Know how you can debug live applications - [link](https://cloud.google.com/source-repositories/docs/debug-overview)
+- Learn how to connect to your application source code repository (e.g. GitHub) - [link](https://cloud.google.com/debugger/docs/source-options)
+- Know how to use debugging snapshots - [link](https://cloud.google.com/source-repositories/docs/debug-snapshots)
+
 ### Deployments
 Know the different application deployments strategies and how to use tools like [Spinnaker](https://spinnaker.io/) for Continuous Deployment.
 
@@ -303,8 +295,10 @@ Know the different application deployments strategies and how to use tools like 
 - **Rolling deployments**: A rolling deployment is a deployment strategy that slowly replaces previous versions of an application with new versions of an application by completely replacing the infrastructure on which the application is running. For example, in a rolling deployment in Amazon ECS, containers running previous versions of the application will be replaced one-by-one with containers running new versions of the application. A rolling deployment is generally faster than a blue/green deployment; however, unlike a blue/green deployment, in a rolling deployment there is no environment isolation between the old and new application versions. This allows rolling deployments to complete more quickly, but also increases risks and complicates the process of rollback if a deployment fails.
 - **Canary deployments**: Canary deployments are a pattern for rolling out releases to a subset of users or servers. The idea is to first deploy the change to a small subset of servers, test it, and then roll the change out to the rest of the servers. The canary deployment serves as an early warning indicator with less impact on downtime: if the canary deployment fails, the rest of the servers aren't impacted. - [link](https://cloud.google.com/solutions/application-deployment-and-testing-strategies#canary_test_pattern)
 
-
-The following Cloud Skills task walk you throw implementing the different deployments strategies using Kubernetes Engine - [link](https://www.cloudskillsboost.google/focuses/639?parent=catalog)
+Some useful resrources on deployments:
+- Read how to implement Continuous Delivery - [link](https://cloud.google.com/solutions/continuous-delivery/)
+- Know how to improve code quality with CI / CD - [link](https://cloud.google.com/blog/products/application-development/release-with-confidence-how-testing-and-cicd-can-keep-bugs-out-of-production)
+- Know how to implement the different deployments strategies using Kubernetes Engine - [link](https://www.cloudskillsboost.google/focuses/639?parent=catalog)
 
 
 ## Certification SWAG
