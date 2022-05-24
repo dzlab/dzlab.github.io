@@ -233,13 +233,14 @@ Since step 2 can now never fail, step 3 is executed and step 4 defines the outco
 
 #### Audit
 Know the different types of events that Logging agents can capture
+
 | Log Type | Description | Documentation |
 | - | - | - |
-| Admin activity| show destroy, create, modify, etc. events for a VM instance. | [link](https://cloud.google.com/logging/docs/audit/#admin-activity) |
-| Data access| Show read activities. | [link](https://cloud.google.com/logging/docs/audit/#data-access)
-| Syslog | A service running in systemd that outputs to stdout will have logs in syslog and will be scraped by the logging agent. | [link](https://github.com/GoogleCloudPlatform/fluentd-catch-all-config/tree/master/configs/config.d) |
-| System event| Tell you about live migration, etc. | [link](https://cloud.google.com/logging/docs/audit/#system-event)|
-| VPC flow logs | uses the substrate specific logging to capture everything. | [link](https://cloud.google.com/vpc/docs/using-flow-logs) [course](https://cloudacademy.com/course/implementing-a-gcp-virtual-private-cloud-1224/vpc-flow-logs/)
+| Admin activity| show destroy, create, modify, etc. events for a VM instance. | [documentation](https://cloud.google.com/logging/docs/audit/#admin-activity) |
+| Data access| Show read activities. | [documentation](https://cloud.google.com/logging/docs/audit/#data-access)
+| Syslog | A service running in systemd that outputs to stdout will have logs in syslog and will be scraped by the logging agent. | [documentation](https://github.com/GoogleCloudPlatform/fluentd-catch-all-config/tree/master/configs/config.d) |
+| System event| Tell you about live migration, etc. | [documentation](https://cloud.google.com/logging/docs/audit/#system-event)|
+| VPC flow logs | uses the substrate specific logging to capture everything. | [documentation](https://cloud.google.com/vpc/docs/using-flow-logs) and [CloudAcademy course](https://cloudacademy.com/course/implementing-a-gcp-virtual-private-cloud-1224/vpc-flow-logs/)
 
 #### Export
 Logging retains app and audit logs for a limited period of time. You might need to retain logs for longer periods to meet compliance obligations. Alternatively, you might want to keep logs for historical analysis.
@@ -300,6 +301,42 @@ Some useful resrources on deployments:
 - Know how to improve code quality with CI / CD - [link](https://cloud.google.com/blog/products/application-development/release-with-confidence-how-testing-and-cicd-can-keep-bugs-out-of-production)
 - Know how to implement the different deployments strategies using Kubernetes Engine - [link](https://www.cloudskillsboost.google/focuses/639?parent=catalog)
 
+## Security
+Security is a broad topic that covers every aspect of your Cloud. Each of the previous services have a specific built-in security. Some areas to know
+
+- Know how to secure Cloud Functions - [link](https://cloud.google.com/functions/docs/securing)
+- Understand the fundamental principle of least privilege - [link](https://cloud.google.com/blog/products/identity-security/dont-get-pwned-practicing-the-principle-of-least-privilege)
+- Know how to secure keys using Key rotation in Cloud Key Management Service - [](https://cloud.google.com/kms/docs/key-rotation)
+- Know how to use container analysis for scanning images (e.g. during CI) - [link](https://cloud.google.com/container-analysis/docs)
+- Know how to scan container images in Container Registry for vulnerabilities - [link](https://cloud.google.com/container-registry/docs/container-analysis)
+
+### Resource Manager
+Google Cloud provides container resources such as organizations and projects that allow you to group and hierarchically organize other Google Cloud resources. This hierarchical organization helps you manage common aspects of your resources, such as access control and configuration settings. The Resource Manager API enables you to programmatically manage these container resources. Check the documentation to learn more about this service - [link](https://cloud.google.com/resource-manager/docs).
+
+### Permission
+- Learn best practices for implementing authentication and authorization - [link](https://cloud.google.com/docs/enterprise/best-practices-for-enterprise-organizations)
+  - A general recommendation is to have one project per application per environment.
+  - Group users with the same responsibilities into groups and assigning IAM roles to the groups rather than to individual users.
+  - Use service accounts for server-to-server interactions.
+
+
+### Cloud Endpoints
+Endpoints is an API management system that helps you secure, monitor, analyze, and set quotas on your APIs using the same infrastructure Google uses for its own APIs.
+
+Depending on where your API is hosted and the type of communications protocol your API uses:
+
+|Option|Limitation|
+|-|-|
+|OpenAPI||
+|gRPC|Not supported on App Engine or Cloud Functions|
+|Endpoints Frameworks|Supported only on App Engine standard Python 2.7 and Java 8|
+
+- Read the documentation of Cloud Endpoints - [link](https://cloud.google.com/endpoints/docs)
+- Know the different HTTP status codes - [link](https://www.restapitutorial.com/httpstatuscodes.html)
+
+## Other
+- Google Cloud system design considerations - [link](https://cloud.google.com/architecture/framework/design-considerations)
+- Case Study: HipLocal - [link](https://services.google.com/fh/files/blogs/master_case_study_hiplocal.pdf)
 
 ## Certification SWAG
 After passing the exam, you can choose one of the official certification swags:
