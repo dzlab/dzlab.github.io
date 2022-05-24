@@ -199,6 +199,114 @@ Cloud Interconnect extends your on-premises network to Google's network through 
 |Dedicated Interconnect|10-Gbps or 100-Gbps circuits with flexible VLAN attachment capacities from 50 Mbps to 50 Gbps.|A direct connection to Google, must meet Google's network in colocation facility |not through the public internet.|
 |Partner Interconnect|Flexible capacities from 50 Mbps to 50 Gbps.| connectivity through one of our supported service providers.|not through the public internet.|
 
+## DevOps
+
+### Container Registry
+Container Registry is a hosted service for securely storing and managing Docker container images.
+
+- Read the product overview - [link](https://cloud.google.com/container-registry)
+
+### Cloud Build
+Cloud Build is a hosted Continuous Integration service, it lets you continuously build, test, and deploy applications.
+
+- Read the product overview - [link](https://cloud.google.com/build/docs)
+
+- https://cloud.google.com/build/docs/configuring-builds/configure-build-step-order
+- https://cloud.google.com/build/docs/configuring-builds/create-basic-configuration
+- https://cloud.google.com/build/docs/build-config
+- https://cloud.google.com/solutions/continuous-delivery/
+
+- Know how - [link](https://cloud.google.com/blog/products/application-development/release-with-confidence-how-testing-and-cicd-can-keep-bugs-out-of-production)
+
+#### Good to know
+There is a persistent file system that is shared between steps in a Cloud Build. We change the story to be:
+1. Deploy the Cloud Function.
+2. Save the results of calling the Cloud Function to a file.
+3. Delete the Cloud Function.
+4. Test the content of the file.
+Since step 2 can now never fail, step 3 is executed and step 4 defines the outcome of the build as a whole.
+
+### Cloud Debugger
+- https://cloud.google.com/source-repositories/docs/debug-overview
+- https://cloud.google.com/source-repositories/docs/debug-snapshots
+- https://cloud.google.com/debugger/docs/source-options#github
+
+
+### Logging
+- Know how to setup logging agent - [link](https://cloud.google.com/logging/docs/agent/installation)
+- Know what are the logging quotas - [link](https://cloud.google.com/logging/quotas)
+- Know how to troubleshooting loggind issues - [link](https://cloud.google.com/error-reporting/docs/troubleshooting)
+
+#### Audit
+Know the different types of events that Logging agents can capture
+| Log Type | Description | Documentation |
+| - | - | - |
+| Admin activity| show destroy, create, modify, etc. events for a VM instance. | [link](https://cloud.google.com/logging/docs/audit/#admin-activity) |
+| Data access| Show read activities. | [link](https://cloud.google.com/logging/docs/audit/#data-access)
+| Syslog | A service running in systemd that outputs to stdout will have logs in syslog and will be scraped by the logging agent. | [link](https://github.com/GoogleCloudPlatform/fluentd-catch-all-config/tree/master/configs/config.d) |
+| System event| Tell you about live migration, etc. | [link](https://cloud.google.com/logging/docs/audit/#system-event)|
+| VPC flow logs | uses the substrate specific logging to capture everything. | [link](https://cloud.google.com/vpc/docs/using-flow-logs) [course](https://cloudacademy.com/course/implementing-a-gcp-virtual-private-cloud-1224/vpc-flow-logs/)
+
+#### Export
+Logging retains app and audit logs for a limited period of time. You might need to retain logs for longer periods to meet compliance obligations. Alternatively, you might want to keep logs for historical analysis.
+
+You can route logs to Cloud Storage, BigQuery, and Pub/Sub. Using filters, you can include or exclude resources from the export. For example, you can export all Compute Engine logs but exclude high-volume logs from Cloud Load Balancing.
+
+- Know how to configure logs export - [link](https://cloud.google.com/logging/docs/export/configure_export_v2)
+- Know what are the different export sinks - [link](https://cloud.google.com/logging/docs/export/using_exported_logs)
+
+
+
+
+### Performance
+- https://www.atlassian.com/software/clover
+- https://jmeter.apache.org/
+- https://snyk.io/blog/secure-code-review/
+
+
+### Monitoring
+
+- Introduction to Prometheus https://cloud.google.com/stackdriver/docs/solutions/gke/prometheus
+- Introduction to OpenTelemetry https://cloud.google.com/learn/what-is-opentelemetry
+
+<div align="center">
+<iframe width="560" height="315" src="https://www.youtube.com/embed/CjGv1bDy9rI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+
+### Cloud Trace
+- Cloud Trace is a distributed tracing system that collects latency data from your applications and displays it in the Google Cloud Console. You can track how requests propagate through your application and receive detailed near real-time performance insights.
+- All Cloud Run, Cloud Functions and App Engine standard applications are automatically traced and libraries are available to trace applications running elsewhere after minimal setup.
+- Read the product overview - [link](https://cloud.google.com/trace)
+
+The following picture depicts how traces are visualized in Clout Trace
+<img align="center" src="https://cloud.google.com/trace/images/quickstart-waterfall-example.png" width="1000" />
+<br/>
+
+
+
+
+
+### Cloud Profiler
+Cloud Profiler is a statistical, low-overhead profiler that continuously gathers CPU usage and memory-allocation information from your production applications. It attributes that information to the application's source code, helping you identify the parts of the application consuming the most resources, and otherwise illuminating the performance characteristics of the code.
+
+- Read the product overview - [link](https://cloud.google.com/profiler/)
+
+The following picture depicts how provide are visualized in application stacktraces
+<img align="center" src="https://cloud.google.com/profiler/docs/images/profiler-quickstart-filtered.png" width="1000" />
+<br/>
+
+### Deployments
+Know the different application deployments strategies and how to use tools like [Spinnaker](https://spinnaker.io/) for Continuous Deployment.
+
+- **Blue/green deployments**: gradually transfers user traffic from a previous version (blue) of an app or microservice to a new release—both (green) of which are running in production.
+- **Traffic-splitting deployments**: allows you to conduct A/B testing between your versions and provides control over the pace when rolling out features. When using a traffic-splitting deployment, you can specify the percentage of production traffic and the amount of time to monitor a new application version before completing the deployment. Once the deployment starts, you can monitor the health of your new application version by tracking events/logs in real time.
+- **Rolling deployments**: A rolling deployment is a deployment strategy that slowly replaces previous versions of an application with new versions of an application by completely replacing the infrastructure on which the application is running. For example, in a rolling deployment in Amazon ECS, containers running previous versions of the application will be replaced one-by-one with containers running new versions of the application. A rolling deployment is generally faster than a blue/green deployment; however, unlike a blue/green deployment, in a rolling deployment there is no environment isolation between the old and new application versions. This allows rolling deployments to complete more quickly, but also increases risks and complicates the process of rollback if a deployment fails.
+- **Canary deployments**: Canary deployments are a pattern for rolling out releases to a subset of users or servers. The idea is to first deploy the change to a small subset of servers, test it, and then roll the change out to the rest of the servers. The canary deployment serves as an early warning indicator with less impact on downtime: if the canary deployment fails, the rest of the servers aren't impacted. - [link](https://cloud.google.com/solutions/application-deployment-and-testing-strategies#canary_test_pattern)
+
+
+The following Cloud Skills task walk you throw implementing the different deployments strategies using Kubernetes Engine - [link](https://www.cloudskillsboost.google/focuses/639?parent=catalog)
+
+
 ## Certification SWAG
 After passing the exam, you can choose one of the official certification swags:
 
