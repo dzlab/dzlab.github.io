@@ -1,10 +1,10 @@
 ---
 layout: post
 comments: true
-title: Capture car diagnostic data and index them with Elasticsearch
-excerpt: Learn how to use obd2 reader to capture your car diagnostic data and then upload it to Elasticsearch.
-categories: certification
-tags: [elasticsearch,python,obd]
+title: Exploring car diagnostic data with Elasticsearch and Kibana
+excerpt: Learn how to use obd2 reader to capture your car diagnostic data and then upload it to Elasticsearch via Kibana UI.
+categories: elasticsearch
+tags: [elasticsearch,python,obd2]
 toc: true
 img_excerpt:
 ---
@@ -177,3 +177,48 @@ if __name__ == "__main__":
   "GET_DTC": "[]"
 }
 ```
+
+From ElasticSearch root directory, start elasticsearch server
+```shell
+$ ./bin/elasticsearch
+...
+[2022-08-13T18:24:30,482][INFO ][o.e.n.Node               ] [unknown] started
+[2022-08-13T18:24:30,985][INFO ][o.e.l.LicenseService     ] [unknown] license [300894ae-b6a0-4964-886f-d3fa540b9480] mode [basic] - valid
+```
+You can validate it started by visiting [http://localhost:9200/]() which may return a JSON payload like
+```json
+{
+  "name" : "unknown",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "LtxiG0t8SdaLVSgzJznW_Q",
+  "version" : {
+    "number" : "7.14.0",
+    "build_flavor" : "default",
+    "build_type" : "tar",
+    "build_hash" : "dd5a0a2acaa2045ff9624f3729fc8a6f40835aa1",
+    "build_date" : "2021-07-29T20:49:32.864135063Z",
+    "build_snapshot" : false,
+    "lucene_version" : "8.9.0",
+    "minimum_wire_compatibility_version" : "6.8.0",
+    "minimum_index_compatibility_version" : "6.0.0-beta1"
+  },
+  "tagline" : "You Know, for Search"
+}
+```
+
+From Kibana root directory, start kibana UI server
+```shell
+$ ./bin/kibana
+...
+  log   [18:27:16.988] [info][monitoring][monitoring][plugins] config sourced from: production cluster
+  log   [18:27:18.889] [info][server][Kibana][http] http server running at http://localhost:5601
+  log   [18:27:19.077] [info][kibana-monitoring][monitoring][monitoring][plugins] Starting monitoring stats collection
+  log   [18:27:19.169] [info][plugins][securitySolution] Dependent plugin setup complete - Starting ManifestTask
+  log   [18:27:19.619] [info][plugins][reporting] Browser executable: /Users/bachirchihani/Tools/kibana-7.14.0-darwin-x86_64/x-pack/plugins/reporting/chromium/headless_shell-darwin_x64/headless_shell
+  log   [18:27:22.674] [info][status] Kibana is now available (was unavailable)
+```
+
+Kibana UI should be available at [http://localhost:5601/]()
+
+![Kibana upload file]({{ "/assets/2022/08/2022-08-13-kibana-upload.png" | absolute_url }})
+
