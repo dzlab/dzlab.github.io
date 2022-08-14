@@ -220,5 +220,4 @@ $ ./bin/kibana
 
 Kibana UI should be available at [http://localhost:5601/]()
 
-![Kibana upload file]({{ "/assets/2022/08/2022-08-13-kibana-upload.png" | absolute_url }})
-
+![OBD2 data import with Kibana wizard]({{ "/assets/2022/08/2022-08-13-kibana-import.gif" | absolute_url }})
