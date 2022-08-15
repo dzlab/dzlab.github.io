@@ -9,8 +9,15 @@ toc: true
 img_excerpt:
 ---
 
+<img align="left" src="/assets/logos/elasticsearch.svg" width="120" />
+<img align="center" src="/assets/logos/kibana.svg" width="100" />
+<br/>
 
 Professional ELM327 WIFI OBD2 Scanner Code Reader/Erases Auto Diagnostic Tool
+
+
+![ELM327 WIFI OBD2 Scanner]({{ "/assets/2022/08/2022-08-13-ELM327-WIFI-OBD2-Scanner.jpg" | absolute_url }})
+
 
 ```shell
 $ git clone https://github.com/dailab/python-OBD-wifi
