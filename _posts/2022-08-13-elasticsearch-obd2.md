@@ -13,16 +13,35 @@ img_excerpt:
 <img align="center" src="/assets/logos/kibana.svg" width="100" />
 <br/>
 
-Professional ELM327 WIFI OBD2 Scanner Code Reader/Erases Auto Diagnostic Tool
+In this article we will collect car diagnostic data using python and ELM327 WIFI OBD2 Scanner, once data is collected we will import it into Elasticsearch for analysis.
 
+## Collecting data with an OBD2 Scanner
+
+To be able to collect the data you may need to get a Professional ELM327 WIFI OBD2 Scanner Code Reader/Erases Auto Diagnostic Tool like the one depicted in the following picture.
 
 ![ELM327 WIFI OBD2 Scanner]({{ "/assets/2022/08/2022-08-13-ELM327-WIFI-OBD2-Scanner.jpg" | absolute_url }})
 
+Once the scanner is plugged into the car, it will create a WiFi network that you will need to connect to it. Note: you will need to disconnect from any other wifi network.
 
+
+Next step is to clone the [python-OBD-wifi](https://github.com/dailab/python-OBD-wifi) repository which contains the python module for the OBD2 protocol.
 ```shell
 $ git clone https://github.com/dailab/python-OBD-wifi
 ```
 
+This python library is very easy to use to connect to the scanner and interacts with it:
+1. Create an `obd.OBD` instance with the IP address of the scanner
+1. Submit a command and interepret the response
+
+```python
+import obd
+
+connection = obd.OBD("192.168.0.10", 35000)
+response = connection.query("SPEED")
+print(response.value)
+```
+
+In our case, we will try to query with all supported commands by the scanner, collect each of the responses into one dictionnary and dump it as one line to an output file. This is what the following script pretty much does:
 
 ```python
 import obd
@@ -67,9 +86,11 @@ if __name__ == "__main__":
   main()
 ```
 
+Here is an example of a single json row that the script outputs for my car. You should get different values based whether the car is running or not, how long the engine was started, etc.
+
 ```json
 {
-  "time": "08/28/2021 18:08:00",
+  "time": "07/28/2022 18:08:00",
   "WARMUPS_SINCE_DTC_CLEAR": 2,
   "RELATIVE_THROTTLE_POS": 0,
   "DTC_RUN_TIME": "None",
@@ -185,6 +206,12 @@ if __name__ == "__main__":
 }
 ```
 
+The size of the output file can grow very rapidely depending on the frequency of collection. You can leave the script running for few minutes it should give you enough data to index and verify the rest of the pipeline before trying to collect/ingest larger file.
+
+## Importing the data into ElasticSearch
+We need ElasticSearch / Kibana up and running so that we can import the data that we collected in the previous section.
+
+### Setting up ElasticSearch / Kibana
 From ElasticSearch root directory, start elasticsearch server
 ```shell
 $ ./bin/elasticsearch
@@ -227,4 +254,12 @@ $ ./bin/kibana
 
 Kibana UI should be available at [http://localhost:5601/]()
 
+### Ingesting data with Kibana UI
+Once ElasticSearch and Kibana services are started we can ingest the diagnostic data. Kibana make it very easy to ingest small size files, the following video illustrates how to upload our diagnostic data file.
+
 ![OBD2 data import with Kibana wizard]({{ "/assets/2022/08/2022-08-13-kibana-import.gif" | absolute_url }})
+
+## That's all folks
+I hope this article was helpfull to get you started with collecting diagnostic data for your car and playing with it in ElasticSearch.
+
+I would love to hear any feedack, suggestions or ideas for improvement. So feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc)
