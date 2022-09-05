@@ -42,3 +42,4 @@ https://www.anyscale.com/ray-summit-2022/agenda/sessions/194
 - Hamilton - [documentation](https://hamilton-docs.gitbook.io/docs/)
 - SkyPilot - [documentation](https://skypilot.readthedocs.io/en/latest/)
 - Ray vs Celery - [github issue](https://github.com/ray-project/ray/issues/21248)
+- Ray at Data science on AWS meetup - [link](https://www.meetup.com/fr-FR/data-science-on-aws/events/cdwjssydclbtb/) / [slides](https://www.slideshare.net/cfregly/ray-ai-runtime-air-on-aws-data-science-on-aws-meetup) / [video](https://youtu.be/UtevBYEEsWw)
