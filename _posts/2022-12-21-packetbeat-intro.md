@@ -19,7 +19,7 @@ In this article we will see how to setup Packetbeat and get started with network
 
 ## Setup
 
-### Elasticsearch and Kibana
+### Elasticsearch
 Before starting we need to setup Elasticsearch and Kibana. If they are already running in your environment then you can skip this section.
 
 Download [Elasticsearch](https://www.elastic.co/downloads/elasticsearch) for your platform and install it
@@ -31,13 +31,33 @@ $ ./bin/elasticsearch
 
 Elasticsearch will be available at http://localhost:9200 
 
+Default configuration can be found under `config/elasticsearch.yml`, for instance the settings for SSL is enabled:
+```yaml
+xpack.security.http.ssl:
+  enabled: true
+  keystore.path: certs/http.p12
+```
 
+Also the setting for enrollment can be enabled/disbaled like this:
+```yaml
+xpack.security.enrollment.enabled: true
+```
+
+Because by default enrollment is enabled, then before proceeding to setting up Kibana, we need to create an Elasticsearch token like this
+
+```shell
+$ bin/elasticsearch-create-enrollment-token --scope kibana
+warning: ignoring JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home; using bundled JDK
+eyJ2ZXIiOiI4LjUuMyIsImFkciI6WyIxOTIuMTY4LjE3My42OjkyMDAiXSwiZmdyIjoiMjM3NjZhNjNmOThkZjYxOGYzNWUxZmVmOGE3NDhkZTk1MWFhMDYxZWM5YjZkOWQwMWJjYTYzNWY4NzIzMzI0MSIsImtleSI6Ik9XWDFQb1VCel81aUhyRm5vNHFTOlRoTGRXSXpLVGVDMmxTNGF1b1BIT1EifQ==
+```
+
+### Kibana
 Download [Kibana](https://www.elastic.co/downloads/kibana) for your platform and install it
 
 ```shell
 $ tar xzf kibana-8.5.3-darwin-aarch64.tar.gz
 $ cd cd kibana-8.5.3
-$ bin/kibana
+$ ./bin/kibana
 ```
 
 If you encounter the below error when starting Kibana then check this article for a resolution - [link](https://dzlab.github.io/2022/12/21/kibana-issue/)
@@ -54,6 +74,14 @@ $ bin/kibana
 
 Go to http://localhost:5601/?code=242129 to get started.
 ```
+
+When visting Kibana dashboard for the first time, it will ask for the enrollment token that we created earlier during Elasticsearch setup. Once, the token is entered, Kibana server will output in its logs a code that you wil enter in the UI, for instance:
+```shell
+
+Your verification code is:  005 216 
+```
+
+After that a widget will ask for Elasticsearch username/password.
 
 ### Packetbeat
 First we need to downlaod the binaries of [Packetbeat](https://www.elastic.co/downloads/beats/packetbeat)
