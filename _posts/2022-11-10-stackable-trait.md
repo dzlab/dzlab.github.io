@@ -21,6 +21,7 @@ From a high level, this pattern aims to reduce the boilerplate code needed to co
 It can be implemented like this:
 
 1. First, declare a base trait with the functionality we want to stack
+
 ```scala
 trait T {  
   def func(): Unit = ()  
@@ -28,6 +29,7 @@ trait T {
 ```
 
 1. Then create couple of implementation traits that does different things when `func()` will be called
+
 ```scala
 trait T1 extends T {
   abstract override def func(): Unit = {  
@@ -46,10 +48,12 @@ trait T2 extends T {
 ```
 
 1. Finally, we can stack those implementation in a class like this
+
 ```scala
 class T3 extends T with T1 with T2
 // or class T4 extends T with T2 with T1
 ```
+
 Now if we call `func()` on an instance of `T3` both implementation from `T1` and `T2` will be called in that order.
 
 > Note how the implementation functions uses **`abstract`** and that inside them we call the parent implementation with **`super.func()`**. This subtle details is actually what makes the pattern works, If we omit one of those details it will not work.
@@ -58,6 +62,7 @@ Now if we call `func()` on an instance of `T3` both implementation from `T1` and
 Let's create a concrete example to better understand how this pattern works. In this example, the interfaces will simply add numbers to a queue so we could tell the order they were called.
 
 First, we define the interfaces
+
 ```scala
 trait T {  
   val queue = scala.collection.mutable.Buffer[Int]()  
@@ -82,6 +87,7 @@ trait T2 extends T {
 Now, we create instances and call our stacked function couple times to see how it is behaving.
 
 1. using the implementation order `T1` then `T2` 
+
 ```scala
 class T3 extends T with T1 with T2
 
@@ -92,9 +98,11 @@ t.inc()
 t.inc()  
 // t.queue shouldBe Seq(1, 2, 1, 2)
 ```
+
 > Note how in this case the implementation of `T1` is called before the implementation of `T2`
 
 1. using the implementation order `T2` then `T1` 
+
 ```scala
 class T4 extends T with T2 with T1
 
