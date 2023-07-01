@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: Network observability with Elasticsearch
+title: Network observability with Elasticsearch on AWS
 excerpt: On building a comprehensive Network observability platform with the Elastic stack
 tags: [elasticsearch,network,aws]
 toc: true
@@ -29,7 +29,11 @@ The Elastic stack with its many components is the perfect candidate to build suc
 
 One would arg why not use an AWS managed log analysis solutions like CloudWatch to build such an observability platform instead of building one and having to manage it. But using CloudWatch is can be become very expensive. For instance, at the time of writing this article, it would cost $0.50 per GB for data ingestion (refere to [CloudWatch pricing](https://aws.amazon.com/cloudwatch/pricing/)) alone which can easily adds up as network logs are high-throughput log streams. But using Elasticsearch, would require using local file storage (EBS) to store data chunks and indexes with the possibility to archive this data on S3. Plus the search cabilities of Elasticsearch are quite efficient due to the indexing phase. To estimate the cost of running an Elasticsearch cluster on AWS refer to the [Elastic Pricing FAQ](https://www.elastic.co/pricing/faq).
 
-This article provides a high level solution on how to built a network observability platform with Elasticsearch.
+This article provides a high level solution on how to built a network observability platform with Elasticsearch on AWS.
+
+![Network observability elasticsearch architecture]({{ "/assets/2023/03/2023-03-04-network-observability-elastic-architecture.svg" | absolute_url }})
+
+
 
 ## That's all folks
 I hope you enjoyed this article, feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc).
