@@ -10,7 +10,7 @@ img_excerpt:
 
 <img align="left" src="/assets/logos/elasticsearch.svg" width="120" />
 <img align="left" src="/assets/logos/kibana.svg" width="100" />
-<img align="center" src="/assets/logos/elastic-beats-logo-vector.svg width="100" />
+<img align="center" src="/assets/logos/elastic-beats-logo-vector.svg" width="100" />
 <br/>
 
 Packetbeat is a real-time network packet sniffer/analyzer which can be combined with Elasticsearch and Kibana to provide a powerfull network monitoring solution. Packetbeat captures network traffic from local devices and decodes a varity of application layer protocols (e.g. HTTP, MySQL, Redis). It is also capable of correlating the requests with their responses. Technically, it is based on the `libbeat` framework and integrates naturally with Elastic stack.
