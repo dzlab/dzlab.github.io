@@ -8,7 +8,7 @@ toc: true
 img_excerpt:
 ---
 
-<img align="left" src="/assets/logos/elasticsearch.svg" width="120" />
+<img align="center" src="/assets/logos/elasticsearch.svg" width="120" />
 <br/>
 <br/>
 
