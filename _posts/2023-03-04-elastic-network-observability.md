@@ -29,10 +29,112 @@ The Elastic stack with its many components is the perfect candidate to build suc
 
 One would arg why not use an AWS managed log analysis solutions like CloudWatch to build such an observability platform instead of building one and having to manage it. But using CloudWatch is can be become very expensive. For instance, at the time of writing this article, it would cost $0.50 per GB for data ingestion (refere to [CloudWatch pricing](https://aws.amazon.com/cloudwatch/pricing/)) alone which can easily adds up as network logs are high-throughput log streams. But using Elasticsearch, would require using local file storage (EBS) to store data chunks and indexes with the possibility to archive this data on S3. Plus the search cabilities of Elasticsearch are quite efficient due to the indexing phase. To estimate the cost of running an Elasticsearch cluster on AWS refer to the [Elastic Pricing FAQ](https://www.elastic.co/pricing/faq).
 
-This article provides a high level solution on how to built a network observability platform with Elasticsearch on AWS.
+## Ingesting VPC flow logs into Elasticsearch
+
+The following diagram illustrates a high level solution on how to build a network observability platform with Elasticsearch on AWS.
 
 ![Network observability elasticsearch architecture]({{ "/assets/2023/03/2023-03-04-network-observability-elastic-architecture.svg" | absolute_url }})
 
+Elasticsearch cluster can be deployed from AWS Marketplace while other AWS resources like the VPC Flow Logs, the S3 buckets, the Lambda function, and the SQS queues can be deployed with Terraform as follows:
+
+First, create the different resources with Terraform as follows
+```
+# S3 bucket where log files will be uploaded
+resource "aws_s3_bucket" "my_bucket" {
+  bucket = "my-bucket"
+}
+
+# SQS queue for notifications when log files are uploaded
+resource "aws_sqs_queue" "my_queue" {
+  name = "my-queue"
+}
+
+# Lambda function for processing log files and ingesting them
+resource "aws_lambda_function" "my_function" {
+  name = "my-function"
+
+  handler = "index.handler"
+  runtime = "python3.8"
+
+  code = {
+    zip_file = "lambda_function.zip"
+  }
+}
+```
+
+Then, we need to make sure that VPC Flow logs are uploaded to a designated S3 bucket. For instance, using Terraform we can do the following:
+```
+resource "aws_flow_log" "vpc_flow_log_to_s3" {
+    log_destination      = "S3_BUCKET_ARN"
+    log_destination_type = "s3"
+    traffic_type         = "ALL"
+    vpc_id               = "VPC_ID"
+}
+```
+
+When a new VPC Flow Log file is uploaded to the S3 bucket, we want to put an entry in SQS queue with information about the file such as the file name, the file size, and the file content.
+
+Using Terraform, we can create such a notification rule by providing the source bucket to be notified when files are uploaded to it, and specifying the destination SQS queue where notifications will be sent. This is an example configuration:
+```
+resource "aws_s3_bucket_notification" "s3_to_sqs_notification" {
+  bucket = "S3_BUCKET_ARN"
+  event_types = ["s3:ObjectCreated:*"]
+  sqs_queue = "S3_SQS_ARN"
+}
+```
+
+Next, we need to create an event trigger for the Lambda function that will process log files and ingest them into Elasticsearch. The event trigger should be set to fire when a new entry is added to the SQS queue. In Terraform, we can do the following:
+
+```
+resource "aws_lambda_event_source_mapping" "my_event_source_mapping" {
+  event_source_arn = "S3_SQS_ARN"
+  function_name = "LAMBDA_FUNCTION_NAME"
+}
+```
+
+Inside the lambda function, we need implement the logic to process log files and ingest them to Elasticsearch. The following snippet illustrates a very simplifed version:
+
+```js
+const AWS = require('aws-sdk');
+const elasticsearch = require('elasticsearch');
+
+exports.handler = async (event, context) => {
+  const s3 = new AWS.S3();
+  const es = new elasticsearch.Client({
+    hosts: ['<ELASTICSEARCH_HOST>:<ELASTICSEARCH_PORT>'],
+  });
+
+  const bucket = event.bucket;
+  const key = event.key;
+
+  const file = await s3.getObject({
+    Bucket: bucket,
+    Key: key,
+  }).promise();
+
+  const data = file.Body.toString();
+
+  const index = 'logs';
+  const doc = {
+    message: data,
+  };
+
+  await es.index({
+    index: index,
+    type: 'doc',
+    id: key,
+    document: doc,
+  }).promise();
+};
+```
+
+After everything is deployed, the VPC flow logs will be uploaded to S3 and then ingested into Elasticsearch. We can verify that the logs are being ingested by querying Elasticsearch. For example, you can use the following command to search for all logs that contain the word `"error"`:
+
+```sh
+curl -XGET 'http://<ELASTICSEARCH_HOST>:<ELASTICSEARCH_PORT>/logs/_search?q=error'
+```
+
+If the logs are being ingested, you should see a response that contains a list of documents that match the search criteria.
 
 
 ## That's all folks
