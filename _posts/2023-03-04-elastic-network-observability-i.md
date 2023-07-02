@@ -10,6 +10,7 @@ img_excerpt:
 
 <img align="left" src="/assets/logos/elasticsearch.svg" width="120" />
 <br/>
+<br/>
 
 Network issues are very common source of trouble for micro-services but still are not easy to troubleshoot, especially in a cloud environment. For instance, you may have seen puzzling cases where a lot of log entries in one service contain `connection timeout` errors yet no indication of issues can be found in the logs of the remove service.
 
