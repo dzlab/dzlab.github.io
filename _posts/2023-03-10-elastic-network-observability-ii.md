@@ -114,7 +114,52 @@ curl -XGET 'http://<ELASTICSEARCH_HOST>:<ELASTICSEARCH_PORT>/logs/_search?q=erro
 
 If the logs are being ingested, you should see a response that contains a list of documents that match the search criteria.
 
+## Searching the logs
+Elasticsearch provides very powerful search capbilities to search and analyze large amounts of data. It has a simple and an extensive search syntax. For instance to retrieve from the logs all `REJECTED` network traffic with a source IP from the 10.0.0.0/8 CIDR range and a destination IP, we can use the following query:
 
+```json
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "type": "REJECTED"
+          }
+        },
+        {
+          "range": {
+            "source_ip": {
+              "gte": "10.0.0.0",
+              "lte": "10.255.255.255"
+            }
+          }
+        },
+        {
+          "match": {
+            "destination_ip": {
+              "exists": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+The above query will first match all documents that have a type of "REJECTED". It will then match all documents that have a source IP address that falls within the 10.0.0.0/8 CIDR range. And finally, it will match all documents that have a destination IP address that exists.
+
+
+We can simplify our search query using the [Kibana Query Language](https://www.elastic.co/guide/en/kibana/current/kuery-query.html). Which is a powerful way to search and filter data in Elasticsearch. It is a query language that allows you to specify the criteria that you want to use to search for documents. Kibana search syntax uses a variety of keywords to specify the criteria for your search, like the `match` keyword to match specific values. It also allows the use of logical operators (e.g. `AND`, `OR`) to combine multiple criteria.
+
+Back to our search query, we can simplify it using Kibana query syntax as follows:
+
+```
+source.ip:10.0.0.0/8 AND event.action:rejected AND destination.ip:*
+```
+
+This query will return all rejected network traffic with a source IP from the 10.0.0.0/8 CIDR range and a destination IP.
 
 ## That's all folks
 I hope you enjoyed this article, feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc).

@@ -66,7 +66,7 @@ If you encounter the below error when starting Kibana then check this article fo
 FATAL  Error: dlopen(/Users/dzlab/Tools/kibana-8.5.3/node_modules/re2/build/Release/re2.node, 0x0001): tried: '/Users/dzlab/Tools/kibana-8.5.3/node_modules/re2/build/Release/re2.node' (code signature in <1683A937-8902-34BD-9886-2F1CC674A96E> '/Users/dzlab/Tools/kibana-8.5.3/node_modules/re2/build/Release/re2.node' not valid for use in process: library load disallowed by system policy)
 ```
 
-It Kibana starts successfully then it should be available at http://localhost:5601  
+If Kibana starts successfully then it should be available at http://localhost:5601  
 ```shell
 $ bin/kibana
 [2022-12-21T12:58:37.552+01:00][INFO ][node] Kibana process configured with roles: [background_tasks, ui]
