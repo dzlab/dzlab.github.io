@@ -10,7 +10,7 @@ img_excerpt:
 
 <img align="left" src="/assets/logos/elasticsearch.svg" width="120" />
 <img align="left" src="/assets/logos/kibana.svg" width="100" />
-<img align="center" src="/assets/logos/elastic-beats-logo-vector.svg width="100" />
+<img align="center" src="/assets/logos/elastic-beats-logo-vector.svg" width="100" />
 <br/>
 
 Packetbeat is a real-time network packet sniffer/analyzer which can be combined with Elasticsearch and Kibana to provide a powerfull network monitoring solution. Packetbeat captures network traffic from local devices and decodes a varity of application layer protocols (e.g. HTTP, MySQL, Redis). It is also capable of correlating the requests with their responses. Technically, it is based on the `libbeat` framework and integrates naturally with Elastic stack.
@@ -66,7 +66,7 @@ If you encounter the below error when starting Kibana then check this article fo
 FATAL  Error: dlopen(/Users/dzlab/Tools/kibana-8.5.3/node_modules/re2/build/Release/re2.node, 0x0001): tried: '/Users/dzlab/Tools/kibana-8.5.3/node_modules/re2/build/Release/re2.node' (code signature in <1683A937-8902-34BD-9886-2F1CC674A96E> '/Users/dzlab/Tools/kibana-8.5.3/node_modules/re2/build/Release/re2.node' not valid for use in process: library load disallowed by system policy)
 ```
 
-It Kibana starts successfully then it should be available at http://localhost:5601  
+If Kibana starts successfully then it should be available at http://localhost:5601  
 ```shell
 $ bin/kibana
 [2022-12-21T12:58:37.552+01:00][INFO ][node] Kibana process configured with roles: [background_tasks, ui]
