@@ -1,16 +1,14 @@
 ---
 layout: post
 comments: true
-title: Elasticsearch 
-excerpt: On building a comprehensive Network observability platform with the Elastic stack
-tags: [elasticsearch,network,aws]
+title: Elasticsearch use cases in cybersecurity
+excerpt: Learn about the difference use cases for Elasticsearch in a cybersecurity context
+tags: [elasticsearch,cybersecurity]
 toc: true
 img_excerpt:
 ---
 
-<img alt="Illustration of laptop with code coming out of the screen and cloud overlaying it." class="article__featured-image article__featured-image--block" sizes="(max-width: 730px) 100vw, (max-width: 1600px) 75vw, 1390px" src="https://techcrunch.com/wp-content/uploads/2023/06/GettyImages-1205513619.jpg?w=730&amp;crop=1">
-Image Credits: Andrey Suslov / Getty Images
-<br/>
+<img alt="Illustration of laptop with code coming out of the screen and cloud overlaying it." sizes="(max-width: 730px) 100vw, (max-width: 1600px) 75vw, 1390px" src="https://techcrunch.com/wp-content/uploads/2023/06/GettyImages-1205513619.jpg?w=730&amp;crop=1">
 <br/>
 
 Elasticsearch core capability is indexing and retrieving textual data, which makes it a solid foundation for many use cases. In the context of cybersecurity, Elasticsearch can be used for a variety of applications, such as:
@@ -22,9 +20,15 @@ Elasticsearch core capability is indexing and retrieving textual data, which mak
 - **Fraud detection:** Elasticsearch can be used to build models for fraud detection by analyzing transactional data, browsing behavior, and device metadata.
 - **Insider Threat Detection:** By collecting and indexing data related to employee activity within company networks and infrastructure, Elasticsearch can be leveraged to flag any unusual activities and raise red flags for further investigation
 
-In this series of articles about Elasticsearch and cybersecurity, we will focus on the **Vulnerability management** use case. Which can be defined as the process of identifying, analyzing, and addressing weaknesses and vulnerabilities present in software products, networks, or systems. It involves continuous discovery, tracking, reporting, and mitigation of known vulnerabilities to prevent potential threats from being exploited. Thus making it an important practice for any organization as it helps maintaining a secure environment, meeting regulatory compliance obligations, and reducing risks from cybersecurity threats.
 
-Those are brief examples on how Elasticsearch can be useful for vulnerability management.
+As you can see there are too many applications, in the rest of this article we will focus on the **Vulnerability management** use case and how Elasticsearch can be leveraged.
+
+<img alt=" five main stages in the vulnerability management cycle" src="https://www.crowdstrike.com/wp-content/uploads/2020/05/vulnerability-management-cycle-1024x529.png">
+<br/>
+
+**Vulnerability management** can be defined as the process of identifying, analyzing, and addressing weaknesses and vulnerabilities present in software products, networks, or systems. It involves continuous discovery, tracking, reporting, and mitigation of known vulnerabilities to prevent potential threats from being exploited. Thus making it an important practice for any organization as it helps maintaining a secure environment, meeting regulatory compliance obligations, and reducing risks from cybersecurity threats.
+
+Elasticsearch offers numerous benefits when applied to vulnerability management processes, providing both automation and scalability to address the increasing volume and complexity of incoming vulnerabilities. Here are some specific use cases where Elasticsearch might play a vital role in vulnerability management:
 
 - **Vulnerability Correlation:** Elasticsearch allows security teams to correlate vulnerabilities across their entire environment by storing and searching through large volumes of scan results from various sources. This helps prioritize remediation efforts and ensure critical assets receive the most attention.
 - **Patch Management:** Elasticsearch can help organizations efficiently manage patches and updates for known vulnerabilities. With accurate tracking of installed software versions, IT administrators can proactively apply necessary patches before vulnerabilities become exploitable.
@@ -33,8 +37,8 @@ Those are brief examples on how Elasticsearch can be useful for vulnerability ma
 - **False Positive Filtering:** Security professionals spend significant time manually reviewing vast amounts of scan results to distinguish actual issues from false positives. Leveraging Elasticsearch’s full text search functionality, security teams can automatically reduce noise levels by weeding out unlikely matches.
 - **Contextual Intelligence Sharing:** With open APIs, integration into numerous third-party systems is achievable, enabling collaboration and sharing of data insights among stakeholders. By consuming external feeds such as threat intelligence reports, incident notifications, and CVE advisories.
 
-- https://github.com/DSecureMe/vmc
-- https://github.com/opencve/opencve
+
+We went through a veriety of cybersecurity related use cases for Elasticsearch and then focused on the vulnerability management use case. In a next article, we will implement a vulnerability tracking system based on Elasticsearch. Stay tuned!
 
 ## That's all folks
 I hope you enjoyed this article, feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc).
