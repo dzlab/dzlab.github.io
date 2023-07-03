@@ -8,7 +8,8 @@ toc: true
 img_excerpt:
 ---
 
-<img align="center" src="/assets/logos/elasticsearch.svg" width="120" />
+<img alt="Illustration of laptop with code coming out of the screen and cloud overlaying it." class="article__featured-image article__featured-image--block" sizes="(max-width: 730px) 100vw, (max-width: 1600px) 75vw, 1390px" src="https://techcrunch.com/wp-content/uploads/2023/06/GettyImages-1205513619.jpg?w=730&amp;crop=1">
+Image Credits: Andrey Suslov / Getty Images
 <br/>
 <br/>
 
