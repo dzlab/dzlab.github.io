@@ -11,6 +11,7 @@ img_excerpt:
 <img alt="Illustration of laptop with code coming out of the screen and cloud overlaying it." sizes="(max-width: 730px) 100vw, (max-width: 1600px) 75vw, 1390px" src="https://techcrunch.com/wp-content/uploads/2023/06/GettyImages-1205513619.jpg?w=730&amp;crop=1">
 <br/>
 
+
 Elasticsearch core capability is indexing and retrieving textual data, which makes it a solid foundation for many use cases. In the context of cybersecurity, Elasticsearch can be used for a variety of applications, such as:
 
 - **Log analysis:** Elasticsearch can be used to store and search through large amounts of log data from different sources, such as network devices, servers, and applications. This can help identify anomalies, detect attacks, and analyze patterns that could indicate potential threats.
@@ -37,6 +38,9 @@ Elasticsearch offers numerous benefits when applied to vulnerability management 
 - **False Positive Filtering:** Security professionals spend significant time manually reviewing vast amounts of scan results to distinguish actual issues from false positives. Leveraging Elasticsearch’s full text search functionality, security teams can automatically reduce noise levels by weeding out unlikely matches.
 - **Contextual Intelligence Sharing:** With open APIs, integration into numerous third-party systems is achievable, enabling collaboration and sharing of data insights among stakeholders. By consuming external feeds such as threat intelligence reports, incident notifications, and CVE advisories.
 
+
+<img align="center" src="/assets/logos/elasticsearch.svg" width="120" />
+<br/>
 
 We went through a veriety of cybersecurity related use cases for Elasticsearch and then focused on the vulnerability management use case. In a next article, we will implement a vulnerability tracking system based on Elasticsearch. Stay tuned!
 
