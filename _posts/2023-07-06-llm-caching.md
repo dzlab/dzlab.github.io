@@ -146,6 +146,7 @@ docker-compose up -d
 
 You should see that the containers are running, if you run "docker ps" in your terminal
 
+Or you can use a managed Milvus instance at https://cloud.zilliz.com/
 
 ### GPTCache
 In order to work with GPTCache, you have to initialize it first
