@@ -39,8 +39,10 @@ Elasticsearch offers numerous benefits when applied to vulnerability management 
 - **Contextual Intelligence Sharing:** With open APIs, integration into numerous third-party systems is achievable, enabling collaboration and sharing of data insights among stakeholders. By consuming external feeds such as threat intelligence reports, incident notifications, and CVE advisories.
 
 
-<img align="center" src="/assets/logos/elasticsearch.svg" width="120" />
-<br/>
+![Elastic Security stack architecture]({{ "/assets/2023/04/2023-04-25-elastic-security-architecture.svg" | absolute_url }})
+
+
+
 
 We went through a veriety of cybersecurity related use cases for Elasticsearch and then focused on the vulnerability management use case. In a next article, we will implement a vulnerability tracking system based on Elasticsearch. Stay tuned!
 
