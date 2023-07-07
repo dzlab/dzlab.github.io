@@ -8,11 +8,11 @@ toc: true
 img_excerpt:
 ---
 
-<img alt="Illustration of laptop with code coming out of the screen and cloud overlaying it." sizes="(max-width: 730px) 100vw, (max-width: 1600px) 75vw, 1390px" src="https://techcrunch.com/wp-content/uploads/2023/06/GettyImages-1205513619.jpg?w=730&amp;crop=1">
+<img alt="Illustration of laptop with code coming out of the screen and cloud overlaying it." src="https://techcrunch.com/wp-content/uploads/2023/06/GettyImages-1205513619.jpg?w=730&amp;crop=1">
 <br/>
 
 
-Elasticsearch core capability is indexing and retrieving textual data, which makes it a solid foundation for many use cases. In the context of cybersecurity, Elasticsearch can be used for a variety of applications, such as:
+Elasticsearch core capabilities are indexing and retrieving of textual data, which makes it a solid foundation for many use cases that involves searching for answers. In the context of cybersecurity, and thanks to Elasticsearch performance and extensibility, analysts can apply it to protect their organizations. Some example of those applications are:
 
 - **Log analysis:** Elasticsearch can be used to store and search through large amounts of log data from different sources, such as network devices, servers, and applications. This can help identify anomalies, detect attacks, and analyze patterns that could indicate potential threats.
 - **Security incident response:** When responding to security incidents, such as breaches or malware outbreaks, Elasticsearch can be used to quickly search through logs and other relevant data to gather evidence and track down the source of the attack.
@@ -21,13 +21,27 @@ Elasticsearch core capability is indexing and retrieving textual data, which mak
 - **Fraud detection:** Elasticsearch can be used to build models for fraud detection by analyzing transactional data, browsing behavior, and device metadata.
 - **Insider Threat Detection:** By collecting and indexing data related to employee activity within company networks and infrastructure, Elasticsearch can be leveraged to flag any unusual activities and raise red flags for further investigation
 
+## Elastic Security
+The Elastic stack has a dedicated solution for cybersecurity purposes that combines analytical capabilities (like threat detection) and protection capabilities (like endpoint prevention and response) into one offering. On a high level, Elastic Security offers following benefits and capabilities:
 
-As you can see there are too many applications, in the rest of this article we will focus on the **Vulnerability management** use case and how Elasticsearch can be leveraged.
+- A rule-based detection engine to identify attacks and misconfigurations
+- Machine learning anomaly jobs to detection signatureless attacks
+- Kibana-based interactive visualizations for ad-hoc analysis
+- A central place for case management, event triage and investigations
+
+
+![Elastic Security stack architecture]({{ "/assets/2023/04/2023-04-25-elastic-security-architecture.svg" | absolute_url }})
+
+
+
+In the rest of this article we will focus on the **Vulnerability management** use case of cybersecuirty and discuss how Elastic stack can be leveraged for this specific type of applications.
+
+## Vulnerability management
+
+As depicted in the following diagram, **Vulnerability management** can be defined as the process of identifying, analyzing, and addressing weaknesses and vulnerabilities present in software products, networks, or systems. It involves continuous discovery, tracking, reporting, and mitigation of known vulnerabilities to prevent potential threats from being exploited. Thus making it an important practice for any organization as it helps maintaining a secure environment, meeting regulatory compliance obligations, and reducing risks from cybersecurity threats.
 
 <img alt=" five main stages in the vulnerability management cycle" src="https://www.crowdstrike.com/wp-content/uploads/2020/05/vulnerability-management-cycle-1024x529.png">
 <br/>
-
-**Vulnerability management** can be defined as the process of identifying, analyzing, and addressing weaknesses and vulnerabilities present in software products, networks, or systems. It involves continuous discovery, tracking, reporting, and mitigation of known vulnerabilities to prevent potential threats from being exploited. Thus making it an important practice for any organization as it helps maintaining a secure environment, meeting regulatory compliance obligations, and reducing risks from cybersecurity threats.
 
 Elasticsearch offers numerous benefits when applied to vulnerability management processes, providing both automation and scalability to address the increasing volume and complexity of incoming vulnerabilities. Here are some specific use cases where Elasticsearch might play a vital role in vulnerability management:
 
@@ -39,12 +53,7 @@ Elasticsearch offers numerous benefits when applied to vulnerability management 
 - **Contextual Intelligence Sharing:** With open APIs, integration into numerous third-party systems is achievable, enabling collaboration and sharing of data insights among stakeholders. By consuming external feeds such as threat intelligence reports, incident notifications, and CVE advisories.
 
 
-![Elastic Security stack architecture]({{ "/assets/2023/04/2023-04-25-elastic-security-architecture.svg" | absolute_url }})
-
-
-
-
+## That's all folks
 We went through a veriety of cybersecurity related use cases for Elasticsearch and then focused on the vulnerability management use case. In a next article, we will implement a vulnerability tracking system based on Elasticsearch. Stay tuned!
 
-## That's all folks
 I hope you enjoyed this article, feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc).
