@@ -11,8 +11,9 @@ img_excerpt:
 <img alt="Illustration of laptop with code coming out of the screen and cloud overlaying it." src="https://techcrunch.com/wp-content/uploads/2023/06/GettyImages-1205513619.jpg?w=730&amp;crop=1">
 <br/>
 
+Elastic Stack at its core relies on Elasticsearch, Kibana and a variety of data ingestion tools. Elasticsearch with its capabilities for indexing and retrieving of textual data, and Kibana for analytics and visualization of data stored in Elasticsearch indices. Furthermore, Kibana is very intuitive, making it very easy to perform advanced data analysis and visualize of data in a variety of charts, tables, and maps.
 
-Elasticsearch core capabilities are indexing and retrieving of textual data, which makes it a solid foundation for many use cases that involves searching for answers. In the context of cybersecurity, and thanks to Elasticsearch performance and extensibility, analysts can apply it to protect their organizations. Some example of those applications are:
+In the context of cybersecurity, and thanks to Elasticsearch performance and extensibility, analysts can apply it to protect their organizations. Some example of those applications are:
 
 - **Log analysis:** Elasticsearch can be used to store and search through large amounts of log data from different sources, such as network devices, servers, and applications. This can help identify anomalies, detect attacks, and analyze patterns that could indicate potential threats.
 - **Security incident response:** When responding to security incidents, such as breaches or malware outbreaks, Elasticsearch can be used to quickly search through logs and other relevant data to gather evidence and track down the source of the attack.
@@ -25,14 +26,22 @@ Elasticsearch core capabilities are indexing and retrieving of textual data, whi
 The Elastic stack has a dedicated solution for cybersecurity purposes that combines analytical capabilities (like threat detection) and protection capabilities (like endpoint prevention and response) into one offering. On a high level, Elastic Security offers following benefits and capabilities:
 
 - A rule-based detection engine to identify attacks and misconfigurations
-- Machine learning anomaly jobs to detection signatureless attacks
+- Machine learning anomaly jobs to detect signatureless attacks
 - Kibana-based interactive visualizations for ad-hoc analysis
 - A central place for case management, event triage and investigations
 
 
 ![Elastic Security stack architecture]({{ "/assets/2023/04/2023-04-25-elastic-security-architecture.svg" | absolute_url }})
 
+The above diagram depicts the overall architecture of Elastic Security and its different components. 
 
+Data is ingested into Elasticsearch from different sources:
+- Using Beats to collect audit logs, metrics, network packets, etc.
+- Using Logstch to collect and transform any format of logs
+- Using Elastic Agent to collect data from hosts and remote machines
+- Using third party connectors, for instance to collect data from databases
+
+A Detection engine is used to continuously search for signs of attacks (e.g. suspicious host and network activity). It relies on a set of Detection rules to periodically search the data for suspicious events and generate alerts when such events are discovered. Users can provide their own rules or use the ones packages with Elastic Security. Furthermore, it provides a Machine learning base a anomaly detection components that analyses host and network data for potential attacks and provide a score for further investigation by an analyst.
 
 In the rest of this article we will focus on the **Vulnerability management** use case of cybersecuirty and discuss how Elastic stack can be leveraged for this specific type of applications.
 
