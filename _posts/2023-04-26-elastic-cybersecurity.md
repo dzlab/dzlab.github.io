@@ -8,7 +8,9 @@ toc: true
 img_excerpt:
 ---
 
-<img alt="Illustration of laptop with code coming out of the screen and cloud overlaying it." src="https://techcrunch.com/wp-content/uploads/2023/06/GettyImages-1205513619.jpg?w=730&amp;crop=1">
+<img align="left" src="/assets/logos/elasticsearch.svg" width="120" />
+<img align="left" src="/assets/logos/kibana.svg" width="100" />
+<img align="center" src="/assets/logos/elastic-beats-logo-vector.svg" width="150" />
 <br/>
 
 Elastic Stack at its core relies on Elasticsearch, Kibana and a variety of data ingestion tools. Elasticsearch with its capabilities for indexing and retrieving of textual data, and Kibana for analytics and visualization of data stored in Elasticsearch indices. Furthermore, Kibana is very intuitive, making it very easy to perform advanced data analysis and visualize of data in a variety of charts, tables, and maps.
@@ -48,9 +50,6 @@ In the rest of this article we will focus on the **Vulnerability management** us
 ## Vulnerability management
 
 As depicted in the following diagram, **Vulnerability management** can be defined as the process of identifying, analyzing, and addressing weaknesses and vulnerabilities present in software products, networks, or systems. It involves continuous discovery, tracking, reporting, and mitigation of known vulnerabilities to prevent potential threats from being exploited. Thus making it an important practice for any organization as it helps maintaining a secure environment, meeting regulatory compliance obligations, and reducing risks from cybersecurity threats.
-
-<img alt=" five main stages in the vulnerability management cycle" src="https://www.crowdstrike.com/wp-content/uploads/2020/05/vulnerability-management-cycle-1024x529.png">
-<br/>
 
 Elasticsearch offers numerous benefits when applied to vulnerability management processes, providing both automation and scalability to address the increasing volume and complexity of incoming vulnerabilities. Here are some specific use cases where Elasticsearch might play a vital role in vulnerability management:
 
