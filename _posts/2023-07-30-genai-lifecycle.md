@@ -34,6 +34,14 @@ A good example of pre-training a model from scratch for increased domain-specifi
 
 ### Model Alignment
 
+In many cases, prompt engineering (and in particular in-context learning) can be enough to get an LLM model to perform well. This is achieved by providing the model with one or few shots/examples to describe the task and expected answer, then assessing the model performance.
+
+However, there are cases where the model may perform poorly in the task at hand, and fine-tuning becomes necessary. One typical approach, is to use a supervised learning process to adapt the model. Another LLM-specific approach is Reinforcement Learning with Human Feedback (RLHF), which can help to make sure that the model behaves well and in a way that is aligned with human preferences. In both approaches, we would need to collect data that is relevant to the task. For the fine-tuning to be effective, we need to make sure data is of high quality by cleaning it, removing any errors or inconsistencies, and formatting it in a way that the model can understand.
+
+Note that this adapt and aligned stage is highly iterative. We may start with prompt engineering and evaluating the outputs, then using fine tuning to improve performance and then revisiting and evaluating prompt engineering one more time to get an acceptable performance level.
+
+To determine how well a model is performing or how well aligned it is to our preferences, we can use classical NLP evaluation techniques like metrics (e.g. ROUGE and BLEU Score) and benchmarks (e.g. GLUE).
+
 ### Application integration
 
 ## Time and effort
