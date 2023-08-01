@@ -10,7 +10,7 @@ img_excerpt:
 
 Generative AI is a powerful technology that has the potential to revolutionize many industries. However, generative AI projects are complex, time-consuming and involves many phases. We can increase the chances of success for such projects by following a well defined framework that maps out the tasks required to take a project from conception to launch.
 
-In this article, we will describe a generative AI project lifecycle to help plan out the phases of a generative AI project, and provide a cheat sheet to help estimate the time and effort required to carry out each phase of work.
+In this article, we will describe a generative AI project lifecycle to help plan out the different phases of a generative AI project, and provide a cheat sheet to help estimate the time and effort required to carry out each one.
 
 ## Project lifecycle
 The below diagram highlights the different phases of the lifecycle of a Generative AI project. In the rest of this section we will go over each phase.
@@ -55,7 +55,15 @@ Those limitations can be overcome by some powerful techniques like:
 
 However, it is important to consider the additional infrastructure and cost that your application will require augment the model at inference.
 
-## Time and effort estimation
+## Project estimation
+It is difficult to estimate the time and effort required for a generative AI project with any degree of accuracy as there are many factors that may come to play. Some considerations that could impact the time it takes to complete a project include:
+
+- The size and complexity of the application.
+- The availability of high quality data.
+- The level of expertise of the team working on the project.
+
+However, by breaking down the project into stages and tasks as we saw in the previous section and following the estimations below for each stage of the project lifecycle, we can get a better idea of how long the project will take and how much effort it will require.
+
 
 ||Pre-training|Prompt engineering|Prompt tuning and fine-tuning|Reinforcement learning/human feedback|Compression/ optimization/ deployment|
 |-|
@@ -64,8 +72,12 @@ However, it is important to consider the additional infrastructure and cost that
 |Objective|Next-token prediction|Increase task performance|Increase task performance|Increase alignment with human preferences|Increase inference performance|
 |Expertise|High|Low|Medium|Medium-High|Medium|
 
+It is important to remember that these are just estimates. The actual time and effort required for a generative AI project may vary depending on a number of factors. However, by following the guidelines above, we can get a better idea of how long a given project will take and how much effort it will require.
 
 ## That's all folks
-In this article we went throught the generative AI project lifecycle to build a good intuition about the important decisions to make, the potential difficulties that could be encountered, and the infrastructure needed to develop and deploy a Genrative AI application.
+In this article we went throught the generative AI project lifecycle to build a good intuition about the important decisions to make, the potential difficulties that could be encountered, and the infrastructure needed to develop and deploy a Genrative AI application. We also saw how we can estimate to a certain degree the time and effort required to complete a generative AI project.
+
+
+
 
 I hope you enjoyed this article, feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc).
