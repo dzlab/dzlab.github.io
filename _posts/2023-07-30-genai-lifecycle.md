@@ -38,13 +38,24 @@ In many cases, prompt engineering (and in particular in-context learning) can be
 
 However, there are cases where the model may perform poorly in the task at hand, and fine-tuning becomes necessary. One typical approach, is to use a supervised learning process to adapt the model. Another LLM-specific approach is Reinforcement Learning with Human Feedback (RLHF), which can help to make sure that the model behaves well and in a way that is aligned with human preferences. In both approaches, we would need to collect data that is relevant to the task. For the fine-tuning to be effective, we need to make sure data is of high quality by cleaning it, removing any errors or inconsistencies, and formatting it in a way that the model can understand.
 
-Note that this adapt and aligned stage is highly iterative. We may start with prompt engineering and evaluating the outputs, then using fine tuning to improve performance and then revisiting and evaluating prompt engineering one more time to get an acceptable performance level.
+Note that this adapt and aligned stage is highly iterative and requires back and forth. We may start with prompt engineering and evaluating the outputs, then using fine tuning to improve performance and then revisiting and evaluating prompt engineering one more time to get an acceptable performance level.
 
 To determine how well a model is performing or how well aligned it is to our preferences, we can use classical NLP evaluation techniques like metrics (e.g. ROUGE and BLEU Score) and benchmarks (e.g. GLUE).
 
 ### Application integration
 
-## Time and effort
+Once the model is meeting the performance expectations and is properly aligned, it becomes ready for deploylement and integration with the application. But, we should not deploy it as is just yet. Instead, we should explore ways to optimize the model for deployment to ensure that we are making the best use of our compute resources and still providing the best possible experience to all users of the application. Example model optimization techniques that proved to work well for LLMs are Distillation, Post-training quantization and pruning.
+
+It is important to note that there are some fundamental limitations of LLMs even if they performs well during their initial training. Example of such limitations inlucde how their information can become outdated, tendency to invent information when they don't know an answer (also known as hallucination), or their limited ability to carry out complex reasoning and mathematics.
+
+Those limitations can be overcome by some powerful techniques like:
+- Retrieval augmented generation (RAG) which aims to augment the model knowlege with external data sources (e.g. wikipedia for fact checking).
+- Chain-of-Thought Prompting: which can be achieved by tweaking the prompt given to the model to include few shots with reasoning instructions.
+- Program-aided Language (PAL) models which aims to integrate the LLM with third-party applications, python interpreter to execute complex reasoning logic, or SQL interpreter to execute SQL queries generate by the model.
+
+However, it is important to consider the additional infrastructure and cost that your application will require augment the model at inference.
+
+## Time and effort estimation
 
 ||Pre-training|Prompt engineering|Prompt tuning and fine-tuning|Reinforcement learning/human feedback|Compression/ optimization/ deployment|
 |-|
