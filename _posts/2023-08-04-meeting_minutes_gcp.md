@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: Meeting minutes generator on GCP with Vertex AI and Cloud Run
-excerpt: Learn how to use create a meeting minutes generator on GCP with Vertex AI (Chirp and PaLM) and Cloud Run
+excerpt: Learn how to create a meeting minutes generator on GCP with Vertex AI (Chirp and PaLM) and Cloud Run
 tags: [ai,gcp,genai]
 toc: true
 img_excerpt:
