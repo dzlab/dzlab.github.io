@@ -89,7 +89,7 @@ Next, we need to create an event trigger for the Cloud Function that will proces
       push_endpoint: https://us-central1-functions.cloudfunctions.net/logs-processing-function
 ```
 
-Save the content from all the previous snippets into `resources.yaml` the create them with
+Save the content from all the previous snippets into `resources.yaml`, then provision them with
 ```shell
 gcloud deployment-manager deployments create logs-deployment --config resources.yaml
 ```
