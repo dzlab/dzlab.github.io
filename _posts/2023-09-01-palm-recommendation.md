@@ -27,9 +27,9 @@ The rest of this article walks through the implementation in details.
 First we create a [LanguageModel](https://llmjava.github.io/llm4j/javadoc/org/llm4j/api/LanguageModel.html) object using the [LLM4J](https://llmjava.github.io/llm4j) library. We will use this object later for text generation and embedding using Google PaLM's API.
 
 ```java
-Map<String, String> configMap = new HashMap<String, String>(){{
-    put("palm.apiKey", "${env:PALM_API_KEY}");
-}};
+Map<String, String> configMap = new HashMap<String, String>();
+configMap.put("palm.apiKey", "${env:PALM_API_KEY}");
+
 Configuration config = new MapConfiguration(configMap);
 LanguageModel palm = LLM4J.getLanguageModel(config, new PaLMLanguageModel.Builder());
 ```
