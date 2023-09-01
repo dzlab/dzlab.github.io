@@ -1,8 +1,8 @@
 ---
 layout: post
 comments: true
-title: Building an Article Recommender App in Java with llm4j, Palm and Elasticsearch
-excerpt: How to Build an News article recommendation App in Java with llm4j, Palm and Elasticsearch
+title: Building an Article Recommender App in Java with llm4j, PaLM and Elasticsearch
+excerpt: How to Build a News article recommendation App in Java with llm4j, PaLM and Elasticsearch
 tags: [genai,palm,elasticsearch]
 toc: true
 img_excerpt:
@@ -11,6 +11,8 @@ img_excerpt:
 ![Article Recommender architecture]({{ "/assets/2023/09/20230901-palm-recommendation.svg" | absolute_url }})
 
 In this tutorial we will see how to build a News Article Recommender app that uses PaLM (a powerful LLM from Google) for calculating text embeddings and Elasticsearch to compare between articles and find similar ones based on their embeddings. Such application is particularly useful to keep users of a newspaper (or any content platform) engaged as it recommends articles related to their reading topics.
+
+The source code of this application can be found here - [news-article-recommender](https://github.com/llmjava/llm4j-examples/tree/main/news-article-recommender).
 
 ## Design Overview
 The above diagram illustrates the overall architecture of the news article recommender which we further explain here:
