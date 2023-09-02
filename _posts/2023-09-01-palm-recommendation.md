@@ -175,6 +175,24 @@ String rawTags = palm.process(prompt);
 
 Google PaLM does a pretty good job with the extraction in most case. For instance, for the article titled `Desailly backs Blues revenge trip` it was able to infer what the news article talk about extract tags such as `chelsea, barcelona`.
 
+### Categories classification
+To improve the recommendation of articles we can further filter them by category before presenting them to the user. In fact, it is very possible that two articles could have close embeddings but are of different categories, e.g. a sport article covering a statement of coach vs one by a political leader. Thus we need to build a news category classifier that will only select articles from the same category.
+
+With In Context Learning we can teach PaLM to classify articles into one of five categories: Business, Politics, Tech, Entertainment, and Sports.
+
+Our prompt for PaLM text generation will include [example classifications](https://developers.generativeai.google/prompts/classify-a-request) and then add the article we want PaLM to classify to the end of the prompt like this
+```
+statement: Gazprom had been expected to win the December auction, but ended up not bidding.
+classification: Business
+statement: Tory leader Michael Howard said the chancellor was up to his old trick of deliberately re-casting his forecasts to give the illusion that everything in the Treasury larder is as fresh as the day it was first stored away for future use.
+classification: Politics
+statement: Skype lets people make free calls to other Skype users and also make low-cost calls to ordinary phone numbers.
+classification: Tech
+statement: Michelle Paver's Wolf Brother, a fantasy set 6,000 years ago, is the first in a planned series of six books.
+classification: Entertainment
+statement: {article}
+classification:
+```
 
 ## Recommendaing Articles
 Finally we are ready to start recommendaing articles by simply find the most similar ones.
