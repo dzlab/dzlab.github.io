@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: Generating Synthetic Data for NLP tasks in Java with llm4j and PaLM
-excerpt: How to Build a News article recommendation App in Java with llm4j, PaLM and Elasticsearch
+excerpt: How to Build a Java-based Synthetic Data generator for your NLP task with llm4j and PaLM
 tags: [genai,palm]
 toc: true
 img_excerpt:
