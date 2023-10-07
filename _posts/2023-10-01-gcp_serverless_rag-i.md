@@ -27,7 +27,7 @@ Create a Cloud Storage bucket or reuse an existing one:
 gsutil mb -l $REGION gs://$BUCKET
 ```
 
-Create a service account to serve as the service identity:
+Create a service account to use as the service identity:
 ```shell
 gcloud iam service-accounts create $SERVICE_ACCOUNT
 ```
@@ -35,8 +35,8 @@ gcloud iam service-accounts create $SERVICE_ACCOUNT
 Grant the service account access to the Cloud Storage bucket:
 ```shell
 gcloud projects add-iam-policy-binding $PROJECT_ID \
-     --member "serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
-     --role "roles/storage.objectAdmin"
+  --member "serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
+  --role "roles/storage.objectAdmin"
 ```
 
 ### PubSub
@@ -46,9 +46,7 @@ This document describes how to create a Pub/Sub topic. To create a topic you can
 
 ```shell
 TOPIC = "documents-upload-topic"
-```
 
-```shell
 gcloud pubsub topics create $TOPIC
 ```
 
@@ -89,40 +87,11 @@ gcloud services enable aiplatform.googleapis.com
 Grant the service account access to the Cloud Storage bucket:
 ```shell
 gcloud projects add-iam-policy-binding $PROJECT_ID \
-     --member "serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
-     --role "roles/cloudsql.client"
+  --member "serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
+  --role "roles/cloudsql.client"
 ```
 
 ## Embedding the documents
-
-### Dockerfile
-
-
-```Dockerfile
-FROM python:3.9-slim
-
-# Ensure stdout/stderr are not buffered.
-ENV PYTHONUNBUFFERED TRUE
-
-# Create a user to run the cloud function
-RUN groupadd -g 1000 userweb && useradd -r -u 1000 -g userweb userweb
-
-ENV APP_HOME /app
-WORKDIR $APP_HOME
-
-RUN chown userweb:userweb $APP_HOME
-
-USER userweb
-
-# Copy local code to the container image.
-COPY . ./
-
-# Install production dependencies.
-RUN pip install -r requirements.txt
-
-# Run the cloud function
-CMD ["functions-framework", "--target=cloudevent_handler", "--signature-type=cloudevent"]
-```
 
 `requirements.txt`
 
@@ -139,10 +108,6 @@ google-cloud-aiplatform==1.26.0
 google-cloud-storage
 ```
 
-- https://cloud.google.com/sql/docs/postgres/connect-functions
-- https://cloud.google.com/sql/docs/postgres/connect-instance-cloud-functions
-- https://codelabs.developers.google.com/codelabs/connecting-to-cloud-sql-with-cloud-functions
-
 ## Vector Embeddings
 
 ### Read file
@@ -152,34 +117,12 @@ google-cloud-storage
 ```python
 from google.cloud import storage
 
-
-def download_blob(bucket_name, source_blob_name, destination_file_name):
-    """Downloads a blob from the bucket."""
-    # The ID of your GCS bucket
-    # bucket_name = "your-bucket-name"
-
-    # The ID of your GCS object
-    # source_blob_name = "storage-object-name"
-
-    # The path to which the file should be downloaded
-    # destination_file_name = "local/path/to/file"
-
-    storage_client = storage.Client()
-
-    bucket = storage_client.bucket(bucket_name)
-
-    # Construct a client side representation of a blob.
-    # Note `Bucket.blob` differs from `Bucket.get_blob` as it doesn't retrieve
-    # any content from Google Cloud Storage. As we don't need additional data,
-    # using `Bucket.blob` is preferred here.
-    blob = bucket.blob(source_blob_name)
-    blob.download_to_filename(destination_file_name)
-
-    print(
-        "Downloaded storage object {} from bucket {} to local file {}.".format(
-            source_blob_name, bucket_name, destination_file_name
-        )
-    )
+def download(bucket_name, source_blob_name, destination_file_name):
+  """Downloads a blob from GS bucket."""
+  storage_client = storage.Client()
+  bucket = storage_client.bucket(bucket_name)
+  blob = bucket.blob(source_blob_name)
+  blob.download_to_filename(destination_file_name)
 ```
 
 ### Generate vector embeddings using a Text Embedding model
@@ -295,6 +238,13 @@ async def save(chunks):
 
 > Note: Saving credentials in environment variables is convenient, but not secure - consider a more secure solution such as [Cloud Secret Manager](https://cloud.google.com/secret-manager) to help keep secrets safe. Alternatively [Cloud SQL Auth Proxy](https://cloud.google.com/sql/docs/postgres/connect-instance-auth-proxy)
 
+
+- https://cloud.google.com/sql/docs/postgres/connect-functions
+- https://cloud.google.com/sql/docs/postgres/connect-instance-cloud-functions
+- https://codelabs.developers.google.com/codelabs/connecting-to-cloud-sql-with-cloud-functions
+
+### All together
+
 `main.py`
 
 ```python
@@ -303,15 +253,14 @@ from cloudevents.http import CloudEvent
 import functions_framework
 from lib import chunk, embed, save
 
-PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
-
 def cloudevent_handler(cloud_event: CloudEvent) -> None:
     print(f"Received event with ID: {cloud_event['id']} and data {cloud_event.data}")
     # Get the bucket and file name from the event.
     data = cloud_event.data["message"]["data"]
-    gs_uri = f"gs://{data["bucket"]}/{data["name"]}"
-    # TODO Read the file from GS
-    document = 
+    # Download the file from GS
+    download(data["bucket"], data["name"], 'blob.txt')
+    # Read local file
+    document = open('blob.txt', 'r').read()
     # Chunk the document
     chunks = chunk(document)
     # Embed all chunks
@@ -324,28 +273,7 @@ if __name__ == "__main__":
   functions_framework.cloud_event(cloudevent_handler)
 ```
 
-Finally, we can deploy our Cloud Function using the `gcloud` CLI from the same directory containing the source code as follows
-
-```shell
-gcloud functions deploy minutes-function \
-  --gen2 \
-  --runtime python39 \
-  --entry-point cloudevent_handler \
-  --source . \
-  --region $REGION \
-  --trigger-topic $TOPIC
-```
-
-
-## Cloud Run
-Finally, we can deploy the container image to Cloud Run using `gcloud`:
-
-- We are not building the image but relying on Cloud Run instead as we deploy the current directory as the source code.
-- We are using Cloud Run service Gen 2 by setting the `--execution-environment` flag
-- For testing, we allow unauthenticated access to the service via `--allow-unauthenticated`
-- We use same service account used when creating Cloud Storage bucket in `--service-account`
-- We pass the name of the bucket via `--update-env-vars` flag as an environment variable 
-
+## Deploy
 
 
 Run the following `gcloud artifacts repositories create` command in Cloud Shell to create a repository in the Artifact Registry named quickstart-repo in the same region as your Cloud SQL instance. Replace YOUR_PROJECT_ID with your project ID and YOUR_REGION_NAME with your region name.
