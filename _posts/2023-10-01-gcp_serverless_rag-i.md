@@ -1,8 +1,8 @@
 ---
 layout: post
 comments: true
-title: Serverless RAG applications on GCP - Part 1
-excerpt: Learn how to deploy Serverless Retrieval augmented generation (RAG) applications on GCP with Vertex AI and LangChain
+title: Scalable RAG applications on GCP with Serverless architecture - Part 1
+excerpt: Learn how to deploy a scalable Retrieval augmented generation (RAG) applications on GCP with a Serverless architecture
 tags: [ai,gcp,genai]
 toc: true
 img_excerpt:
@@ -13,16 +13,26 @@ img_excerpt:
 
 Retrieval-Augmented Generation (RAG) is an AI framework that enhances the quality of Large Language Model (LLM)-generated responses by supplementing the LLM's internal representation of information with external sources of knowledge. This gives us control over the data used by the LLM when it formulates a response. With RAG, we can constrain the external information accessible to the LLM to include any type of vectorized data: documents, images, audio, and video. 
 
-This serie of articles showcase how to leverage GCP services to implement Retrieval-Augmented workflows. In this first part, we will develop a serverless ETL data pipeline to extract, embed, index business documents. We will leaverage **LangChain** for chunking large documents into small chunks, **Vertex AI** for data indexing and **Cloud SQL for Postgres** and its **pgvector** extension as a managed vector store.
-In the second part, we will implement the data retrieval part by leaveraging **LangChain** to construct Question/Answering prompts.
+This serie of articles showcase how to leverage GCP managed services to implement Retrieval-Augmented workflows at Scale. In this first part, we will develop a serverless ETL data pipeline to extract, embed, index business documents of any scale. We will leaverage **LangChain** for chunking large documents into small chunks, **Vertex AI** for data indexing and **Cloud SQL for Postgres** and its **pgvector** extension as a managed vector store. To be able to scale the data pipeline up or down based on the amount of documents while controlling cost we will use **Cloud Functions**.
+In the second part, we will implement a serverless data retrieval by leaveraging **Cloud Run** as a scalable runtime and **LangChain** to construct Question/Answering prompts from user input in a format that maximizes the LLM response accuracy.
 
 
 ## Infrastructure
 
-The diagram is of a cloud storage system. It shows the process of uploading a document, processing it, and searching for it using embeddings. The diagram is divided into 10 steps, each step is numbered and labeled. The steps are: 1) upload document, 2) notification, 3) trigger, 4) document processing, 5) embed/chunk, 6) saving document with embeddings, 7) query, 8) embed query, 9) search with embeddings, 10) result. The diagram shows the user uploading a document to cloud storage, the document being processed and saved with embeddings, and the user querying and searching for the document using embeddings.
+The diagram above illustrates the architecture and components of the solution. It shows the process of uploading a document to cloud storage, the document being processed and saved with embeddings, and the user querying and searching for the document using embeddings.
+
+The solution is divided into 10 steps:
+
+- Steps 1 to 6 represents the ETL Data pipeline
+- Steps 7 to 10 represents the user query flow
+
+In the remaining of this first part, we will implement the steps of the ETL Data pipeline.
+
 
 ### Cloud Storage
-We need to setup a Cloud Storage bucket, let's first define some environment variables
+First, we need to setup a Cloud Storage bucket where the data will be uploaded for processing.
+
+Let's first define some environment variables
 
 ```shell
 PROJECT_ID = ""
@@ -49,9 +59,9 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 ```
 
 ### PubSub
-Within Pub/Sub, a topic is a named resource that represents a feed of messages. You must create a topic before you can publish or subscribe to it.
+Once documents are uploaded to Cloud Storage, we want a notification event to be created and queued in a PubSub topic.
 
-This document describes how to create a Pub/Sub topic. To create a topic you can use the Google Cloud console, the Google CLI, the client library, or the Pub/Sub API.
+Let's create a PubSub topic with the Google CLI.
 
 ```shell
 TOPIC = "documents-upload-topic"
@@ -59,13 +69,23 @@ TOPIC = "documents-upload-topic"
 gcloud pubsub topics create $TOPIC
 ```
 
-Using `gsutil`, we can create such a notification rule by providing the source bucket to be notified when files are uploaded to it, and specifying the destination PubSub queue where notifications will be sent. This is an example configuration:
+Then, using `gsutil`, we create a notification rule on the source bucket to be notified when files are uploaded to this bucket, and specifying the destination PubSub queue where notifications will be sent.
 
 ```shell
 gsutil notification create -t $TOPIC -f json -e OBJECT_FINALIZE gs://$BUCKET
 ```
 
 ### Cloud SQL
+Cloud SQL for PostgreSQL supports the [pgvector](https://github.com/pgvector/pgvector) extension that brings the power of vector search operations to PostgreSQL. This extension is not enabled by default, but we can activate it by simply running the following SQL query:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+```
+
+Once pgvector is enabled, a new data type called `vector` becomes available to use with PostgreSQL table columns. Using the `vector` data type we can directly save embeddings like we would do with any other PostgreSQL data type. Learn more about using pgvector with Cloud SQL for Postgres - [link](https://cloud.google.com/blog/products/databases/using-pgvector-llms-and-langchain-with-google-cloud-databases/).
+
+
+Let's create a PosgreSQL instance to store the documents chunks and their embeddings:
 
 ```shell
 INSTANCE_NAME = "vectorstore"
@@ -92,17 +112,19 @@ gcloud services enable sqladmin.googleapis.com
 gcloud services enable aiplatform.googleapis.com
 ```
 
-
 Grant the service account access to the Cloud Storage bucket:
+
 ```shell
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member "serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
   --role "roles/cloudsql.client"
 ```
 
-## Indexing documents
+## Serverless data pipeline
 
-`requirements.txt`
+The data pipeline, responsible for ingesting/processing/storing documents, is implemented as a Cloud Function.
+
+Let's first define the dependencies in a `requirements.txt` file
 
 ```
 cloudevents
@@ -117,11 +139,12 @@ google-cloud-aiplatform==1.26.0
 google-cloud-storage
 ```
 
-## Vector Embeddings
+The rest of this section, describes the detailed implementation of each component of the data pipeline.
 
-### Read file
+> Note: all helper functions are stored in the `lib.py` file
 
-- https://cloud.google.com/storage/docs/downloading-objects
+### Reading from Cloud Storage
+This is a helper function to read a file from Cloud Storage (see [documentation](https://cloud.google.com/storage/docs/downloading-objects)), to be used in our Cloud Function to download documents.
 
 ```python
 from google.cloud import storage
@@ -134,16 +157,10 @@ def download(bucket_name, source_blob_name, destination_file_name):
   blob.download_to_filename(destination_file_name)
 ```
 
-### Generate vector embeddings using a Text Embedding model
+### Chunking with LangChain
+The ingested documents can be much longer than what can fit into a Vertex AI request for generating the vector embedding. In fact, Vertex AI text embedding model accepts text of size up to 3,072.
 
-Step 1: Split long product description text into smaller chunks
-
-- The product descriptions can be much longer than what can fit into a single API request for generating the vector embedding.
-
-- For example, Vertex AI text embedding model accepts a maximum of 3,072 input tokens for a single API request.
-
-- Use the `RecursiveCharacterTextSplitter` from LangChain library to split
-the description into smaller chunks of 500 characters each.
+This helper function uses the `RecursiveCharacterTextSplitter` from the LangChain library to split a document into smaller chunks of 1024 characters each.
 
 ```python
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -153,7 +170,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 def chunk(document)
   text_splitter = RecursiveCharacterTextSplitter(
     separators=[".", "\n"],
-    chunk_size=500,
+    chunk_size=1024,
     chunk_overlap=0,
     length_function=len,
   )
@@ -162,11 +179,9 @@ def chunk(document)
   return chunks
 ```
 
-Step 2: Generate vector embedding for each chunk by calling an Embedding Generation service
+### Text embedding with Vertex AI
+This helper function uses Vertex AI text embedding model to generate vector embeddings, which are a 768-dimensional vectors. It takes a list of document chunks and calls Vertex AI Embedding Generation service with a batch of chunks each time, then adds the embeddings to each chunk's object using the key `"embedding"`.
 
-- In this demo, Vertex AI text embedding model is used to generate vector embeddings, which outputs a 768-dimensional vector for each chunk of text.
-
->⚠️ The following code snippet may run for a few minutes.
 
 ```python
 from langchain.embeddings import VertexAIEmbeddings
@@ -176,7 +191,7 @@ project_id = os.environ["PROJECT_ID"]
 region = os.environ["REGION"]
 
 # Generate the vector embeddings for each chunk of text.
-def embed(chunks, batch_size = 5):
+def embed(chunks, batch_size = 3):
   # Initialize Vertex AI Embedding Service
   aiplatform.init(project=project_id, location=region)
   embeddings_service = VertexAIEmbeddings()
@@ -189,10 +204,10 @@ def embed(chunks, batch_size = 5):
       x["embedding"] = e
 ```
 
-### Use pgvector to store the generated embeddings within PostgreSQL
+### Saving to PostgreSQL
+This helper function use pgvector to store the generated embeddings within PostgreSQL.
 
-- The `pgvector` extension introduces a new `vector` data type.
-- **The new `vector` data type allows you to directly save a vector embedding (represented as a NumPy array) through a simple INSERT statement in PostgreSQL!**
+
 
 >⚠️ The following code snippet may run for a few minutes.
 
@@ -229,7 +244,7 @@ async def save(chunks):
     await conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
     await register_vector(conn)
 
-    # Create the `document_embeddings` table.
+    # Create the `document_embeddings` table (it does not exist yet)
     await conn.execute(
       """CREATE TABLE IF NOT EXISTS document_embeddings(
             id VARCHAR(1024) PRIMARY KEY,
