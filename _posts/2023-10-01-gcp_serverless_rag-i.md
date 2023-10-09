@@ -10,7 +10,16 @@ img_excerpt:
 
 ![GCP Serverless RAG architecture]({{ "/assets/2023/10/20231001-gcp-serverless-rag.svg" | absolute_url }})
 
+
+Retrieval-Augmented Generation (RAG) is an AI framework that enhances the quality of Large Language Model (LLM)-generated responses by supplementing the LLM's internal representation of information with external sources of knowledge. This gives us control over the data used by the LLM when it formulates a response. With RAG, we can constrain the external information accessible to the LLM to include any type of vectorized data: documents, images, audio, and video. 
+
+This serie of articles showcase how to leverage GCP services to implement Retrieval-Augmented workflows. In this first part, we will develop a serverless ETL data pipeline to extract, embed, index business documents. We will leaverage **LangChain** for chunking large documents into small chunks, **Vertex AI** for data indexing and **Cloud SQL for Postgres** and its **pgvector** extension as a managed vector store.
+In the second part, we will implement the data retrieval part by leaveraging **LangChain** to construct Question/Answering prompts.
+
+
 ## Infrastructure
+
+The diagram is of a cloud storage system. It shows the process of uploading a document, processing it, and searching for it using embeddings. The diagram is divided into 10 steps, each step is numbered and labeled. The steps are: 1) upload document, 2) notification, 3) trigger, 4) document processing, 5) embed/chunk, 6) saving document with embeddings, 7) query, 8) embed query, 9) search with embeddings, 10) result. The diagram shows the user uploading a document to cloud storage, the document being processed and saved with embeddings, and the user querying and searching for the document using embeddings.
 
 ### Cloud Storage
 We need to setup a Cloud Storage bucket, let's first define some environment variables
@@ -91,7 +100,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
   --role "roles/cloudsql.client"
 ```
 
-## Embedding the documents
+## Indexing documents
 
 `requirements.txt`
 
@@ -248,10 +257,9 @@ async def save(chunks):
 `main.py`
 
 ```python
-import os
 from cloudevents.http import CloudEvent
 import functions_framework
-from lib import chunk, embed, save
+from lib import download, chunk, embed, save
 
 def cloudevent_handler(cloud_event: CloudEvent) -> None:
     print(f"Received event with ID: {cloud_event['id']} and data {cloud_event.data}")
@@ -273,7 +281,7 @@ if __name__ == "__main__":
   functions_framework.cloud_event(cloudevent_handler)
 ```
 
-## Deploy
+## Deploy to GCP
 
 
 Run the following `gcloud artifacts repositories create` command in Cloud Shell to create a repository in the Artifact Registry named quickstart-repo in the same region as your Cloud SQL instance. Replace YOUR_PROJECT_ID with your project ID and YOUR_REGION_NAME with your region name.
@@ -290,13 +298,13 @@ Run the `gcloud builds submit` command as follows in Cloud Shell to build a Dock
 
 ```shell
 gcloud builds submit \
-  --tag $REGION-docker.pkg.dev/$PROJECT_ID/quickstart-repo/embed-function .
+  --tag $REGION-docker.pkg.dev/$PROJECT_ID/rag-repo/index-function .
 ```
 
 Finally, we can deploy our Cloud Function using the `gcloud` CLI from the same directory containing the source code as follows
 
 ```shell
-gcloud functions deploy embed-function --source . \
+gcloud functions deploy index-function --source . \
   --execution-environment gen2 \
   --runtime python39 \
   --entry-point cloudevent_handler \
@@ -307,11 +315,6 @@ gcloud functions deploy embed-function --source . \
   --update-env-vars INSTANCE_CONNECTION_NAME=$PROJECT_ID:$REGION:$INSTANCE_NAME
 ```
 
-
-After deployment finishes and the service becomes available, we can test it with the following `curl`
-```shell
-curl -X POST -H "Content-Type: text/plain" -d "Tell me a joke" https://my-service-abcdef-uc.a.run.app
-```
 
 ## That's all folks
 In this article we saw how easy it is to use Google Cloud Run to package LLM applications, and leaverage Cloud Storage to store the weights once and for all.
