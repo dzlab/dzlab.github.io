@@ -205,11 +205,7 @@ def embed(chunks, batch_size = 3):
 ```
 
 ### Saving to PostgreSQL
-This helper function use pgvector to store the generated embeddings within PostgreSQL.
-
-
-
->⚠️ The following code snippet may run for a few minutes.
+This helper function uses the [Cloud SQL Python Connector](https://cloud.google.com/sql/docs/postgres/samples/cloud-sql-postgres-sqlalchemy-connect-connector) to connect to the Cloud SQL from our Cloud Function. Then makes sure the `pgvector` extension is loaded and the target embeddings table is created. Finally, writes the chunks with their embeddings into Cloud SQL.
 
 ```python
 # Save the Pandas dataframe in a PostgreSQL table.
@@ -247,7 +243,7 @@ async def save(chunks):
     # Create the `document_embeddings` table (it does not exist yet)
     await conn.execute(
       """CREATE TABLE IF NOT EXISTS document_embeddings(
-            id VARCHAR(1024) PRIMARY KEY,
+            id BIGSERIAL PRIMARY KEY,
             content TEXT,
             embedding VECTOR(768))"""
     )
@@ -260,16 +256,10 @@ async def save(chunks):
     await conn.close()
 ```
 
-> Note: Saving credentials in environment variables is convenient, but not secure - consider a more secure solution such as [Cloud Secret Manager](https://cloud.google.com/secret-manager) to help keep secrets safe. Alternatively [Cloud SQL Auth Proxy](https://cloud.google.com/sql/docs/postgres/connect-instance-auth-proxy)
-
-
-- https://cloud.google.com/sql/docs/postgres/connect-functions
-- https://cloud.google.com/sql/docs/postgres/connect-instance-cloud-functions
-- https://codelabs.developers.google.com/codelabs/connecting-to-cloud-sql-with-cloud-functions
+> Note: Saving credentials in environment variables is convenient, but not secure - consider a more secure solution such as [Cloud Secret Manager](https://cloud.google.com/secret-manager) to help keep secrets safe. Alternatively [Cloud SQL Auth Proxy](https://cloud.google.com/sql/docs/postgres/connect-instance-auth-proxy).
 
 ### All together
-
-`main.py`
+Finally, we implement the event handling of our Cloud Function in `main.py`. Upon receiving a notification event related to a file upload, we download the file, chunk it, embed each chunk, then store the embeddings to Cloud SQL.
 
 ```python
 from cloudevents.http import CloudEvent
@@ -296,10 +286,8 @@ if __name__ == "__main__":
   functions_framework.cloud_event(cloudevent_handler)
 ```
 
-## Deploy to GCP
-
-
-Run the following `gcloud artifacts repositories create` command in Cloud Shell to create a repository in the Artifact Registry named quickstart-repo in the same region as your Cloud SQL instance. Replace YOUR_PROJECT_ID with your project ID and YOUR_REGION_NAME with your region name.
+## Deploy to Cloud Function
+First, we create a repository in the Artifact Registry to host the Docker containers of our Cloud Function (see [documentation](https://cloud.google.com/sql/docs/postgres/connect-instance-cloud-functions)).
 
 ```shell
 gcloud artifacts repositories create rag-repo \
@@ -309,14 +297,14 @@ gcloud artifacts repositories create rag-repo \
   --description="Artifacts for RAG applications"
 ```
 
-Run the `gcloud builds submit` command as follows in Cloud Shell to build a Docker container and publish it to Artifact Registry. Replace YOUR_PROJECT_ID with your project ID and YOUR_REGION_NAME with your region name.
+We can optionally build Docker container of our Cloud Function and publish it to the Artifact Registry we created earlier.
 
 ```shell
 gcloud builds submit \
   --tag $REGION-docker.pkg.dev/$PROJECT_ID/rag-repo/index-function .
 ```
 
-Finally, we can deploy our Cloud Function using the `gcloud` CLI from the same directory containing the source code as follows
+Finally, we deploy our Cloud Function using the `gcloud` CLI from the same directory containing the source code as follows
 
 ```shell
 gcloud functions deploy index-function --source . \
@@ -332,6 +320,6 @@ gcloud functions deploy index-function --source . \
 
 
 ## That's all folks
-In this article we saw how easy it is to use Google Cloud Run to package LLM applications, and leaverage Cloud Storage to store the weights once and for all.
+Building RAG applications to query bunch of files on your local machine is straightforward, however building a scalable and reliable architecture for RAG to ingest and query large amount of data is no easy business. In this article, we saw how to leverage Google Cloud managed services to build a serverless large-scale data pipeline to ingest and process data on the fly. In a next article, we will continue with our serverless approach and implemenet a scalable retrieval system, stay tuned.
 
 I hope you enjoyed this article, feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc).
