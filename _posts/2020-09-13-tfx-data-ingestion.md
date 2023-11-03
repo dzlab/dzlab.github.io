@@ -147,13 +147,13 @@ table = pa.Table.from_pandas(df)
 pq.write_table(table, 'parquet_data/creditcard.parquet')
 
 # Import generic file loader component and Parquet-specific executor
-from tfx.components import FileBasedExampleGen
+from tfx.components.example_gen.component import FileBasedExampleGen
 from tfx.components.example_gen.custom_executors import parquet_executor
-from tfx.components.base.executor_spec import ExecutorClassSpec
+from tfx.dsl.components.base.executor_spec import BeamExecutorSpec
 from tfx.utils.dsl_utils import external_input
 
 examples = external_input('parquet_data/')
-executor_spec = ExecutorClassSpec(parquet_executor.Executor)
+executor_spec = BeamExecutorSpec(parquet_executor.Executor)
 example_gen = FileBasedExampleGen(input_base=examples, custom_executor_spec=executor_spec)
 
 context.run(example_gen)
