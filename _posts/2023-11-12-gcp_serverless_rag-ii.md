@@ -10,7 +10,7 @@ img_excerpt:
 
 ![GCP Serverless RAG architecture]({{ "/assets/2023/10/20231001-gcp-serverless-rag.svg" | absolute_url }})
 
-In a previous article, we built a serverless data pipeline to make an entire dataset searchable using simple English. In this second part, we will build a query anwering pipeline as represented by the Steps 7 to 10 in the diagram above. We will leverage **pgvector** Cosine search operator to filter documents from our dataset and **Vertex AI** with **LangChain** to generate a final answer based on the selected subset of documents.
+In a [previous article]({{ "2023/10/01/gcp_serverless_rag-i/" }}), we built a serverless data pipeline to make an entire dataset searchable using simple English. In this second part, we will build a query anwering pipeline as represented by the Steps 7 to 10 in the diagram above. We will leverage **pgvector** Cosine search operator to filter documents from our dataset and **Vertex AI** with **LangChain** to generate a final answer based on the selected subset of documents.
 
 ## Serverless Query Answering
 In this section, we define a set of helper functions to implement each component of the Query Answering pipeline in the `lib.py` file.
@@ -42,6 +42,8 @@ def embed_query(user_query):
     embeddings_service = VertexAIEmbeddings()
     return embeddings_service.embed_query([user_query])
 ```
+
+> To learn more about using **Vertex AI** for retrieval check the following [article](https://cloud.google.com/blog/products/databases/using-pgvector-llms-and-langchain-with-google-cloud-databases/)
 
 ### Retrive the documents
 
@@ -104,6 +106,8 @@ def qa(matches, question):
     outputs = chain(inputs, return_only_outputs=True)["output_text"]
     return outputs
 ```
+
+> To learn more about using **LangChain** for Question Answering check the following [article](https://dzlab.github.io/2023/01/02/prompt-langchain/)
 
 ### All together
 Finally, we create a simple Flask based API to answer user queries. Upon receiving a user request with a question, we embed the question, use the embeddings to filter out non relevant documents, then pass the selected documents along with the user query to an LLM to generate a response.
