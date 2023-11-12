@@ -208,7 +208,6 @@ def embed(chunks, batch_size = 3):
 This helper function uses the [Cloud SQL Python Connector](https://cloud.google.com/sql/docs/postgres/samples/cloud-sql-postgres-sqlalchemy-connect-connector) to connect to the Cloud SQL from our Cloud Function. Then makes sure the `pgvector` extension is loaded and the target embeddings table is created. Finally, writes the chunks with their embeddings into Cloud SQL.
 
 ```python
-# Save the Pandas dataframe in a PostgreSQL table.
 import os
 import asyncio
 import asyncpg
@@ -308,14 +307,14 @@ Finally, we deploy our Cloud Function using the `gcloud` CLI from the same direc
 
 ```shell
 gcloud functions deploy index-function --source . \
-  --execution-environment gen2 \
-  --runtime python39 \
-  --entry-point cloudevent_handler \
-  --region $REGION \
-  --trigger-topic $TOPIC
-  --service-account $SERVICE_ACCOUNT \
-  --update-env-vars BUCKET=$BUCKET \
-  --update-env-vars INSTANCE_CONNECTION_NAME=$PROJECT_ID:$REGION:$INSTANCE_NAME
+--execution-environment gen2 \
+--runtime python39 \
+--entry-point cloudevent_handler \
+--region $REGION \
+--trigger-topic $TOPIC
+--service-account $SERVICE_ACCOUNT \
+--set-env-vars BUCKET=$BUCKET \
+--set-env-vars INSTANCE_CONNECTION_NAME=$PROJECT_ID:$REGION:$INSTANCE_NAME
 ```
 
 
