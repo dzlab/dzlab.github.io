@@ -3,14 +3,11 @@ layout: page
 title: About
 ---
 
-https://pboyd.io/consulting/
-https://taylor.town/hire-me
-
 Hey there! This is Bachir, a freelance Software Engineer with strong industry experience in building enterprise products, specializing in Data platforms and Deep Learning. I am currently availabile for short to medium-term projects. My resume is available on request. Send me an [Email](mailto:dzlabs@outlook.com), and we can set up a introductory call.
 
 I started this blog to share my hands on experience with deep learning and related stuff (computer vision, nlp).
 
-You can subscribe to updates using this [feed]({{ site.url }}/feed.xml).
+You can subscribe to updates using this [feed]({{ "feed.xml" }}).
 
 You can find me and my work:
 * On [Google Dev Library](https://devlibrary.withgoogle.com/authors/bachiirc)
