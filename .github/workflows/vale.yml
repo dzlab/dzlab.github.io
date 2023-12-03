@@ -8,18 +8,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: ls ${{github.workspace}}
-        run: ls -alt ${{github.workspace}}
-      - name: ls $GITHUB_WORKSPACE
-        run: ls -alt $GITHUB_WORKSPACE
       - name: Install and run Vale
         uses: errata-ai/vale-action@reviewdog
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           version: 2.29.0
-          vale_flags: --config=${{github.workspace}}/.github/.vale.ini
-          # github-pr-check, github-pr-review, github-check
+          vale_flags: --config=${{github.workspace}}/.github/vale/.vale.ini
           reporter: github-pr-check
           fail_on_error: true
           filter_mode: added
