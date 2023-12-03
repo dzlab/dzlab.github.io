@@ -14,7 +14,7 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           version: 2.29.0
-          vale_flags: --config=.github/.vale.ini
+          vale_flags: --config=${{github.workspace}}/.github/.vale.ini
           # github-pr-check, github-pr-review, github-check
           reporter: github-pr-check
           fail_on_error: true
