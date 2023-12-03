@@ -8,6 +8,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: ls ${{github.workspace}}
+        run: ls -alt ${{github.workspace}}
+      - name: ls $GITHUB_WORKSPACE
+        run: ls -alt $GITHUB_WORKSPACE
       - name: Install and run Vale
         uses: errata-ai/vale-action@reviewdog
         env:
