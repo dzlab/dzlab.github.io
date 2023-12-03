@@ -7,7 +7,7 @@ Hey there! This is Bachir, a freelance Software Engineer with strong industry ex
 
 I started this blog to share my hands on experience with deep learning and related stuff (computer vision, nlp).
 
-You can subscribe to updates using this [feed]({{ "feed.xml" }}).
+You can subscribe to updates using this [feed]({{ "/feed.xml" }}).
 
 You can find me and my work:
 * On [Google Dev Library](https://devlibrary.withgoogle.com/authors/bachiirc)
