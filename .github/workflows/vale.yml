@@ -1,0 +1,22 @@
+name: reviewdog
+
+on: [pull_request]
+
+jobs:
+  prose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install and run Vale
+        uses: errata-ai/vale-action@reviewdog
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          version: 2.29.0
+          vale_flags: --config=${{github.workspace}}/.github/vale/.vale.ini
+          reporter: github-pr-check
+          fail_on_error: true
+          filter_mode: added
+          files: all
+
