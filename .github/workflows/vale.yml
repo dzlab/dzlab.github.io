@@ -19,5 +19,5 @@ jobs:
           reporter: github-pr-check
           fail_on_error: true
           filter_mode: added
-          files: ./_posts/*.md
+          files: all
 
