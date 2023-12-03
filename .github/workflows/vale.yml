@@ -1,0 +1,23 @@
+name: reviewdog
+
+on: [pull_request]
+
+jobs:
+  prose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install and run Vale
+        uses: errata-ai/vale-action@reviewdog
+        with:
+          version: 2.17.0
+          # github-pr-check, github-pr-review, github-check
+          reporter: github-pr-check
+          token: ${{secrets.GITHUB_TOKEN}}
+          fail_on_error: true
+          styles: |
+            https://github.com/errata-ai/write-good/releases/latest/download/write-good.zip
+            https://github.com/errata-ai/proselint/releases/latest/download/proselint.zip
+          files: ./_posts/*.md
+
