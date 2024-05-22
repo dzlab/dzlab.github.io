@@ -9,7 +9,7 @@ toc: true
 img_excerpt:
 ---
 
-<img align="left" src="/assets/logos/icons8-docker.svg" width="200" />
+<img align="left" src="/assets/logos/icons8-docker.svg" width="150" />
 <img align="left" src="/assets/logos/elasticsearch.svg" width="120" />
 <img align="left" src="/assets/logos/kibana.svg" width="100" />
 <img align="center" src="/assets/logos/elastic-beats-logo-vector.svg" width="160" />
