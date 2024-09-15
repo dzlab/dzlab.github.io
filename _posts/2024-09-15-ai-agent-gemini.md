@@ -4,17 +4,15 @@ comments: true
 title: AI agent from scratch with Gemini
 excerpt: Build an AI agent from scratch using Gemini Function calling
 categories: monitoring
-tags: [docker,elastic,kibana]
+tags: [genai]
 toc: true
 img_excerpt:
 ---
 
-<img align="left" src="/assets/logos/icons8-docker.svg" width="150" />
-<img align="left" src="/assets/logos/elasticsearch.svg" width="120" />
-<img align="left" src="/assets/logos/kibana.svg" width="100" />
-<img align="center" src="/assets/logos/elastic-beats-logo-vector.svg" width="160" />
+<img align="left" src="/assets/logos/Google_Gemini_logo.svg" width="200" />
 <br/>
 
+https://medium.com/around-the-prompt/what-are-gpt-agents-a-deep-dive-into-the-ai-interface-of-the-future-3c376dcb0824
 
 ```shell
 pip install -q google-generativeai backoff
