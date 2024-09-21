@@ -3,8 +3,8 @@ layout: post
 comments: true
 title: AI agent from scratch with Gemini
 excerpt: Build an AI agent from scratch using Gemini Function calling
-categories: monitoring
-tags: [genai]
+categories: genai
+tags: [agent]
 toc: true
 img_excerpt:
 ---
@@ -12,11 +12,22 @@ img_excerpt:
 <img align="left" src="/assets/logos/Google_Gemini_logo.svg" width="200" />
 <br/>
 
-https://medium.com/around-the-prompt/what-are-gpt-agents-a-deep-dive-into-the-ai-interface-of-the-future-3c376dcb0824
+
+LLMs like [Google Gemini](https://gemini.google.com/) takes input for a single query and returns an output (e.g. text, image or audio), it cannot do more than a single task at a time. On the other hand, an Agent run iteratively with some goals / tasks defined. An agent uses complex workflows it continusouly talks to the LLM without a human interaction until it reaches its goal.
+
+With the introduction of [Function Calling](https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling), Gemini can make use of external tools by outputting a well formatted output that matches the input expected. This capability is a first manifestation of the “agents” idea inside of Gemini as now the model can make the decision on whether to use the tools at it hand and which one.
+
+In the rest of this article, we will use Gemini's Function Calling to build a simple FileSystem Agent from scratch.
+
+> Note: Agent workflows may require a lot of interactions with the LLM, and as a result may cause a lot of API usage which may not be free of charge.
+
+First, let's install some dependencies. We will need the [backoff](https://github.com/litl/backoff) to implement retries for Gemini API as the agent will cause the Rate limit to be reached quickly.
 
 ```shell
 pip install -q google-generativeai backoff
 ```
+
+Import packages
 
 ```python
 import os
@@ -27,11 +38,16 @@ from google.api_core.exceptions import InternalServerError, TooManyRequests
 import backoff
 ```
 
+Setup Gemini API Key
+
 ```python
 genai.configure(api_key=os.environ['GOOGLE_API_KEY'])
 ```
 
+We define the external APIs that the agent will be executing, in this cases these APIs perform operations on the local Filesystem. e.g. create folder, write file, etc.
+
 ```python
+# Create a folder at the given path
 def create_folder(path):
     try:
         os.makedirs(path, exist_ok=True)
@@ -39,6 +55,7 @@ def create_folder(path):
     except Exception as e:
         return f"Error creating folder: {str(e)}"
 
+# Create a file at the given path and optionnally write the content into it
 def create_file(path, content=""):
     try:
         with open(path, 'w') as f:
@@ -47,6 +64,7 @@ def create_file(path, content=""):
     except Exception as e:
         return f"Error creating file: {str(e)}"
 
+# Write content to a file
 def write_file(path, content):
     try:
         with open(path, 'w') as f:
@@ -55,6 +73,7 @@ def write_file(path, content):
     except Exception as e:
         return f"Error writing to file: {str(e)}"
 
+# Read content of a file
 def read_file(path):
     try:
         with open(path, 'r') as f:
@@ -63,6 +82,7 @@ def read_file(path):
     except Exception as e:
         return f"Error reading file: {str(e)}"
 
+# List files at given location
 def list_files(path="."):
     try:
         files = os.listdir(path)
@@ -70,6 +90,8 @@ def list_files(path="."):
     except Exception as e:
         return f"Error listing files: {str(e)}"
 ```
+
+To easily 
 
 ```python
 action_functions = {
@@ -80,6 +102,8 @@ action_functions = {
     'list_files'   : list_files,    # Function to list files in the root directory
 }
 ```
+
+Execute function call
 
 ```python
 def execute_function_call(function_call, functions):
@@ -170,7 +194,8 @@ model = genai.GenerativeModel('models/gemini-1.5-pro-latest', tools=[
     ])
 ```
 
-Helper function to print colored text in Colab
+Helper function to print colored text
+
 ```python
 def print_colored(text, color):
     color_map = {
