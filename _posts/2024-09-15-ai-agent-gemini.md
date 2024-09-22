@@ -9,7 +9,7 @@ toc: true
 img_excerpt:
 ---
 
-<img align="left" src="/assets/logos/Google_Gemini_logo.svg" width="200" />
+<img align="center" src="/assets/logos/Google_Gemini_logo.svg" width="200" />
 <br/>
 
 
@@ -321,6 +321,8 @@ world
 You: exit
 Thank you for chatting. Goodbye!
 </pre>
+
+We can manually check that the file was created a the right place and with the right content:
 
 ```shell
 $ cat ./texts/hello
