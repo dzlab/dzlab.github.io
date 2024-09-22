@@ -13,14 +13,19 @@ img_excerpt:
 <br/>
 
 
-LLMs like [Google Gemini](https://gemini.google.com/) takes input for a single query and returns an output (e.g. text, image or audio), it cannot do more than a single task at a time. On the other hand, an Agent run iteratively with some goals / tasks defined. An agent uses complex workflows it continusouly talks to the LLM without a human interaction until it reaches its goal.
+LLMs like [Google Gemini](https://gemini.google.com/) takes input for a single query and returns an output (e.g. text, image or audio), it cannot do more than a single task at a time. On the other hand, an Agent run iteratively with some goals / tasks defined. An agent uses complex workflows; it continusouly talks to the LLM without a human interaction until it reaches its goal.
 
-With the introduction of [Function Calling](https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling), Gemini can make use of external tools by outputting a well formatted output that matches the input expected. This capability is a first manifestation of the “agents” idea inside of Gemini as now the model can make the decision on whether to use the tools at it hand and which one.
+With the introduction of [Function Calling](https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling), Gemini can make use of external tools by outputting a well formatted output that matches the input expected. This capability is a first manifestation of the “agents” idea inside of Gemini as now the model can make the decision on whether to use the tools at hand and which one.
 
-In the rest of this article, we will use Gemini's Function Calling to build a simple FileSystem Agent from scratch.
+In the rest of this article, we will use Gemini's Function Calling to build a simple FileSystem Agent from scratch. The main components of our agent implementation are:
+- **Tool dispatching:** This component is reponsible of executing the right tool based on the LLM reponse.
+- **Task planning:** This component leaverages the LLM Gemini to reason about the user query and respond to it with the appropriate a function call.
+- **Agent orchestration:** This component implements the agent main loop, it listen to user query, forwards them to the task planner, and then uses the tool dispatching component to execute tools.
 
 > Note: Agent workflows may require a lot of interactions with the LLM, and as a result may cause a lot of API usage which may not be free of charge.
 
+
+## Setup
 First, let's install some dependencies. We will need the [backoff](https://github.com/litl/backoff) to implement retries for Gemini API as the agent will cause the Rate limit to be reached quickly.
 
 ```shell
@@ -44,7 +49,23 @@ Setup Gemini API Key
 genai.configure(api_key=os.environ['GOOGLE_API_KEY'])
 ```
 
-We define the external APIs that the agent will be executing, in this cases these APIs perform operations on the local Filesystem. e.g. create folder, write file, etc.
+Define a helper function to print colored text
+
+```python
+def print_colored(text, color):
+    color_map = {
+        'blue': '#3366cc',
+        'yellow': '#ffcc00',
+        'green': '#33cc33',
+        'white': '#ffffff'
+    }
+    html_color = color_map.get(color.lower(), '#000000')  # Default to black if color not found
+    display(HTML(f'<pre style="color: {html_color};">{text}</pre>'))
+```
+
+## Tool dispatching
+
+We define the tools or external APIs that the agent will be executing as instructed by the LLM. In our case, these APIs perform operations on the local Filesystem. e.g. create folder, write file, etc.
 
 ```python
 # Create a folder at the given path
@@ -91,7 +112,7 @@ def list_files(path="."):
         return f"Error listing files: {str(e)}"
 ```
 
-To easily 
+To easily locate our functions by name, we group them into a dictionary that we will use later:
 
 ```python
 action_functions = {
@@ -103,7 +124,7 @@ action_functions = {
 }
 ```
 
-Execute function call
+The following is a helper function dispatches the Function Call returned by the LLM to the right tool. First, we locate the right tool and then call it.
 
 ```python
 def execute_function_call(function_call, functions):
@@ -113,6 +134,12 @@ def execute_function_call(function_call, functions):
     return f"Unknown tool: {function_name}"
   return functions[function_name](**function_args)
 ```
+
+## Task planning
+
+Task planning configures Gemini Function Calling with a list of tools. It declares each exposed tool using Gemini's function schema by providing a description of the tool and its list of parameters.
+
+Below are the definitions of our Filesystem tools:
 
 ```python
 create_folder_action = {'function_declarations': [
@@ -183,6 +210,7 @@ list_files_action = {'function_declarations': [
 ]}
 ```
 
+Now, we configure Gemini with the list of our tools as follows:
 
 ```python
 model = genai.GenerativeModel('models/gemini-1.5-pro-latest', tools=[
@@ -194,19 +222,10 @@ model = genai.GenerativeModel('models/gemini-1.5-pro-latest', tools=[
     ])
 ```
 
-Helper function to print colored text
+## Agent orchestration
+This section details the implementation of the Agent orchestration, where we orchestrates the interactions with the user, the LLM and the tools.
 
-```python
-def print_colored(text, color):
-    color_map = {
-        'blue': '#3366cc',
-        'yellow': '#ffcc00',
-        'green': '#33cc33',
-        'white': '#ffffff'
-    }
-    html_color = color_map.get(color.lower(), '#000000')  # Default to black if color not found
-    display(HTML(f'<pre style="color: {html_color};">{text}</pre>'))
-```
+First, let's create a helper function to submit requests to Gemini
 
 ```python
 session = model.start_chat()
@@ -214,17 +233,27 @@ session = model.start_chat()
 @backoff.on_exception(backoff.expo, (InternalServerError, TooManyRequests))
 def send_message(msg):
     return session.send_message(msg)
+```
 
+Note the use of the [Exponential backoff](https://en.wikipedia.org/wiki/Exponential_backoff) strategy when calling Gemini API so that we automatically retry with backoff when we hit the rate limit for API call. In fact, Gemini would trigger the following exception:
+
+```
+google.api_core.exceptions.InternalServerError: 500 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?%24alt=json%3Benum-encoding%3Dint: An internal error has occurred. Please retry or report in https://developers.generativeai.google/guide/troubleshooting
+```
+
+Second, we define an orchestration helper function that takes user queries, call the task planner with this input, forward the planned task to the dispatcher, then sends back the tool response to the LLM, and finally return the final result to the user.
+
+```python
 def ask(user_input):
   # Make the initial API call
   response = send_message(user_input)
 
   part = response.candidates[0].content.parts[0]
 
-  # Check if it's a function call; in real use you'd need to also handle text
-  # responses as you won't know what the model will respond with.
-
-  if part.function_call:
+  # Check if it's a function call otherwise simply return the LLM response
+  if not part.function_call:
+    result = part.text
+  else:
     function_result = execute_function_call(part.function_call, action_functions)
     # Send the function response back to the model
     response = send_message(
@@ -236,12 +265,11 @@ def ask(user_input):
             )
         )
     result = response.text
-  else:
-    result = part.text
+
   return result
 ```
 
-Main loop
+Finally, we define the Main loop that indefinitely asks the user for queries, plan and execute the corresponding task, then return the result to the user.
 
 ```python
 print_colored("Welcome to the AI Agent Chat!", "blue")
@@ -257,9 +285,11 @@ while True:
   print_colored(f"AI: {response}", "green")
 ```
 
-Output
 
-```
+## Testing the Agent
+The folloing is an example conversation between a user trying to execute some basic Filesystem actions and our Gemini-based Agent:
+
+<pre style="color: #3366cc;">
 Welcome to the AI Agent Chat!
 Type 'exit' to end the conversation.
 
@@ -290,20 +320,12 @@ world
 
 You: exit
 Thank you for chatting. Goodbye!
-```
-
-> Node: google.api_core.exceptions.InternalServerError: 500 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?%24alt=json%3Benum-encoding%3Dint: An internal error has occurred. Please retry or report in https://developers.generativeai.google/guide/troubleshooting
+</pre>
 
 ```shell
 $ cat ./texts/hello
 world
 ```
-
-Resources:
-- https://github.com/jggomez/gemini-workshop/blob/main/09_function_calling.py
-- https://github.com/jggomez/gemini-workshop/blob/main/10_function_calling_advanced.py
-- https://github.com/google-gemini/cookbook/blob/main/quickstarts/Function_calling.ipynb
-- https://codelabs.developers.google.com/codelabs/gemini-function-calling
 
 ## That's all folks
 
