@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: From Postgres to Kafka throw Debezium 
+title: From Postgres to Kafka through Debezium 
 excerpt: Setup CDC pipeline with Debezium to move data from Postgres to Kafka
 categories: debezium
 tags: [docker,postgres,kafka]
@@ -10,7 +10,7 @@ img_excerpt:
 ---
 
 <img align="left" src="/assets/logos/icons8-docker.svg" width="150" />
-<img align="center" src="/assets/logos/debeziumio-ar21.svg" width="200" />
+<img align="center" src="/assets/logos/debeziumio-ar21.svg" width="400" />
 <br/>
 
 
