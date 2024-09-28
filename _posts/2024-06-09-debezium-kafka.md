@@ -10,7 +10,7 @@ img_excerpt:
 ---
 
 <img align="left" src="/assets/logos/icons8-docker.svg" width="150" />
-<img align="center" src="/assets/logos/debeziumio-ar21.svg" width="400" />
+<img align="center" src="/assets/logos/debeziumio-ar21.svg" width="300" />
 <br/>
 
 
