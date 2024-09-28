@@ -9,10 +9,7 @@ toc: true
 img_excerpt:
 ---
 
-<img align="left" src="/assets/logos/icons8-docker.svg" width="150" />
-<img align="left" src="/assets/logos/elasticsearch.svg" width="120" />
-<img align="center" src="/assets/logos/debeziumio-ar21.svg" width="300" />
-<br/>
+![Debezium toplogy]({{ "/assets/2024/06/20240613-debezium-topology.svg" | absolute_url }})
 
 
 You need to install the Elasticsearch sink connector separately or use the Kafka Connect images from Confluent and install Debezium into those https://www.confluent.io/hub/debezium/debezium-connector-postgresql
