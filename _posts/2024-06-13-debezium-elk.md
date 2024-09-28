@@ -15,31 +15,29 @@ In a [previous article]({{ "debezium/2024/06/09/debezium-kafka/" | absolute_url 
 
 ## Toplogy
 
+The below diagram highlights the different components of our cluster:
+- Postgres - a Relational Database for storing the data and representing the changes source
+- [Apache Kafka](https://kafka.apache.org/) - used to create a messaging topic which will store the CDC data coming from the database.
+- [Apache Zookeeper](https://zookeeper.apache.org/) - a centralized service that provides distributed synchronization. It is used by Kafka to store configuration management.
+- [Debezium](https://github.com/debezium/debezium) — a CDC tool based on [Kafka Connect](https://www.confluent.io/product/connectors/) to stream WAL data from source system to Kafka. It will be run with the following connectors:
+  - Debezium Source for Postgres: this connector is used to read transactions log from Postgres
+  - Debezium Sink for Elasticsearch: this connector is used to write documents into Elasticsearch
+
+We will use a separate container for each service without use of persistent volumes. Data will be stored locally inside the containers, and will be lost when the container is stopped. You can mount directories on the host machine as volumes in case you want to persist data between restarts.
+
 ![Debezium toplogy]({{ "/assets/2024/06/20240613-debezium-topology.svg" | absolute_url }})
 
-we will use a separate container for each service and don’t use persistent volume. ZooKeeper and Kafka would typically store their data locally inside the containers, which would require you to mount directories on the host machine as volumes. So in this tutorial, all persisted data is lost when a container is stopped
+### Build Docker image for Debezium
 
-You need to install the Elasticsearch sink connector separately or use the Kafka Connect images from Confluent and install Debezium into those https://www.confluent.io/hub/debezium/debezium-connector-postgresql
-
-
-`Dockerfile.connect-jdbc-es`
+By default, Debezium Docker image does not ship with the Elasticsearch sink connector so we need to build an image ourselves by starting from `debezium/connect` Docker image and then installing on it the Elasticsearch sink connector.
+Create a `Dockerfile.connect-jdbc-es` Dockerfile with the following instructions:
 
 ```Dockerfile
 ARG DEBEZIUM_VERSION
 FROM debezium/connect:${DEBEZIUM_VERSION}
-ENV KAFKA_CONNECT_JDBC_DIR=$KAFKA_CONNECT_PLUGINS_DIR/kafka-connect-jdbc \
-    KAFKA_CONNECT_ES_DIR=$KAFKA_CONNECT_PLUGINS_DIR/kafka-connect-elasticsearch
+ENV KAFKA_CONNECT_ES_DIR=$KAFKA_CONNECT_PLUGINS_DIR/kafka-connect-elasticsearch
 
-ARG POSTGRES_VERSION=42.5.1
-ARG KAFKA_JDBC_VERSION=5.3.2
 ARG KAFKA_ELASTICSEARCH_VERSION=5.3.2
-
-# Deploy PostgreSQL JDBC Driver
-RUN cd /kafka/libs && curl -sO https://jdbc.postgresql.org/download/postgresql-$POSTGRES_VERSION.jar
-
-# Deploy Kafka Connect JDBC
-RUN mkdir $KAFKA_CONNECT_JDBC_DIR && cd $KAFKA_CONNECT_JDBC_DIR &&\
-	curl -sO https://packages.confluent.io/maven/io/confluent/kafka-connect-jdbc/$KAFKA_JDBC_VERSION/kafka-connect-jdbc-$KAFKA_JDBC_VERSION.jar
 
 # Deploy Confluent Elasticsearch sink connector
 RUN mkdir $KAFKA_CONNECT_ES_DIR && cd $KAFKA_CONNECT_ES_DIR &&\
@@ -57,10 +55,14 @@ RUN mkdir $KAFKA_CONNECT_ES_DIR && cd $KAFKA_CONNECT_ES_DIR &&\
         curl -sO https://repo1.maven.org/maven2/com/google/guava/guava/31.0.1-jre/guava-31.0.1-jre.jar
 ```
 
+Build the Docker image
+
 ```shell
 export DEBEZIUM_VERSION=2.1
 docker build -t debezium/connect-jdbc-es:${DEBEZIUM_VERSION} --build-arg DEBEZIUM_VERSION=${DEBEZIUM_VERSION} -f Dockerfile.connect-jdbc-es .
 ```
+
+The build output should look something like this:
 
 ```
 [+] Building 6.4s (8/8) FINISHED                                                                                                                             docker:default
@@ -69,10 +71,8 @@ docker build -t debezium/connect-jdbc-es:${DEBEZIUM_VERSION} --build-arg DEBEZIU
  => [internal] load metadata for docker.io/debezium/connect:2.1                                                                                                        0.0s
  => [internal] load .dockerignore                                                                                                                                      0.0s
  => => transferring context: 2B                                                                                                                                        0.0s
- => [1/4] FROM docker.io/debezium/connect:2.1                                                                                                                          0.2s
- => [2/4] RUN cd /kafka/libs && curl -sO https://jdbc.postgresql.org/download/postgresql-42.5.1.jar                                                                    1.6s
- => [3/4] RUN mkdir /kafka/connect/kafka-connect-jdbc && cd /kafka/connect/kafka-connect-jdbc && curl -sO https://packages.confluent.io/maven/io/confluent/kafka-conn  0.6s
- => [4/4] RUN mkdir /kafka/connect/kafka-connect-elasticsearch && cd /kafka/connect/kafka-connect-elasticsearch &&        curl -sO https://packages.confluent.io/mave  3.8s
+ => [1/2] FROM docker.io/debezium/connect:2.1                                                                                                                          0.2s
+ => [2/2] RUN mkdir /kafka/connect/kafka-connect-elasticsearch && cd /kafka/connect/kafka-connect-elasticsearch &&        curl -sO https://packages.confluent.io/mave  3.8s
  => exporting to image                                                                                                                                                 0.1s
  => => exporting layers                                                                                                                                                0.0s
  => => writing image sha256:90d40c1d011179c31f33a52122f661a08e29ed695eba67503fa0035120678f2f                                                                           0.0s
@@ -80,6 +80,8 @@ docker build -t debezium/connect-jdbc-es:${DEBEZIUM_VERSION} --build-arg DEBEZIU
 ```
 
 ### Setup With Docker
+
+Now, we start each service of the cluster using Docker:
 
 ```shell
 docker run -d --rm --name zookeeper -p 2181:2181 -p 2888:2888 -p 3888:3888 debezium/zookeeper:${DEBEZIUM_VERSION}
@@ -94,8 +96,7 @@ docker run -d --rm --name connect -p 8083:8083 -p 5005:5005 --link kafka --link 
 ```
 
 ### Setup with Docker Compose
-
-`docker-compose.yaml`
+Alternative, we can setup the entire cluster with Docker Compose using the following `docker-compose.yaml` file:
 
 ```yaml
 version: '2'
@@ -147,7 +148,7 @@ services:
      - STATUS_STORAGE_TOPIC=my_connect_statuses
 ```
 
-Start the topology as defined in https://debezium.io/documentation/reference/stable/tutorial.html
+Now we start every service in the topology as follows:
 
 ```shell
 export DEBEZIUM_VERSION=2.1
@@ -155,6 +156,7 @@ docker-compose -f docker-compose.yaml up
 ```
 
 ### Check everything is running
+Before going any further, we neeed to check that every service is up and running:
 
 ```shell
 $ docker ps | grep debezium
@@ -167,11 +169,16 @@ cca024019c84   debezium/zookeeper:2.1                                           
 
 
 ## Register Connectors with Debezium
+In this section we will register the Posgres source and Elasticsearch sink connectors with the Debezium service.
+
+First, check the Kafka Connect service is up and running
 
 ```shell
 $ curl -H "Accept:application/json" localhost:8083/
 {"version":"3.3.1","commit":"e23c59d00e687ff5","kafka_cluster_id":"UBy0Y35cSfOg-Ltt4kBK3g"}
 ```
+
+Then, check the current list of runing connectors (we should be empty at this point)
 
 ```shell
 $ curl -H "Accept:application/json" localhost:8083/connectors/
@@ -179,8 +186,7 @@ $ curl -H "Accept:application/json" localhost:8083/connectors/
 ```
 
 ### Register Postgres source
-
-`pg-source.json`
+The following `pg-source.json` configuration file contains details for Debezium on how to access Postgres (shema, table, etc.), what topic to use for streaming the data and how to transform the transactions:
 
 ```json
 {
@@ -205,7 +211,7 @@ $ curl -H "Accept:application/json" localhost:8083/connectors/
 }
 ```
 
-Start Postgres connector
+We can register this source connector to read from Postgres as follows:
 
 ```shell
 $ curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @pg-source.json
@@ -213,7 +219,7 @@ $ curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/jso
 {"name":"pg-source","config":{"connector.class":"io.debezium.connector.postgresql.PostgresConnector","tasks.max":"1","database.hostname":"postgres","database.port":"5432","database.user":"postgres","database.password":"postgres","database.dbname":"postgres","topic.prefix":"dbserver1","schema.include.list":"inventory","schema.history.internal.kafka.bootstrap.servers":"kafka:9092","schema.history.internal.kafka.topic":"schema-changes.inventory","transforms":"route","transforms.route.type":"org.apache.kafka.connect.transforms.RegexRouter","transforms.route.regex":"([^.]+)\\.([^.]+)\\.([^.]+)","transforms.route.replacement":"$3","name":"pg-source"},"tasks":[],"type":"source"}
 ```
 
-Check that the connector is created:
+Then, check that the Postgres connector is created:
 
 
 ```shell
@@ -221,18 +227,16 @@ $ curl -H "Accept:application/json" localhost:8083/connectors/
 ["pg-source"]
 ```
 
-Check that the connector is running:
+And check that the source connector is running:
 
 ```shell
 $ curl localhost:8083/connectors/pg-source/status
 {"name":"pg-source","connector":{"state":"RUNNING","worker_id":"172.17.0.19:8083"},"tasks":[{"id":0,"state":"RUNNING","worker_id":"172.17.0.19:8083"}],"type":"source"}
 ```
 
-The first time it connects to a PostgreSQL server, Debezium takes a [consistent snapshot](https://debezium.io/documentation/reference/1.6/connectors/postgresql.html#postgresql-snapshots) of the tables selected for replication, so you should see that the pre-existing records in the replicated table are initially pushed into your Kafka topic:
-
 ### Register Elasticsearch sink
+The following `es-sink.json` configuration file contains details for Debezium to write events to Elasticsearch (index, documents, etc.) and what Kafka topic to read from:
 
-`es-sink.json`
 
 ```json
 {
@@ -254,16 +258,22 @@ The first time it connects to a PostgreSQL server, Debezium takes a [consistent 
 }
 ```
 
+Similarly to Postgres source, We can register this connector to write into Elasticsearch as follows:
+
 ```shell
 $ curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @es-sink.json
 
 {"name":"elastic-sink","config":{"connector.class":"io.confluent.connect.elasticsearch.ElasticsearchSinkConnector","tasks.max":"1","topics":"customers","connection.url":"http://elastic:9200","transforms":"unwrap,key","transforms.unwrap.type":"io.debezium.transforms.ExtractNewRecordState","transforms.unwrap.drop.tombstones":"false","transforms.key.type":"org.apache.kafka.connect.transforms.ExtractField$Key","transforms.key.field":"id","key.ignore":"false","type.name":"customer","behavior.on.null.values":"delete","name":"elastic-sink"},"tasks":[],"type":"sink"}
 ```
 
+Then, check that the connectors list is updated with the new Elasticsearch sink:
+
 ```shell
 $ curl -H "Accept:application/json" localhost:8083/connectors/
 ["elastic-sink","pg-source"]
 ```
+
+And check that the sink connector is running:
 
 ```shell
 $ curl localhost:8083/connectors/elastic-sink/status
@@ -272,14 +282,16 @@ $ curl localhost:8083/connectors/elastic-sink/status
 ```
 
 ## Populate Postgres with Data
+To test our pipeline, we need to populate some Data in Postgres and then check that it landed as expected in Elasticsearch.
 
-Modify records in the database via Postgres client
+We can modify records in the database via Postgres client as follows:
+
 ```shell
 $ docker exec -it --env PGOPTIONS="--search_path=inventory" postgres /bin/bash -c 'psql -U $POSTGRES_USER postgres'
 postgres=# 
 ```
 
-https://github.com/debezium/container-images/blob/main/examples/postgres/3.0/inventory.sql
+Then run few queries to populate Postgres with Data (based on [inventory.sql](https://github.com/debezium/container-images/blob/main/examples/postgres/3.0/inventory.sql))
 
 ```sql
 CREATE SCHEMA inventory;
@@ -303,10 +315,13 @@ VALUES (default,'Sally','Thomas','sally.thomas@acme.com'),
 
 
 ## Elasticsearch
+Now we can check the Postgres data changes are available in Elasticsearch by simply listing the objects in our index `customers`.
 
 ```shell
 curl 'http://localhost:9200/customers/_search?pretty'
 ```
+
+The output would look something like this:
 
 ```json
 {
@@ -381,6 +396,7 @@ curl 'http://localhost:9200/customers/_search?pretty'
 
 
 ## Shut down the cluster
+If the services where started individually with `docker run` then we can stop them as follows:
 
 ```shell
 docker stop connect
@@ -389,6 +405,8 @@ docker stop zookeeper
 docker stop elastic
 docker stop postgres
 ```
+
+Alternatively, if the services were started with Docker compose we simply stop the cluster as follows:
 
 ```shell
 # Shut down the cluster
