@@ -244,6 +244,7 @@ $ curl -X PUT $ES_URL
 ```shell
 cat stream/regresstion-slot.jsonl | \
   jq -c '. | select(.change | length > 0) | .' | \
+  jq '.change | flatten'
   curl -X POST $ES_URL/_doc -H "Content-Type: application/json" --data-binary @-
 ```
 
@@ -262,6 +263,20 @@ Handle authentication:
 If your Elasticsearch instance requires authentication, add the appropriate credentials to the curl command.
 
 ```shell
+sudo cat stream/regresstion-slot.jsonl | \
+  jq -c '. | select(.change | length > 0) | .' | \
+  jq -r '.change[] | @json' | \
+  jq -c '[.columnnames, .columnvalues] | transpose | map({(.[0]): .[1]}) | add'
+```
+
+does the following `jq -c '[.columnnames, .columnvalues] | transpose | map({(.[0]): .[1]}) | add'`
+Here's a breakdown of how this jq command works:
+[.a, .b] creates an array containing the values of keys "a" and "b".
+transpose converts the array of arrays into an array of paired elements.
+map({(.): .[1]}) transforms each pair into an object with the first element as the key and the second as the value.
+add combines all the individual objects into a single object.
+
+```shell
 curl 'http://localhost:9200/customers/_search?pretty'
 ```
 
@@ -272,6 +287,12 @@ End the application:
 
 ```shell
 $ docker-compose down
+
+Stopping db ... done
+Stopping es ... done
+Removing db ... done
+Removing es ... done
+Removing network pg-wal2json_default
 ```
 
 Using filebeat
