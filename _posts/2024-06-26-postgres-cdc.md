@@ -241,40 +241,95 @@ $ curl -X PUT $ES_URL
 {"acknowledged":true,"shards_acknowledged":true,"index":"customers"}
 ```
 
-```shell
-cat stream/regresstion-slot.jsonl | \
-  jq -c '. | select(.change | length > 0) | .' | \
-  jq '.change | flatten'
-  curl -X POST $ES_URL/_doc -H "Content-Type: application/json" --data-binary @-
+```python
+import argparse
+import json
+import os
+import requests
+import time
+
+# Helper class to interact with Elasticsearch
+class Elasticsearch:
+  def __init__(self, base_url):
+    self.base_url = base_url
+
+  def upsert(self, index_name, document, doc_id=None):
+    headers = {'Content-Type': 'application/json'}
+    
+    if doc_id:
+      url = f"{self.base_url}/{index_name}/_doc/{doc_id}"
+    else:
+      url = f"{self.base_url}/{index_name}/_doc"
+    
+    try:
+      response = requests.post(url, data=json.dumps(document), headers=headers)
+      response.raise_for_status()
+      return response.json()
+    except requests.exceptions.RequestException as e:
+      print(f"Error writing document to Elasticsearch: {e}")
+      return None
+
+# Tail a file and yield new lines, similar to 'tail -f'.
+def tail_file(file_path, interval=1.0):
+  with open(file_path, 'r') as file:
+    # Move to the end of the file
+    file.seek(0, os.SEEK_END)
+    
+    while True:
+      # Read new lines
+      line = file.readline()
+      if line:
+        yield line.strip()
+      else:
+        # No new lines, wait before checking again
+        time.sleep(interval)
+
+# Process a single transaction
+def process_transaction(in_obj):
+  out_obj = {}
+  for key in ['kind', 'schema', 'table']:
+    out_obj[key] = in_obj[key]
+  if in_obj['kind'] != 'delete':
+    for key, value in zip(in_obj['columnnames'], in_obj['columnvalues']):
+      out_obj[key] = value
+  if 'oldkeys' in in_obj:
+    out_obj['old'] = {}
+    for key, value in zip(in_obj['oldkeys']['keynames'], in_obj['oldkeys']['keyvalues']):
+      out_obj['old'][key] = value
+  return out_obj
+
+# Process a file of change transactions
+def process_file(es_url, file_path):
+  es = Elasticsearch(es_url)
+  for line in tail_file(file_path):
+    txs = json.loads(line)
+    if txs['change'] == []:
+      continue
+    for tx in txs['change']:
+      result = process_transaction(tx)
+      id = result['id'] if 'id' in result else None
+      es.upsert(result['table'], result, id)
+
+# Parse CLI arguments
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Description of your program")
+    parser.add_argument('-f', '--file', help='Input file name')
+    parser.add_argument('-u', '--url', default='http://localhost:9200', help='Base URL for Elasticsearch')
+    return parser.parse_args()
+
+def main():
+    args = parse_arguments()
+    print(f'Processing transactions file {args.file}')
+    print(f'Uploading transactions to {args.url}')
+    process_file(args.url, args.file)
+
+if __name__ == "__main__":
+    main()
 ```
 
-
-Let's break down the command:
-The echo command outputs the JSON object.
-The pipe (|) sends the output to curl.
-curl sends a POST request to the Elasticsearch update endpoint.
--H "Content-Type: application/json" sets the content type header.
---data-binary @- tells curl to read the request body from stdin.
-Customize the JSON object:
-Modify the JSON object to include the fields you want to upsert. The "doc_as_upsert": true flag tells Elasticsearch to perform an upsert operation.
-Adjust the Elasticsearch endpoint:
-Replace your_index with the name of your index and your_document_id with the ID of the document you want to upsert.
-Handle authentication:
-If your Elasticsearch instance requires authentication, add the appropriate credentials to the curl command.
-
 ```shell
-sudo cat stream/regresstion-slot.jsonl | \
-  jq -c '. | select(.change | length > 0) | .' | \
-  jq -r '.change[] | @json' | \
-  jq -c '[.columnnames, .columnvalues] | transpose | map({(.[0]): .[1]}) | add'
+$ python process.py -f /stream/regresstion-slot.jsonl
 ```
-
-does the following `jq -c '[.columnnames, .columnvalues] | transpose | map({(.[0]): .[1]}) | add'`
-Here's a breakdown of how this jq command works:
-[.a, .b] creates an array containing the values of keys "a" and "b".
-transpose converts the array of arrays into an array of paired elements.
-map({(.): .[1]}) transforms each pair into an object with the first element as the key and the second as the value.
-add combines all the individual objects into a single object.
 
 ```shell
 curl 'http://localhost:9200/customers/_search?pretty'
