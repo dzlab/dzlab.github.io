@@ -153,15 +153,12 @@ SELECT slot_name, plugin, slot_type, database, active, restart_lsn, confirmed_fl
 (1 row)
 ```
 
-## Activate Logical Replication Slot
+On a separate shell activate Logical Replication Slot with `pg_recvlogical`
 ```shell
-docker-compose exec db pg_recvlogical -d inventory -U postgres --slot regression_slot --start -o pretty-print=1 -f /stream/regresstion-slot.jsonl
+$ docker-compose exec db pg_recvlogical -d inventory -U postgres --slot regression_slot --start -o pretty-print=1 -f /stream/regresstion-slot.jsonl
 ```
 
-
-```shell
-$ docker-compose exec db psql -U postgres -d inventory
-```
+Going back to the SQL shell and check 
 
 ```
 inventory=# SELECT slot_name, plugin, slot_type, database, active, restart_lsn, confirmed_flush_lsn FROM pg_replication_slots;
@@ -227,16 +224,11 @@ $ docker-compose exec db psql -U postgres -d inventory \
 ```
 
 
-```shell
-ES_INDEX=customers
-ES_URL="http://localhost:9200/$ES_INDEX"
-```
-
 To create an Elasticsearch index, you can use the Create Index API. Here's how to do it:
 Basic index creation:
 
 ```shell
-$ curl -X PUT $ES_URL
+$ curl -X PUT http://localhost:9200/customers
 
 {"acknowledged":true,"shards_acknowledged":true,"index":"customers"}
 ```
@@ -246,21 +238,16 @@ import argparse
 import json
 import os
 import requests
-import time
+import sys
 
 # Helper class to interact with Elasticsearch
 class Elasticsearch:
   def __init__(self, base_url):
     self.base_url = base_url
 
-  def upsert(self, index_name, document, doc_id=None):
+  def upsert(self, index_name, document):
     headers = {'Content-Type': 'application/json'}
-    
-    if doc_id:
-      url = f"{self.base_url}/{index_name}/_doc/{doc_id}"
-    else:
-      url = f"{self.base_url}/{index_name}/_doc"
-    
+    url = f"{self.base_url}/{index_name}/_doc"
     try:
       response = requests.post(url, data=json.dumps(document), headers=headers)
       response.raise_for_status()
@@ -268,21 +255,6 @@ class Elasticsearch:
     except requests.exceptions.RequestException as e:
       print(f"Error writing document to Elasticsearch: {e}")
       return None
-
-# Tail a file and yield new lines, similar to 'tail -f'.
-def tail_file(file_path, interval=1.0):
-  with open(file_path, 'r') as file:
-    # Move to the end of the file
-    file.seek(0, os.SEEK_END)
-    
-    while True:
-      # Read new lines
-      line = file.readline()
-      if line:
-        yield line.strip()
-      else:
-        # No new lines, wait before checking again
-        time.sleep(interval)
 
 # Process a single transaction
 def process_transaction(in_obj):
@@ -296,43 +268,70 @@ def process_transaction(in_obj):
     out_obj['old'] = {}
     for key, value in zip(in_obj['oldkeys']['keynames'], in_obj['oldkeys']['keyvalues']):
       out_obj['old'][key] = value
+  print(out_obj)
   return out_obj
 
 # Process a file of change transactions
-def process_file(es_url, file_path):
+def process_input(es_url):
   es = Elasticsearch(es_url)
-  for line in tail_file(file_path):
+  for line in sys.stdin:
     txs = json.loads(line)
     if txs['change'] == []:
       continue
     for tx in txs['change']:
       result = process_transaction(tx)
-      id = result['id'] if 'id' in result else None
-      es.upsert(result['table'], result, id)
+      es.upsert(result['table'], result)
 
 # Parse CLI arguments
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Description of your program")
-    parser.add_argument('-f', '--file', help='Input file name')
     parser.add_argument('-u', '--url', default='http://localhost:9200', help='Base URL for Elasticsearch')
     return parser.parse_args()
 
 def main():
     args = parse_arguments()
-    print(f'Processing transactions file {args.file}')
     print(f'Uploading transactions to {args.url}')
-    process_file(args.url, args.file)
+    process_input(args.url)
 
 if __name__ == "__main__":
     main()
 ```
 
 ```shell
-$ python process.py -f /stream/regresstion-slot.jsonl
+$ cat ./stream/regresstion-slot.jsonl | jq -c | python process.py
+```
+```json
+{'kind': 'insert', 'schema': 'inventory', 'table': 'customers', 'id': 1001, 'first_name': 'Sally', 'last_name': 'Thomas', 'email': 'sally.thomas@acme.com'}
+{'kind': 'insert', 'schema': 'inventory', 'table': 'customers', 'id': 1002, 'first_name': 'George', 'last_name': 'Bailey', 'email': 'gbailey@foobar.com'}
+{'kind': 'insert', 'schema': 'inventory', 'table': 'customers', 'id': 1003, 'first_name': 'Edward', 'last_name': 'Walker', 'email': 'ed@walker.com'}
+{'kind': 'insert', 'schema': 'inventory', 'table': 'customers', 'id': 1004, 'first_name': 'Anne', 'last_name': 'Kretchmar', 'email': 'annek@noanswer.org'}
+{'kind': 'insert', 'schema': 'inventory', 'table': 'customers', 'id': 1005, 'first_name': 'John', 'last_name': 'Doe', 'email': 'john.doe@example.com'}
+{'kind': 'update', 'schema': 'inventory', 'table': 'customers', 'id': 1005, 'first_name': 'Jane', 'last_name': 'Roe', 'email': 'john.doe@example.com', 'old': {'id': 1005, 'first_name': 'John', 'last_name': 'Doe', 'email': 'john.doe@example.com'}}
+{'kind': 'delete', 'schema': 'inventory', 'table': 'customers', 'old': {'id': 1005, 'first_name': 'Jane', 'last_name': 'Roe', 'email': 'john.doe@example.com'}}
 ```
 
 ```shell
 curl 'http://localhost:9200/customers/_search?pretty'
+```
+
+```json
+      {
+        "_index": "customers",
+        "_type": "_doc",
+        "_id": "Hl72PpIBc0uZl7MqeRNu",
+        "_score": 1,
+        "_source": {
+          "kind": "delete",
+          "schema": "inventory",
+          "table": "customers",
+          "old": {
+            "id": 1005,
+            "first_name": "Jane",
+            "last_name": "Roe",
+            "email": "john.doe@example.com"
+          }
+        }
+      }
 ```
 
 # Shut down the cluster
