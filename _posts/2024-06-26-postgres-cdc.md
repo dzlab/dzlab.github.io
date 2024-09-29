@@ -158,10 +158,6 @@ SELECT slot_name, plugin, slot_type, database, active, restart_lsn, confirmed_fl
 docker-compose exec db pg_recvlogical -d inventory -U postgres --slot regression_slot --start -o pretty-print=1 -f /stream/regresstion-slot.jsonl
 ```
 
-```
-pg_recvlogical -h pgserver.postgres.database.azure.com -U rachel@pgserver -d postgres --slot logical_slot --start -o pretty-print=1 -f –
-```
-
 
 ```shell
 $ docker-compose exec db psql -U postgres -d inventory
@@ -233,15 +229,51 @@ $ docker-compose exec db psql -U postgres -d inventory \
 
 ```shell
 ES_INDEX=customers
-ES_URL="http://localhost:9200/$ES_INDEX/_doc"
-tail -f stream/regresstion-slot.jsonl | \
-  curl -X POST $ES_URL -H "Content-Type: application/json" --data-binary @-
+ES_URL="http://localhost:9200/$ES_INDEX"
 ```
 
-End the application:
+To create an Elasticsearch index, you can use the Create Index API. Here's how to do it:
+Basic index creation:
+
+```shell
+$ curl -X PUT $ES_URL
+
+{"acknowledged":true,"shards_acknowledged":true,"index":"customers"}
+```
+
+```shell
+cat stream/regresstion-slot.jsonl | \
+  jq -c '. | select(.change | length > 0) | .' | \
+  curl -X POST $ES_URL/_doc -H "Content-Type: application/json" --data-binary @-
+```
+
+
+Let's break down the command:
+The echo command outputs the JSON object.
+The pipe (|) sends the output to curl.
+curl sends a POST request to the Elasticsearch update endpoint.
+-H "Content-Type: application/json" sets the content type header.
+--data-binary @- tells curl to read the request body from stdin.
+Customize the JSON object:
+Modify the JSON object to include the fields you want to upsert. The "doc_as_upsert": true flag tells Elasticsearch to perform an upsert operation.
+Adjust the Elasticsearch endpoint:
+Replace your_index with the name of your index and your_document_id with the ID of the document you want to upsert.
+Handle authentication:
+If your Elasticsearch instance requires authentication, add the appropriate credentials to the curl command.
+
+```shell
+curl 'http://localhost:9200/customers/_search?pretty'
+```
 
 # Shut down the cluster
 
+End the application:
+
+
 ```shell
-$ docker compose down
+$ docker-compose down
 ```
+
+Using filebeat
+- https://github.com/rmalchow/docker-json-filebeat-example
+- https://www.sarulabs.com/post/5/2019-08-12/sending-docker-logs-to-elasticsearch-and-kibana-with-filebeat.html
