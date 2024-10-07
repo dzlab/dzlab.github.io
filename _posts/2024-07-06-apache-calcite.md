@@ -19,8 +19,48 @@ Apache Calcite is used as a SQL interface by a lot of Data storage systems, espe
 
 In the article, we will see how to implement a custom Adapter for Apache Calcite to query a REST API with SQL. We will wrap the [';--have i been pwned?](https://haveibeenpwned.com/api/v2) REST API to query account breach data with SQL. [The complete source code can be found on GitHub](https://github.com/dzlab/snippets/tree/master/calcite-adapter).
 
+## Data
 
+[HaveIBeenPwned](https://haveibeenpwned.com/) is a free resource for one to quickly assess if they are at risk due to one of their an online account having been **pwned** (i.e. compromised) by a data breach.
+A **data breach** is an incident where a hacker illegally obtains data (e.g. personal account) from a system then released them to the public domain. HaveIBeenPwned collects, aggregates publicly leaked **data breaches**, and makes them searchable.
 
+HaveIBeenPwned provides an easy to use REST API to list data about breaches as well as the list of pwned accounts (email addresses and usernames).
+
+The base URL for this service when using version 2 of the API is as follows:
+
+```
+https://haveibeenpwned.com/api/v2/{service}/{parameter}
+```
+
+In our case, and for simplicity, we will only use the `/breaches` endpoint that returns information about public data breaches. The full URL for this service is [https://haveibeenpwned.com/api/v2/breaches](), it returns a list of JSON objects that look like the following example:
+
+```json
+  {
+    "Name": "Zurich",
+    "Title": "Zurich",
+    "Domain": "zurich.co.jp",
+    "BreachDate": "2023-01-08",
+    "AddedDate": "2023-01-22T22:30:56Z",
+    "ModifiedDate": "2023-01-22T22:30:56Z",
+    "PwnCount": 756737,
+    "Description": "In January 2023, <a href=\"https://therecord.media/millions-of-aflac-zurich-insurance-customers-in-japan-have-data-leaked-after-breach/\" target=\"_blank\" rel=\"noopener\">the Japanese arm of Zurich insurance suffered a data breach that exposed 2.6M customer records with over 756k unique email addresses</a>. The data was subsequently posted to a popular hacking forum and also included names, genders, dates of birth and details of insured vehicles. The data was provided to HIBP by a source who requested it be attributed to &quot;IntelBroker&quot;.",
+    "LogoPath": "https://haveibeenpwned.com/Content/Images/PwnedLogos/Zurich.png",
+    "DataClasses": [
+      "Dates of birth",
+      "Email addresses",
+      "Genders",
+      "Names",
+      "Vehicle details"
+    ],
+    "IsVerified": true,
+    "IsFabricated": false,
+    "IsSensitive": false,
+    "IsRetired": false,
+    "IsSpamList": false,
+    "IsMalware": false,
+    "IsSubscriptionFree": false
+  }
+```
 
 
 ## That's all folks
