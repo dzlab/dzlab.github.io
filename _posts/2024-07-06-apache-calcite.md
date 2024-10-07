@@ -62,6 +62,34 @@ In our case, and for simplicity, we will only use the `/breaches` endpoint that 
   }
 ```
 
+## Calcite Adapter
+
+![Apache Calcite Architecture](/assets/2024/07/20240706-calcite-architecture.svg)
+
+A schema is collection of schema and tables
+A schema can be arbitrary nested
+
+```java
+public interface Schema {
+
+    Table getTable(String name);
+    Set<String> getTableNames();
+    Schema getSubSchema(String name);
+    Set<String> getSubSchemaNames();
+}
+```
+
+A Table represents a single dataset
+Fields are defined by a `RelDataType`
+
+```java
+public interface Table {
+
+    RelDataType getRowType(RelDataTypeFactory typeFactory);
+    Statistic getStatistic();
+    Schema.TableType getJdbcTableType();
+}
+```
 
 ## That's all folks
 In this article, we saw how easy is it to build a new data Adapter for Apache Calcite in order to query random data systems with SQL.
