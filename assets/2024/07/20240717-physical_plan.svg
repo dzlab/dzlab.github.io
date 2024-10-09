@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="430pt" height="775pt" viewBox="0.00 0.00 430.49 774.70">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 770.7031)">
+<title>%0</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-770.7031 426.4923,-770.7031 426.4923,4 -4,4"/>
+<!-- EnumerableCalc\nexpr#0..16 = {inputs}\nC_NAME = $t1\nO_ORDERKEY = $t8\nO_ORDERDATE = $t12\n -->
+<g id="node1" class="node">
+<title>EnumerableCalc\nexpr#0..16 = {inputs}\nC_NAME = $t1\nO_ORDERKEY = $t8\nO_ORDERDATE = $t12\n</title>
+<ellipse fill="none" stroke="#000000" cx="211.5724" cy="-247.9615" rx="111.4496" ry="65.1077"/>
+<text text-anchor="middle" x="211.5724" y="-277.3615" font-family="Times,serif" font-size="14.00" fill="#000000">EnumerableCalc</text>
+<text text-anchor="middle" x="211.5724" y="-260.5615" font-family="Times,serif" font-size="14.00" fill="#000000">expr#0..16 = {inputs}</text>
+<text text-anchor="middle" x="211.5724" y="-243.7615" font-family="Times,serif" font-size="14.00" fill="#000000">C_NAME = $t1</text>
+<text text-anchor="middle" x="211.5724" y="-226.9615" font-family="Times,serif" font-size="14.00" fill="#000000">O_ORDERKEY = $t8</text>
+<text text-anchor="middle" x="211.5724" y="-210.1615" font-family="Times,serif" font-size="14.00" fill="#000000">O_ORDERDATE = $t12</text>
+</g>
+<!-- EnumerableSort\nsort0 = $0\nsort1 = $1\ndir0 = ASC\ndir1 = ASC\n -->
+<g id="node2" class="node">
+<title>EnumerableSort\nsort0 = $0\nsort1 = $1\ndir0 = ASC\ndir1 = ASC\n</title>
+<ellipse fill="none" stroke="#000000" cx="211.5724" cy="-65.0538" rx="75.7815" ry="65.1077"/>
+<text text-anchor="middle" x="211.5724" y="-94.4538" font-family="Times,serif" font-size="14.00" fill="#000000">EnumerableSort</text>
+<text text-anchor="middle" x="211.5724" y="-77.6538" font-family="Times,serif" font-size="14.00" fill="#000000">sort0 = $0</text>
+<text text-anchor="middle" x="211.5724" y="-60.8538" font-family="Times,serif" font-size="14.00" fill="#000000">sort1 = $1</text>
+<text text-anchor="middle" x="211.5724" y="-44.0538" font-family="Times,serif" font-size="14.00" fill="#000000">dir0 = ASC</text>
+<text text-anchor="middle" x="211.5724" y="-27.2538" font-family="Times,serif" font-size="14.00" fill="#000000">dir1 = ASC</text>
+</g>
+<!-- EnumerableCalc\nexpr#0..16 = {inputs}\nC_NAME = $t1\nO_ORDERKEY = $t8\nO_ORDERDATE = $t12\n&#45;&gt;EnumerableSort\nsort0 = $0\nsort1 = $1\ndir0 = ASC\ndir1 = ASC\n -->
+<g id="edge1" class="edge">
+<title>EnumerableCalc\nexpr#0..16 = {inputs}\nC_NAME = $t1\nO_ORDERKEY = $t8\nO_ORDERDATE = $t12\n-&gt;EnumerableSort\nsort0 = $0\nsort1 = $1\ndir0 = ASC\ndir1 = ASC\n</title>
+<path fill="none" stroke="#000000" d="M211.5724,-182.7023C211.5724,-168.9979 211.5724,-154.4364 211.5724,-140.3979"/>
+<polygon fill="#000000" stroke="#000000" points="215.0725,-140.2878 211.5724,-130.2879 208.0725,-140.2879 215.0725,-140.2878"/>
+<text text-anchor="middle" x="215.0724" y="-152.3076" font-family="Times,serif" font-size="14.00" fill="#000000">0</text>
+</g>
+<!-- EnumerableCalc\nexpr#0..16 = {inputs}\nexpr#17 = 3\nexpr#18 = &lt;($t0, $t17)\nproj#0..16 = {exprs}\n$condition = $t18 -->
+<g id="node3" class="node">
+<title>EnumerableCalc\nexpr#0..16 = {inputs}\nexpr#17 = 3\nexpr#18 = &lt;($t0, $t17)\nproj#0..16 = {exprs}\n$condition = $t18</title>
+<ellipse fill="none" stroke="#000000" cx="211.5724" cy="-442.7485" rx="101.8172" ry="76.8665"/>
+<text text-anchor="middle" x="211.5724" y="-480.5485" font-family="Times,serif" font-size="14.00" fill="#000000">EnumerableCalc</text>
+<text text-anchor="middle" x="211.5724" y="-463.7485" font-family="Times,serif" font-size="14.00" fill="#000000">expr#0..16 = {inputs}</text>
+<text text-anchor="middle" x="211.5724" y="-446.9485" font-family="Times,serif" font-size="14.00" fill="#000000">expr#17 = 3</text>
+<text text-anchor="middle" x="211.5724" y="-430.1485" font-family="Times,serif" font-size="14.00" fill="#000000">expr#18 = &lt;($t0, $t17)</text>
+<text text-anchor="middle" x="211.5724" y="-413.3485" font-family="Times,serif" font-size="14.00" fill="#000000">proj#0..16 = {exprs}</text>
+<text text-anchor="middle" x="211.5724" y="-396.5485" font-family="Times,serif" font-size="14.00" fill="#000000">$condition = $t18</text>
+</g>
+<!-- EnumerableCalc\nexpr#0..16 = {inputs}\nexpr#17 = 3\nexpr#18 = &lt;($t0, $t17)\nproj#0..16 = {exprs}\n$condition = $t18&#45;&gt;EnumerableCalc\nexpr#0..16 = {inputs}\nC_NAME = $t1\nO_ORDERKEY = $t8\nO_ORDERDATE = $t12\n -->
+<g id="edge2" class="edge">
+<title>EnumerableCalc\nexpr#0..16 = {inputs}\nexpr#17 = 3\nexpr#18 = &lt;($t0, $t17)\nproj#0..16 = {exprs}\n$condition = $t18-&gt;EnumerableCalc\nexpr#0..16 = {inputs}\nC_NAME = $t1\nO_ORDERKEY = $t8\nO_ORDERDATE = $t12\n</title>
+<path fill="none" stroke="#000000" d="M211.5724,-365.7635C211.5724,-351.7299 211.5724,-337.1044 211.5724,-323.1244"/>
+<polygon fill="#000000" stroke="#000000" points="215.0725,-323.0766 211.5724,-313.0766 208.0725,-323.0766 215.0725,-323.0766"/>
+<text text-anchor="middle" x="215.0724" y="-335.2153" font-family="Times,serif" font-size="14.00" fill="#000000">0</text>
+</g>
+<!-- EnumerableHashJoin\ncondition = =($0, $9)\njoinType = inner\n -->
+<g id="node4" class="node">
+<title>EnumerableHashJoin\ncondition = =($0, $9)\njoinType = inner\n</title>
+<ellipse fill="none" stroke="#000000" cx="211.5724" cy="-613.7768" rx="96.3288" ry="41.0911"/>
+<text text-anchor="middle" x="211.5724" y="-626.3768" font-family="Times,serif" font-size="14.00" fill="#000000">EnumerableHashJoin</text>
+<text text-anchor="middle" x="211.5724" y="-609.5768" font-family="Times,serif" font-size="14.00" fill="#000000">condition = =($0, $9)</text>
+<text text-anchor="middle" x="211.5724" y="-592.7768" font-family="Times,serif" font-size="14.00" fill="#000000">joinType = inner</text>
+</g>
+<!-- EnumerableHashJoin\ncondition = =($0, $9)\njoinType = inner\n&#45;&gt;EnumerableCalc\nexpr#0..16 = {inputs}\nexpr#17 = 3\nexpr#18 = &lt;($t0, $t17)\nproj#0..16 = {exprs}\n$condition = $t18 -->
+<g id="edge3" class="edge">
+<title>EnumerableHashJoin\ncondition = =($0, $9)\njoinType = inner\n-&gt;EnumerableCalc\nexpr#0..16 = {inputs}\nexpr#17 = 3\nexpr#18 = &lt;($t0, $t17)\nproj#0..16 = {exprs}\n$condition = $t18</title>
+<path fill="none" stroke="#000000" d="M211.5724,-572.3756C211.5724,-559.5238 211.5724,-544.8415 211.5724,-530.0867"/>
+<polygon fill="#000000" stroke="#000000" points="215.0725,-529.8818 211.5724,-519.8819 208.0725,-529.8819 215.0725,-529.8818"/>
+<text text-anchor="middle" x="215.0724" y="-541.8817" font-family="Times,serif" font-size="14.00" fill="#000000">0</text>
+</g>
+<!-- EnumerableTableScan\ntable = [CUSTOMER]\n -->
+<g id="node5" class="node">
+<title>EnumerableTableScan\ntable = [CUSTOMER]\n</title>
+<ellipse fill="none" stroke="#000000" cx="101.5724" cy="-737.2874" rx="101.6448" ry="29.3315"/>
+<text text-anchor="middle" x="101.5724" y="-741.4874" font-family="Times,serif" font-size="14.00" fill="#000000">EnumerableTableScan</text>
+<text text-anchor="middle" x="101.5724" y="-724.6874" font-family="Times,serif" font-size="14.00" fill="#000000">table = [CUSTOMER]</text>
+</g>
+<!-- EnumerableTableScan\ntable = [CUSTOMER]\n&#45;&gt;EnumerableHashJoin\ncondition = =($0, $9)\njoinType = inner\n -->
+<g id="edge4" class="edge">
+<title>EnumerableTableScan\ntable = [CUSTOMER]\n-&gt;EnumerableHashJoin\ncondition = =($0, $9)\njoinType = inner\n</title>
+<path fill="none" stroke="#000000" d="M127.085,-708.6412C139.8479,-694.3108 155.6183,-676.6033 170.0651,-660.3822"/>
+<polygon fill="#000000" stroke="#000000" points="172.9946,-662.3553 177.0318,-652.5598 167.7672,-657.6997 172.9946,-662.3553"/>
+<text text-anchor="middle" x="160.0724" y="-677.2718" font-family="Times,serif" font-size="14.00" fill="#000000">0</text>
+</g>
+<!-- EnumerableTableScan\ntable = [ORDERS]\n -->
+<g id="node6" class="node">
+<title>EnumerableTableScan\ntable = [ORDERS]\n</title>
+<ellipse fill="none" stroke="#000000" cx="321.5724" cy="-737.2874" rx="100.84" ry="29.3315"/>
+<text text-anchor="middle" x="321.5724" y="-741.4874" font-family="Times,serif" font-size="14.00" fill="#000000">EnumerableTableScan</text>
+<text text-anchor="middle" x="321.5724" y="-724.6874" font-family="Times,serif" font-size="14.00" fill="#000000">table = [ORDERS]</text>
+</g>
+<!-- EnumerableTableScan\ntable = [ORDERS]\n&#45;&gt;EnumerableHashJoin\ncondition = =($0, $9)\njoinType = inner\n -->
+<g id="edge5" class="edge">
+<title>EnumerableTableScan\ntable = [ORDERS]\n-&gt;EnumerableHashJoin\ncondition = =($0, $9)\njoinType = inner\n</title>
+<path fill="none" stroke="#000000" d="M296.0597,-708.6412C283.2968,-694.3108 267.5264,-676.6033 253.0796,-660.3822"/>
+<polygon fill="#000000" stroke="#000000" points="255.3775,-657.6997 246.1129,-652.5598 250.1501,-662.3553 255.3775,-657.6997"/>
+<text text-anchor="middle" x="280.0724" y="-677.2718" font-family="Times,serif" font-size="14.00" fill="#000000">1</text>
+</g>
+</g>
+</svg>
