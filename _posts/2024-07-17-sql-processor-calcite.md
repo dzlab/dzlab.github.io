@@ -187,10 +187,11 @@ Or generate a [Dotviz graph](graphviz.org) which would look like this:
 ![Physical Plan](/assets/2024/07/20240717-physical_plan.svg)
 
 ## Physical to Executable plan
+With the physical plan at hand we can now execute it.
+
+First, create simple data context that contains only schema information for similicity.
+
 ```java
-/**
- * A simple data context only with schema information.
- */
 private static final class SchemaOnlyDataContext implements DataContext {
   private final SchemaPlus schema;
 
@@ -215,23 +216,23 @@ private static final class SchemaOnlyDataContext implements DataContext {
   }
 }
 ```
-// TODO 18. Compile generated code and obtain the executable program
+
+Next, compile generated code and obtain the executable program
+
 ```java
 Bindable<Object[]> execPlan = EnumerableInterpretable.toBindable(new HashMap<>(), null, phyPlan, EnumerableRel.Prefer.ARRAY);
 ```
-// TODO 19. Run the program using a context simply providing access to the schema and print
-// results
+
+Finally, run the program using a context simply providing access to the schema and print the resulting rows:
+
 ```java
-long start = System.currentTimeMillis();
 for(Object[] row: execPlan.bind(new SchemaOnlyDataContext(schema))) {
   System.out.println(Arrays.toString(row));
 }
-long finish = System.currentTimeMillis();
-System.out.println("Elapsed time " + (finish - start) + "ms");
 ```
 
 
-
-
 ## That's all folks
+In this article, we saw in a step by step how to process a SQL query and execute it. Calcite can do these steps for us when we simply create a `CalciteConnection` as seen in a [previous article]({{ "database/2024/07/06/apache-calcite/" | absolute_url }}).
+
 I hope you enjoyed this article, feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc).
