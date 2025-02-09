@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: Ingesting Stocks historical data into Elasticsearch
-excerpt: Learn how to quickly setup an ELK-based stack to ingest stocks data.
+excerpt: Learn how to setup ELK with docker-compose and ingest stocks data into Elasticsearch.
 categories: monitoring
 tags: [docker,elastic,kibana]
 toc: true
@@ -14,6 +14,16 @@ img_excerpt:
 <img align="center" src="/assets/logos/kibana.svg" width="100" />
 <br/>
 
+For those seeking to gain a deeper understanding of market trends, economic fluctuations, and consumer behavior, historical stock data is a treasure trove of insights waiting to be unearthed.
+
+In this blog post, we'll explore how to ingest historical stock data into Elasticsearch. From data preparation to indexing, we'll delve into the steps required to harness the power of historical data and supercharge your analytics engine with actionable insights.
+
+## Infrastructure setup
+
+In this section, we'll dive into the different components of our architecture (Elasticsearch, Kibana, and our custom ingestion application), and how to brings them together in containerized environment using Docker-Compose.
+
+The directory structure of the application and the different files needed for the setup is as follows:
+
 ```
 ├── docker-compose.yml
 └── ingestr
@@ -23,7 +33,12 @@ img_excerpt:
     └── requirements.txt
 ```
 
-`docker-compose.yml`
+The following `docker-compose.yml` configuration file defines the relationships between the different services and networks:
+
+* Run a single-node Elasticsearch cluster reachable on port 9200 and with security enabled
+* Deploy Kibana alongside Elasticsearch for seamless data visualization and exploration. The server is availabe on port 5601, and will connect to Elasticsearch at http://elasticsearch:9200
+* Build and deploy our custom ingesting application, which will be responsible for pushing historical stock data into Elasticsearch. This containerized application will be built from the `Dockerfile` located under the `./ingestr` directory.
+* Setup networking using the `bridge` driver to connect all three services, allowing them to communicate seamlessly with each other.
 
 ```yaml
 version: '3.8'
@@ -72,7 +87,20 @@ networks:
     driver: bridge
 ```
 
-`Dockerfile`
+## Ingestion application
+
+### Containerization
+
+The following `Dockerfile` is used to build a container for running the ingestion application written in Python. Here's a step-by-step breakdown of what it does:
+
+* Installs pip and sets up a new user named "worker" with a home directory.
+* Sets up the `PATH` environment variable for the new user.
+* Copies and installs the required packages listed in `requirements.txt`.
+* Copies the application code into the container.
+* Sets the default command to run the `main.py` file.
+
+When you build this Dockerfile, it will create a container that can be started with the command `docker run -it <image_name>`, where `<image_name>` is the name given to the resulting image when building the Dockerfile.
+
 
 ```Dockerfile
 FROM python
@@ -94,7 +122,7 @@ COPY --chown=worker:worker . .
 CMD ["python", "main.py"]
 ```
 
-`requirements.txt`
+The depdencies of the application are defined in the `requirements.txt` file:
 
 ```
 requests_html
@@ -103,7 +131,16 @@ yahoo_fin
 elasticsearch[async]
 ```
 
-`main.py`
+### Application logic
+
+The following Python code snippet from the `main.py` file implements the ingestion application that feeds historical stock data from Yahoo Finance into Elasticsearch. The code is organized around the following business functionalities:
+
+* Yahoo Finance Data Retrieval: historical data are retrieved from Yahoo Finance using the `yahoo_fin` library. We fetch the list of tickers in the Dow Jones Industrial Average (Dow 30) and then iterates through each ticker to collect its corresponding historical data.
+
+* Interactions with Elasticsearch: Elasticsearch index creation using mapping from the `mappings.json` that defines the structure of the documents that will be indexed. Also, we define the ingestion method that uses Elasic asyncio python library to store stocks data.
+
+* Asyncio Integration: the application uses `asyncio` library to handle the different tasks concurrently, such as connecting to Elasticsearch, loading mappings, creating an index, and ingesting data.
+
 
 ```python
 import asyncio
@@ -166,7 +203,9 @@ except KeyboardInterrupt:
   pass
 ```
 
-`mappings.json`
+### Indexing stocks data
+
+The `mappings.json` JSON file defines the mapping definition for the stocks index. It specifies the structure of the documents with six fields: ticker, date, open, close, adjclose, high, low, and volume.
 
 ```json
 {
@@ -198,5 +237,7 @@ except KeyboardInterrupt:
   }
 }
 ```
+
+## That's all folks
 
 I hope you enjoyed this article, feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc).
