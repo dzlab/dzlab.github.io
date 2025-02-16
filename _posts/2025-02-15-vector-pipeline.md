@@ -6,7 +6,7 @@ excerpt: Learn how to build a data pipeline with Vector to ingest data from Kafk
 categories: monitoring
 tags: [docker,elastic,kibana]
 toc: true
-img_excerpt: 2025/02/20250215-vector-pipeline.svg
+img_excerpt: assets/logos/vector-by-datadog.svg
 ---
 
 <img align="center" src="/assets/logos/vector-by-datadog.svg" />
@@ -14,6 +14,7 @@ img_excerpt: 2025/02/20250215-vector-pipeline.svg
 
 
 
+![Vector architecture]({{ "/assets/2025/02/20250215-vector.svg" | absolute_url }})
 
 
 ## Infra setup
@@ -127,20 +128,45 @@ ssh -vNL 8686:localhost:8686 $LDAP_USERNAME@$DEV_HOME.meraki.com
 
 connecting to kafka https://www.baeldung.com/kafka-docker-connection
 
-```
-$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-console-producer --bootstrap-server kafka:9092 --topic stocks-xyz
-```
+List topics
 
 ```
-$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-console-consumer --bootstrap-server kafka:9092 --topic stocks-xyz --from-beginning
+$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-topics --bootstrap-server kafka:9092 --list
 
-{"ticker":"xyz","open":1.1,"close":1.2,"date":"2025-02-15"}
+logs-2025-02-15
+```
+
+Describe a topic
+
+```
+$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-topics --bootstrap-server kafka:9092 --describe --topic logs-2025-02-15
+
+Topic: logs-2025-02-15	TopicId: KS47H7xDRV2BhEI7CYyOOg	PartitionCount: 1	ReplicationFactor: 1	Configs: 
+	Topic: logs-2025-02-15	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: N/A	LastKnownElr: N/A
+```
+
+Manually publish messages to the topic
+
+```
+$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-console-producer --bootstrap-server kafka:9092 --topic logs-2025-02-15
+```
+
+Read published messages
+
+```
+$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-console-consumer --bootstrap-server kafka:9092 --topic logs-2025-02-15 --from-beginning
+
+{"appname":"BronzeGamer","facility":"audit","hostname":"for.yun","message":"We're gonna need a bigger boat","msgid":"ID897","procid":4423,"severity":"debug","timestamp":"2025-02-15T23:50:09.677Z","version":1}
 Processed a total of 1 messages
 ```
 
 ## Vector
 
 ![Vector pipeline]({{ "/assets/2025/02/20250215-vector-pipeline.svg" | absolute_url }})
+
+The Kafka topics names to read events from.
+
+Regular expression syntax is supported if the topic begins with ^.
 
 ```yaml
 # vector.yaml 
@@ -151,9 +177,11 @@ sources:
   kafka_in:
     type: "kafka"
     bootstrap_servers: "kafka:9092"
-    group_id: "stocks"
+    group_id: "logs"
     key_field: "message"
-    topics: ["stocks-*"]
+    topics: ["^logs-.+"]
+    metrics:
+      topic_lag_metric: true
 
 transforms:
   json_parse:
@@ -172,11 +200,11 @@ sinks:
     inputs:
       - json_parse
     endpoints: ["http://elasticsearch:9200"]
-    api_version: "v7"
-    mode: "bulk"
+    api_version: "auto"
+    mode: "data_stream"
     bulk:
-      action: "index"
-      index: "stocks-%Y-%m-%d"
+      action: "create"
+      index: "logs-%Y-%m-%d"
     compression: "none"
 ```
 
@@ -187,8 +215,10 @@ docker run \
   -p 8686:8686 \
   --name vector \
   --network vector_example_network \
-  timberio/vector:nightly-debian --verbose
+  timberio/vector:nightly-debian
 ```
+
+> Note: use the `--verbose` to get debug level logging
 
 Validate the target config, then exit
 
