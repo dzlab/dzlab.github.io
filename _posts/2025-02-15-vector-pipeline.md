@@ -195,10 +195,15 @@ transforms:
       . |= object(parsed) ?? {}
 
 sinks:
+  console_out:
+    inputs: ["remap_syslog"]
+    type: "console"
+    encoding:
+      codec: "json"
+
   elasticsearch_out:
     type: elasticsearch
-    inputs:
-      - json_parse
+    inputs: [ "remap_syslog" ]
     endpoints: ["http://elasticsearch:9200"]
     api_version: "auto"
     mode: "data_stream"
@@ -206,6 +211,14 @@ sinks:
       action: "create"
       index: "logs-%Y-%m-%d"
     compression: "none"
+
+  kafka_out:
+    type: "kafka"
+    inputs: [ "remap_syslog" ]
+    bootstrap_servers: "kafka:9092"
+    topic: "logs-%Y-%m-%d"
+    encoding:
+      codec: "json"
 ```
 
 ```
