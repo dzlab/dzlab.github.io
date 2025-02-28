@@ -174,25 +174,18 @@ api:
   enabled: true
 
 sources:
-  kafka_in:
-    type: "kafka"
-    bootstrap_servers: "kafka:9092"
-    group_id: "logs"
-    key_field: "message"
-    topics: ["^logs-.+"]
-    metrics:
-      topic_lag_metric: true
+  generate_syslog:
+    type: "demo_logs"
+    format: "syslog"
+    count: 50
 
 transforms:
-  json_parse:
+  remap_syslog:
+    inputs: [ "generate_syslog"]
     type: "remap"
-    inputs: ["kafka_in"]
     source: |
-      parsed, err = parse_json(.message)
-      if err != null {
-        log(err, level: "error")
-      }
-      . |= object(parsed) ?? {}
+      parsed = parse_syslog!(.message)
+      . = object(parsed)
 
 sinks:
   console_out:
@@ -202,15 +195,10 @@ sinks:
       codec: "json"
 
   elasticsearch_out:
-    type: elasticsearch
-    inputs: [ "remap_syslog" ]
+    type: "elasticsearch"
+    inputs: ["remap_syslog"]
+    healthcheck: false
     endpoints: ["http://elasticsearch:9200"]
-    api_version: "auto"
-    mode: "data_stream"
-    bulk:
-      action: "create"
-      index: "logs-%Y-%m-%d"
-    compression: "none"
 
   kafka_out:
     type: "kafka"
@@ -261,11 +249,11 @@ Output the topology as visual representation using the DOT language which can be
 $ docker exec -ti $(docker ps -aqf "name=vector") vector graph
 
 digraph {
-  "kafka_in" [shape="trapezium"]
-  "json_parse" [shape="diamond"]
-  "kafka_in" -> "json_parse"
+  "generate_syslog" [shape="trapezium"]
+  "remap_syslog" [shape="diamond"]
+  "generate_syslog" -> "remap_syslog"
   "elasticsearch_out" [shape="invtrapezium"]
-  "json_parse" -> "elasticsearch_out"
+  "remap_syslog" -> "elasticsearch_out"
 }
 ```
 
@@ -279,9 +267,174 @@ $ docker exec -ti $(docker ps -aqf "name=vector") vector tap
 2025-02-13T23:10:13.677283Z  INFO vector::app: Log level is enabled. level="info"
 [tap] Pattern '*' successfully matched.
 [tap] Warning: sink outputs cannot be tapped. Output pattern '*' matches sinks ["elasticsearch_out"]
+
+{"appname":"BronzeGamer","facility":"local4","hostname":"names.rsvp","message":"#hugops to everyone who has to deal with this","msgid":"ID347","procid":6651,"severity":"emerg","timestamp":"2025-02-28T00:08:10.006Z","version":2}
 ```
 
+```
+$ curl -s http://localhost:9200/_aliases | jq
+
+{
+  ...
+  "vector-2025.02.28": {
+    "aliases": {}
+  },
+  ...
+}
+```
+
+
+```
+$ curl -s http://localhost:9200/vector-2025.02.28 | jq
+
+{
+  "vector-2025.02.28": {
+    "aliases": {},
+    "mappings": {
+      "properties": {
+        "appname": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "facility": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "hostname": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "msgid": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "procid": {
+          "type": "long"
+        },
+        "severity": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "timestamp": {
+          "type": "date"
+        },
+        "version": {
+          "type": "long"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "routing": {
+          "allocation": {
+            "include": {
+              "_tier_preference": "data_content"
+            }
+          }
+        },
+        "number_of_shards": "1",
+        "provided_name": "vector-2025.02.28",
+        "creation_date": "1740701263010",
+        "number_of_replicas": "1",
+        "uuid": "GE9reUyzTSyS0W-og3YQ6g",
+        "version": {
+          "created": "7160399"
+        }
+      }
+    }
+  }
+}
+```
+
+```
+$ curl -s 'http://localhost:9200/vector-2025.02.28/_search?pretty=true&size=1'
+
+{
+  "took" : 1,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 50,
+      "relation" : "eq"
+    },
+    "max_score" : 1.0,
+    "hits" : [
+      {
+        "_index" : "vector-2025.02.28",
+        "_type" : "_doc",
+        "_id" : "Yo_hSZUBbMT2FeGGgyTf",
+        "_score" : 1.0,
+        "_source" : {
+          "appname" : "BryanHorsey",
+          "facility" : "uucp",
+          "hostname" : "random.helsinki",
+          "message" : "Pretty pretty pretty good",
+          "msgid" : "ID4",
+          "procid" : 4488,
+          "severity" : "notice",
+          "timestamp" : "2025-02-28T00:07:50.006Z",
+          "version" : 2
+        }
+      }
+    ]
+  }
+}
+```
 
 ```
 $ docker rm -f $(docker ps -aqf "name=vector")
+```
+
+```
+$ docker-compose down
+
+Stopping kafka         ... done
+Stopping kibana        ... done
+Stopping zookeeper     ... done
+Stopping elasticsearch ... done
+Removing kafka         ... done
+Removing kibana        ... done
+Removing zookeeper     ... done
+Removing elasticsearch ... done
+Removing network vector_example_network
 ```
