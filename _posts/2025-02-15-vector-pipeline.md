@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: Building data pipelines with Vector by Datadog
-excerpt: Learn how to build a data pipeline with Vector to ingest data from Kafka into Elasticsearch.
+excerpt: Learn how to build a data pipeline with Vector to ingest data into Elasticsearch.
 categories: monitoring
 tags: [docker,elastic,kibana]
 toc: true
@@ -13,11 +13,23 @@ img_excerpt: assets/logos/vector-by-datadog.svg
 <br/>
 
 
+[Vector](https://vector.dev/) is an open-source log aggregator developed by Datadog. Vector is a lightweight, exceptionally fast, and memory efficiency alternative to [Logstash](https://www.elastic.co/logstash). Vector makes it easy to build observability pipelines by seamlessly capturing logs from many sources, applying transformations, and routing to one of the many predefined sinks.
 
 ![Vector architecture]({{ "/assets/2025/02/20250215-vector.svg" | absolute_url }})
 
+In this article, we will explore how to leverage Vector to collect syslog messages, transform them into JSON events, then write to a Kafka topic as well as an Elasticsearch Index.
 
-## Infra setup
+
+## Infrastructure setup
+
+First, let's setup the infrastructure using Docker. The following Docker Compose file defines the setup with the following components:
+
+* **ZooKeeper** a coordination service for distributed systems, used by Kafka. It exposes port 2181 (mapped to host port 22181).
+* **Kafka** a distributed event streaming platform, exposes port 29092 (for host access)
+* **Elasticsearch**: a Search and analytics engine, available on port 9200
+* **Kibana** a Data visualization dashboard for Elasticsearch, available on port 5601
+
+Additionally, all services are connected through a custom Docker network called.
 
 ```yaml
 # docker-compose.yaml
@@ -79,6 +91,8 @@ networks:
     name: vector_example_network
 ```
 
+We can start the infrastructure as follows:
+
 ```
 $ docker-compose up -d
 
@@ -102,7 +116,7 @@ kibana          /bin/tini -- /usr/local/bi ...   Up      0.0.0.0:5601->5601/tcp,
 zookeeper       /etc/confluent/docker/run        Up      0.0.0.0:22181->2181/tcp,:::22181->2181/tcp, 2888/tcp, 3888/tcp
 ```
 
-Check all ports are open
+Another check to perform before moving further, is to verify that all exposed ports are open
 
 ```
 $ nc -zv localhost 22181
@@ -116,48 +130,6 @@ Connection to localhost 9200 port [tcp/*] succeeded!
 
 $ nc -zv localhost 5601
 Connection to localhost 5601 port [tcp/*] succeeded!
-```
-
-
-ssh -vNL 5601:localhost:5601 $LDAP_USERNAME@$DEV_HOME.meraki.com
-
-
-ssh -vNL 8686:localhost:8686 $LDAP_USERNAME@$DEV_HOME.meraki.com
-
-### Kafka
-
-connecting to kafka https://www.baeldung.com/kafka-docker-connection
-
-List topics
-
-```
-$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-topics --bootstrap-server kafka:9092 --list
-
-logs-2025-02-15
-```
-
-Describe a topic
-
-```
-$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-topics --bootstrap-server kafka:9092 --describe --topic logs-2025-02-15
-
-Topic: logs-2025-02-15	TopicId: KS47H7xDRV2BhEI7CYyOOg	PartitionCount: 1	ReplicationFactor: 1	Configs: 
-	Topic: logs-2025-02-15	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: N/A	LastKnownElr: N/A
-```
-
-Manually publish messages to the topic
-
-```
-$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-console-producer --bootstrap-server kafka:9092 --topic logs-2025-02-15
-```
-
-Read published messages
-
-```
-$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-console-consumer --bootstrap-server kafka:9092 --topic logs-2025-02-15 --from-beginning
-
-{"appname":"BronzeGamer","facility":"audit","hostname":"for.yun","message":"We're gonna need a bigger boat","msgid":"ID897","procid":4423,"severity":"debug","timestamp":"2025-02-15T23:50:09.677Z","version":1}
-Processed a total of 1 messages
 ```
 
 ## Vector
@@ -270,6 +242,44 @@ $ docker exec -ti $(docker ps -aqf "name=vector") vector tap
 
 {"appname":"BronzeGamer","facility":"local4","hostname":"names.rsvp","message":"#hugops to everyone who has to deal with this","msgid":"ID347","procid":6651,"severity":"emerg","timestamp":"2025-02-28T00:08:10.006Z","version":2}
 ```
+
+## Kafka
+
+connecting to kafka https://www.baeldung.com/kafka-docker-connection
+
+List topics
+
+```
+$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-topics --bootstrap-server kafka:9092 --list
+
+logs-2025-02-15
+```
+
+Describe a topic
+
+```
+$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-topics --bootstrap-server kafka:9092 --describe --topic logs-2025-02-15
+
+Topic: logs-2025-02-15	TopicId: KS47H7xDRV2BhEI7CYyOOg	PartitionCount: 1	ReplicationFactor: 1	Configs: 
+	Topic: logs-2025-02-15	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: N/A	LastKnownElr: N/A
+```
+
+Manually publish messages to the topic
+
+```
+$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-console-producer --bootstrap-server kafka:9092 --topic logs-2025-02-15
+```
+
+Read published messages
+
+```
+$ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-console-consumer --bootstrap-server kafka:9092 --topic logs-2025-02-15 --from-beginning
+
+{"appname":"BronzeGamer","facility":"audit","hostname":"for.yun","message":"We're gonna need a bigger boat","msgid":"ID897","procid":4423,"severity":"debug","timestamp":"2025-02-15T23:50:09.677Z","version":1}
+Processed a total of 1 messages
+```
+
+## Elasticsearch
 
 ```
 $ curl -s http://localhost:9200/_aliases | jq
@@ -438,3 +448,7 @@ Removing zookeeper     ... done
 Removing elasticsearch ... done
 Removing network vector_example_network
 ```
+
+## That's all folks
+
+I hope you enjoyed this article, feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc).
