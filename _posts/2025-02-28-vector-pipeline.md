@@ -6,10 +6,10 @@ excerpt: Learn how to build a data pipeline with Vector to ingest data into Elas
 categories: monitoring
 tags: [docker,elastic,kibana]
 toc: true
-img_excerpt: assets/logos/vector-by-datadog.svg
+img_excerpt: assets/2025/02/20250215-vector-pipeline.svg
 ---
 
-<img align="center" src="/assets/logos/vector-by-datadog.svg" />
+<img align="center" src="/assets/logos/vector-by-datadog.svg" width="100" />
 <br/>
 
 
