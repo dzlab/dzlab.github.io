@@ -133,12 +133,16 @@ Connection to localhost 5601 port [tcp/*] succeeded!
 ```
 
 ## Vector
+In this section, we will build the data processing pipeline for our log data, specifically using Vector, which is a high-performance observability data pipeline tool. Our pipeline will generate few samples of syslog data, apply some transformations, then send the processed data to selected destinations.
 
 ![Vector pipeline]({{ "/assets/2025/02/20250215-vector-pipeline.svg" | absolute_url }})
 
-The Kafka topics names to read events from.
+The structure of a our Vector pipeline as defined in the below YAML file, is as follows:
 
-Regular expression syntax is supported if the topic begins with ^.
+- **Sources**: defines the input data origin. In our case, we will simply generate sample syslog data.
+- **Transforms**: defines a step called `remap_syslog` to parse the syslog-formatted messages into structured data, then extract few fields like timestamp, severity, facility, etc.
+- **Sinks**: defines the output of the pipeline; we use Console Output to monitor in real-time the output of the pipeline. We also forward the data for storage into Elasticsearch and Kafka.
+
 
 ```yaml
 # vector.yaml 
@@ -181,6 +185,8 @@ sinks:
       codec: "json"
 ```
 
+Now we can start the Vector service and pass in the YAML file containing the pipeline definition
+
 ```
 docker run \
   -d \
@@ -205,11 +211,13 @@ $ docker exec -ti $(docker ps -aqf "name=vector") vector validate
                            Validated
 ```
 
+Check the logs from the container running Vector to make sure everything is running correctly:
+
 ```
 docker logs -f $(docker ps -aqf "name=vector")
 ```
 
-Display topology and metrics in the console, for a local or remote Vector instance
+Display Vector's metrics in the console
 
 ```
 $ docker exec -ti $(docker ps -aqf "name=vector") vector top
@@ -229,9 +237,7 @@ digraph {
 }
 ```
 
-
-
-Observe output log events from source or transform components. Logs are sampled at a specified interval
+Also, we can observe output log events from the source or transform components:
 
 ```
 $ docker exec -ti $(docker ps -aqf "name=vector") vector tap
@@ -243,11 +249,8 @@ $ docker exec -ti $(docker ps -aqf "name=vector") vector tap
 {"appname":"BronzeGamer","facility":"local4","hostname":"names.rsvp","message":"#hugops to everyone who has to deal with this","msgid":"ID347","procid":6651,"severity":"emerg","timestamp":"2025-02-28T00:08:10.006Z","version":2}
 ```
 
-## Kafka
-
-connecting to kafka https://www.baeldung.com/kafka-docker-connection
-
-List topics
+## Kafka setup
+Our Vector pipeline will forward message to a Kafka topic, we can list topics to verify that our topic for receiving events:
 
 ```
 $ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-topics --bootstrap-server kafka:9092 --list
@@ -255,7 +258,7 @@ $ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bi
 logs-2025-02-15
 ```
 
-Describe a topic
+We can also list more information about the topic created by Vector:
 
 ```
 $ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-topics --bootstrap-server kafka:9092 --describe --topic logs-2025-02-15
@@ -264,13 +267,13 @@ Topic: logs-2025-02-15	TopicId: KS47H7xDRV2BhEI7CYyOOg	PartitionCount: 1	Replica
 	Topic: logs-2025-02-15	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: N/A	LastKnownElr: N/A
 ```
 
-Manually publish messages to the topic
+Optionally publish messages to the topic manually for testing:
 
 ```
 $ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-console-producer --bootstrap-server kafka:9092 --topic logs-2025-02-15
 ```
 
-Read published messages
+Read the published messages as they are pushed to Kafka
 
 ```
 $ docker run -it --rm --network vector_example_network confluentinc/cp-kafka /bin/kafka-console-consumer --bootstrap-server kafka:9092 --topic logs-2025-02-15 --from-beginning
@@ -280,6 +283,8 @@ Processed a total of 1 messages
 ```
 
 ## Elasticsearch
+
+Elasticsearch is another destination for the logs shipped by Vector. We can list the indices and check that we have one created by Vector:
 
 ```
 $ curl -s http://localhost:9200/_aliases | jq
@@ -293,6 +298,7 @@ $ curl -s http://localhost:9200/_aliases | jq
 }
 ```
 
+We can check the structure of the documents that will be sent by Vector
 
 ```
 $ curl -s http://localhost:9200/vector-2025.02.28 | jq
@@ -390,6 +396,8 @@ $ curl -s http://localhost:9200/vector-2025.02.28 | jq
 }
 ```
 
+We can view the documents inserted in this index by Vector
+
 ```
 $ curl -s 'http://localhost:9200/vector-2025.02.28/_search?pretty=true&size=1'
 
@@ -431,9 +439,14 @@ $ curl -s 'http://localhost:9200/vector-2025.02.28/_search?pretty=true&size=1'
 }
 ```
 
+## Wrapping up
+Stop the Vector container
+
 ```
 $ docker rm -f $(docker ps -aqf "name=vector")
 ```
+
+And tear down the infrastucture previously setup with Docker Compose:
 
 ```
 $ docker-compose down
