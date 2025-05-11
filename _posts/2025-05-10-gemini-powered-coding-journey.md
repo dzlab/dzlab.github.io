@@ -7,11 +7,11 @@ categories: ai
 tags: [gemini,elastic]
 toc: true
 img_excerpt:
+mermaid: true
 ---
 
 
-![The Power of AI-Assisted Development]({{ "/assets/2025/05/20250510-ai-assisted-development.png" | absolute_url }})
-
+![The Power of AI-Assisted Development]({{ "/assets/2025/05/20250510-ai-assisted-development.png" | absolute_url }}){: .center-image }
 
 Tools available to Software developers are constantly evolving and changing how applications are developed. AI coding assistants rapidly become an indispensable tool for developping. In fact, the introduction of AI assistants created a new discipline widely known these days as "vibe coding". It's a dynamic, collaborative session where a developer and an AI assistant collaborate to build an application, with the AI providing suggestions, generating code, and helping navigate complexities.
 
