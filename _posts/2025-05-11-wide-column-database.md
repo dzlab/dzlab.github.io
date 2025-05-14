@@ -79,7 +79,7 @@ b'user_profile\x00user123\x00email\x00\xff\xff\xfey\x1a\x92\x8f\xff'
 
 ### Python Implementation
 
-The full implementation of this Datastore can be found at this [GitHub KVWC project](https://github.com/dzlab/vibecoding/tree/main/kvwc), specifically in the [WideColumnDB](https://github.com/dzlab/vibecoding/blob/main/kvwc/wide_column_db.py) class.
+The full implementation of this Datastore can be found at this [GitHub KVWC project](https://github.com/dzlab/kvwc), specifically in the [WideColumnDB](https://github.com/dzlab/vibecoding/blob/main/kvwc/wide_column_db.py) class.
 
 Here are some key points from this implementation:
 
