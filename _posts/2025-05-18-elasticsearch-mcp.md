@@ -9,7 +9,9 @@ toc: true
 img_excerpt:
 ---
 
-The integration between AI agents and assistants like Claude Desktop and external data sources represents one of the most powerful capabilities in modern AI application development. In this blog post, we explore how to implement a Model Context Protocol (MCP) server for Elasticsearch that enables Claude Desktop (or any AI Agent) to directly query and analyze data from an Elasticsearch cluster.
+Large Language Models (LLMs) are getting better every day at understanding all sorts of data, but they still suffer from knowledge cut-off when dealing with data that were not part of their pre-training. By integrating LLMs with external systems and knowledge bases, LLMs could achieve their true potential as they allow users to query and analyze complex data with natural conversations. [Model Context Protol (MCP)](https://modelcontextprotocol.io/) is one way of integrating LLMs and AI assistants like Claude Desktop with external data sources. 
+
+In this blog post, we explore how to implement an MCP server for Elasticsearch that enables Claude Desktop (or any AI Agent) to directly query and analyze data from an Elasticsearch cluster.
 
 ## What is MCP?
 
