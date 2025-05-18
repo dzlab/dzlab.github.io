@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: Building an Elasticsearch MCP Server for AI agents
+title: Integrating Elasticsearch with AI agents through Model Context Protocol
 excerpt: Building an Elasticsearch MCP Server for AI agents like Claude Desktop
 categories: genai
 tags: [elasticsearch,mcp]
