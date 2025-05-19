@@ -11,7 +11,7 @@ img_excerpt:
 
 Large Language Models (LLMs) are getting better every day at understanding all sorts of data, but they still suffer from knowledge cut-off when dealing with data that were not part of their pre-training. By integrating LLMs with external systems and knowledge bases, LLMs could achieve their true potential as they allow users to query and analyze complex data with natural conversations. [Model Context Protol (MCP)](https://modelcontextprotocol.io/) is one way of enable LLMs and AI assistants like Claude Desktop to perform actions, query data, and leverage the capabilities of other applications.
 
-In this blog post, we explore how to implement in Python using the `fastmcp` library an MCP server for Elasticsearch that enables Claude Desktop (or any AI Agent) to directly query and analyze data from an Elasticsearch cluster. We'll then see how to configure Claude Desktop to use this server.
+In this blog post, we explore how to implement in Python using the `fastmcp` library an MCP server for Elasticsearch that enables Claude Desktop (or any AI Agent) to directly query and analyze data from an Elasticsearch cluster. We'll then see how to configure Claude Desktop to use this server. Full source code can be found at [GitHub](https://github.com/dzlab/snippets/tree/master/elasticsearch_mcp).
 
 ## What is MCP?
 
@@ -89,7 +89,7 @@ ES_PASSWORD=your_password
 ES_CA_CERT=/path/to/http_ca.crt # Optional, for HTTPS verification
 ```
 
-Next, in our python code we laod environment variables from `.env` and then create an Elasticsearch client instance with one of the following authentication methods:
+Next, in our python code we load environment variables from `.env` and then create an Elasticsearch client instance with one of the following authentication methods:
 1. API key authentication
 2. Username/password authentication
 3. No authentication for local development
@@ -226,12 +226,21 @@ This configuration tells Claude Desktop how to launch the Elasticsearch MCP serv
 2. It specifies the working directory where the server code is located
 3. It runs the `server.py` script
 
+After editing the config file, restart Claude Desktop app and check that the new MCP server connected was connected successfully as illustrated in the following screenshot:
+
+![MCP server connected]({{ "/assets/2025/05/20250518-claude-mcp-server-connected.png" | absolute_url }}){: .center-image }
+
+If case of connection issues, you can check the logs of the MCP server
+
+```shell
+tail -n 20 -f ~/Library/Logs/Claude/mcp-server-ElasticsearchServer.log
+```
 
 ### Using the Elasticsearch MCP Server with Claude
 
 With our MCP server implemented and Claude Desktop configured, we can now interact with our Elasticsearch cluster directly from Claude. For this, simply launch Claude Desktop and start a new conversation, that's it.
 
-We ask Claude questions about our Elasticsearch cluster and it will use the `list_indices`, `get_mappings`, or `search` tools accordingly to fulfill the requests.
+We can ask Claude questions about our Elasticsearch cluster and it will use the `list_indices`, `get_mappings`, or `search` tools accordingly to fulfill the requests.
 
 Here are few questions and answers:
 
@@ -276,6 +285,10 @@ This appears to be an index storing Hacker News posts along with their associate
 
 Would you like me to show you how to query this data in a specific way?
 ```
+
+> Notes: Claude Desktop will ask confirmation before using external tools as illustrated below
+
+![Claude confirmation dialog for using external tools]({{ "/assets/2025/05/20250518-claude-confirmation.png" | absolute_url }}){: .center-image }
 
 
 ## Conclusion
