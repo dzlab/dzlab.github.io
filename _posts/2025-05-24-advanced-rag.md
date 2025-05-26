@@ -184,10 +184,11 @@ The following visualizations highlight why simply picking the top-k nearest neig
 
 Visualizations like these highlight why simply picking the top-k nearest neighbors isn't always optimal.
 
-## Boosting Retrieval: Query Expansion Techniques
-To combat these issues, the notebook explores query expansion:
+## Improving the Query Itself: Query Expansion Techniques
+One powerful approach is to use an LLM to improve the user's initial query before sending it to the retrieval system. This section highlights two main techniques for this:
 
-1. Expansion with Generated Answers (HyDE-like approach): The idea here is to generate a hypothetical answer to the user's query using an LLM. This hypothetical answer, rich in relevant keywords and concepts, is then concatenated with the original query. The combined text is embedded and used for retrieval. This often helps bridge the semantic gap between the query and the actual documents.
+### 1. Expansion with Generated Answers (HyDE-like approach):
+The idea here is to generate a hypothetical answer to the user's query using an LLM. This hypothetical answer, rich in relevant keywords and concepts, is then concatenated with the original query, creating a richer input. The combined text is embedded and used for retrieval. This often helps bridge the semantic gap between the query and the actual documents. As the retrieval system is guided to find documents that don't just discuss the topic but actually *look like* they contain an answer.
 
 ```python
 @lru_cache(maxsize=128)
@@ -213,9 +214,14 @@ Provide an example answer to the given question, that might be found in a docume
 # results = chroma_collection.query(query_texts=joint_query, n_results=5, include=['documents'])
 ```
 
-The UMAP plots in the notebook would show how this joint_query embedding often shifts closer to relevant document clusters.
+The following UMAP plots show how this combined input (user query with a synthetic answer) embeddings often shifts closer to relevant document clusters.
 
-2. Expansion with Multiple Queries: Instead of one hypothetical answer, we can generate several related sub-queries. Each of these (original + augmented queries) is then used to retrieve documents. The results are pooled, deduplicated, and then re-ranked.
+![Query Expansion with Generated Answers]({{ "/assets/2025/05/20250524-Expansion-with-Generated-Answers.png" | absolute_url }}){: .center-image }
+
+
+### 2. Expansion with Multiple Queries:
+Instead of one hypothetical answer, we can generate several *related* questions based on the original query. Each of these (original + augmented queries) is then used to retrieve documents. The results are pooled, deduplicated, and then re-ranked.
+This expands the search to cover different facets or re-wordings of the user's need, potentially retrieving relevant information from various parts of the embedding space that a single query might miss.
 
 ```python
 @lru_cache(maxsize=128)
@@ -244,6 +250,11 @@ Question: {query}
 # # ... then deduplicate and re-rank
 
 ```
+
+The following UMAP plots show how this combined input (user query with sub-queries) embeddings often shifts closer to relevant document clusters.
+
+![Expansion with Multiple Queries]({{ "/assets/2025/05/20250524-Expansion-with-Multiple-Queries.png" | absolute_url }}){: .center-image }
+
 
 ## Refining Results: Cross-Encoder Re-ranking
 Retrieving a larger set of candidate documents (either through basic search or query expansion) is often followed by a re-ranking step. The notebook introduces cross-encoders for this:
