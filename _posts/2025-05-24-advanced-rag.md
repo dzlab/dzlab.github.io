@@ -14,7 +14,8 @@ Retrieval Augmented Generation (RAG) has become a cornerstone for building power
 At its heart, RAG relies on vector databases as a knowledge source, storing information as embeddings (i.e. numerical vectors) that represent the semantic meaning of text, images, or other data types in a high-dimensional space. These embeddings are used to query and retrieve relevant information before generating a response from the LLM, improving the model's ability to provide contextually accurate answers.
 
 While basic vector search with embeddings is a great starting point, we often encounter scenarios where it falls short. It tends to find documents that discuss similar *topics* as the query, but don't necessarily contain the direct *answer* needed. This can lead to the LLM receiving irrelevant information, known as "distractors," which can degrade the quality of the generated response and make debugging difficult.
-This blog post, explores how we can enhance a RAG pipelines using query expansion and re-ranking, with practical examples using ChromaDB and Google's Generative AI models.
+
+This blog post, explores how we can enhance a RAG pipelines using query expansion and re-ranking, with practical examples using ChromaDB and Google's Generative AI models. The notebook with implementation can be found [here](https://github.com/dzlab/deeplearning.ai/blob/main/2024/01/AdvancedRetrievalforAIwithChroma/Query_Expansion.ipynb).
 
 ## The Foundation: Embeddings-Based Retrieval
 
@@ -142,15 +143,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Assuming 'embeddings' is a list/array of all document embeddings from chroma_collection.get()
-# umap_transform = umap.UMAP(random_state=0, transform_seed=0).fit(embeddings)
+umap_transform = umap.UMAP(random_state=0, transform_seed=0).fit(embeddings)
 
-# def project_embeddings(embeddings_list, umap_model):
-#   umap_embeddings = np.empty((len(embeddings_list), 2))
-#   for i, embedding in enumerate(tqdm(embeddings_list)):
-#     umap_embeddings[i] = umap_model.transform([embedding])
-#   return umap_embeddings
+def project_embeddings(embeddings_list, umap_model):
+  umap_embeddings = np.empty((len(embeddings_list), 2))
+  for i, embedding in enumerate(tqdm(embeddings_list)):
+    umap_embeddings[i] = umap_model.transform([embedding])
+  return umap_embeddings
 
-# projected_dataset_embeddings = project_embeddings(embeddings, umap_transform)
+projected_dataset_embeddings = project_embeddings(embeddings, umap_transform)
 
 # Plotting function
 def plot_retrieval(query, projected_dataset_embeddings, umap_transform, chroma_collection, embedding_function):
