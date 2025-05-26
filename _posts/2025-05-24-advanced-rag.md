@@ -15,17 +15,17 @@ Retrieval Augmented Generation (RAG) has become a cornerstone for building power
 
 At its heart, RAG relies on vector databases as a knowledge source, storing information as embeddings (i.e. numerical vectors) that represent the semantic meaning of text, images, or other data types in a high-dimensional space. These embeddings are used to query and retrieve relevant information before generating a response from the LLM, improving the model's ability to provide contextually accurate answers.
 
-While basic vector search with embeddings is a great starting point, we often encounter scenarios where it falls short. This blog post, explores how we can enhance a RAG pipelines using query expansion and re-ranking, with practical examples using ChromaDB and Google's Generative AI models.
-
-
-The journey begins with a common RAG setup: ingesting a document (in this case, Cisco's 2023 Annual Report), splitting it into manageable chunks, embedding these chunks, and storing them in a vector database like ChromaDB.
+While basic vector search with embeddings is a great starting point, we often encounter scenarios where it falls short. It tends to find documents that discuss similar *topics* as the query, but don't necessarily contain the direct *answer* needed. This can lead to the LLM receiving irrelevant information, known as "distractors," which can degrade the quality of the generated response and make debugging difficult.
+This blog post, explores how we can enhance a RAG pipelines using query expansion and re-ranking, with practical examples using ChromaDB and Google's Generative AI models.
 
 ## The Foundation: Embeddings-Based Retrieval
 
+Many teams start with simple retrieval methods, often relying on semantic similarity or basic embeddings. The common workflow involves ingesting documents, splitting them into manageable chunks, embedding these chunks, and storing them in a vector database like ChromaDB. When a user submits a query, this get embed with same way as the chunks were embedded. Then finding documents with the most similar embeddings (nearest neighbors), and feeding those documents as context to the LLM.
 
-First, let's quickly start with a basic RAG pipeline:
+Let's build this basic RAG pipeline:
 
-1. Document Loading & Preprocessing: A PDF document is loaded, and its text is extracted. This raw text is then split into smaller, more manageable chunks. The notebook uses both RecursiveCharacterTextSplitter and SentenceTransformersTokenTextSplitter to illustrate different approaches to chunking.
+### 1. Document Loading & Preprocessing:
+We will load a PDF document, and extract its text content. The raw text is then split into smaller, more manageable chunks. We use both `RecursiveCharacterTextSplitter` and `SentenceTransformersTokenTextSplitter` to for chunking.
 
 ```python
 from pypdf import PdfReader
@@ -52,7 +52,8 @@ for text in tqdm(character_split_texts):
   token_split_texts += token_splitter.split_text(text)
 ```
 
-2. Embedding & Indexing: These text chunks are then converted into dense vector embeddings using a sentence transformer model. ChromaDB is used as the vector store, with SentenceTransformerEmbeddingFunction handling the embedding process.
+### 2. Embedding & Indexing:
+The text chunks are then converted into dense vector embeddings using a sentence transformer model. [ChromaDB](https://www.trychroma.com/) is used as the vector store, with `SentenceTransformerEmbeddingFunction` handling the embedding process.
 
 ```python
 import chromadb
@@ -71,7 +72,8 @@ print("Total indexed documents", chroma_collection.count())
 
 ```
 
-3. Retrieval & Generation: When a user query comes in, it's embedded, and ChromaDB is queried to find the most similar document chunks. These retrieved chunks, along with the original query, are then passed to an LLM (like Google's PaLM or Gemini) to generate an answer.
+### 3. Retrieval & Generation:
+When a user submits a query, we embed it, and ChromaDB is queried to find the most similar document chunks. These retrieved chunks, along with the original query, are then passed to an LLM (like Google's Gemini) to generate an answer.
 
 ```python
 import os
@@ -115,13 +117,28 @@ Answer the user's question using only this information.
 # print(answer)
 ```
 
-## When Simple Vector Search Stumbles: Visualizing Embeddings
-The notebook cleverly uses UMAP (Uniform Manifold Approximation and Projection) to visualize the document embeddings in a 2D space. This helps us understand the "shape" of our data and identify potential pitfalls:
+## When Simple Vector Search Stumbles
+
+### Limitations
+While finding documents with similar embeddings seems intuitive, simple vector search based on a general-purpose embedding model isn't always sufficient for effective RAG. The core issue is that semantic similarity in a high-dimensional embedding space, derived from a model trained on broad language patterns, doesn't always equate to *relevancy* for a specific user query or task.
+
+Here's why simple vector search can stumble:
+
+*   **Topical Similarity vs. Direct Answers:** Embedding models are great at capturing the overall meaning or topic of a document chunk and a query. However, a query might be about a very specific fact or detail. Simple semantic similarity might retrieve documents that talk extensively about the topic but don't contain the precise piece of information the user needs.
+*   **Lack of Task-Specific Understanding:** The embedding model is trained generally and doesn't inherently understand the specific task the RAG system is trying to accomplish with the retrieved documents (e.g., answering a financial question vs. summarizing a technical paper). The "nearest" neighbors in the general embedding space might not be the most useful for the particular query's intent.
+*   **The Problem of Distractors:** For many queries, especially those that are ambiguous, very general, or completely irrelevant to the document set, simple vector search will still return the "nearest" documents. These results are often irrelevant to the query and are referred to as **distractors**.
+*   **Impact of Distractors on LLMs:** Passing distractors to the LLM as context can significantly degrade the quality of the generated response. The LLM might get "distracted" by the irrelevant information, leading to incorrect, nonsensical, or incomplete answers. Diagnosing and debugging these issues caused by distractors can be challenging.
+*   **Geometric Distribution:** Queries can land in different parts of the embedding space relative to the data points. Queries that fall outside dense clusters of relevant information might retrieve documents that are geometrically "nearest" but are spread out and less cohesive in terms of specific relevancy. Conversely, even irrelevant queries will return documents based on proximity in the embedding space, resulting in a context window filled entirely with distractors.
+
+These limitations highlight the need for more sophisticated techniques that can refine the query, re-evaluate the retrieved documents, or adapt the embedding space itself to better align with the specific task and user intent.
+
+### Visualizing Embeddings
+To better understand the "shape" of the data (user query vs stored documents) and identify potential pitfalls, we can use UMAP (Uniform Manifold Approximation and Projection) to visualize the embeddings in a 2D space. This projection will also help us understand:
 
 - Sparse Regions: Queries might fall into areas of the embedding space where relevant documents are scarce.
 - Semantic Ambiguity: A query might be semantically close to irrelevant documents if its embedding isn't precise enough or if the document embeddings themselves aren't well-separated.
 
-```pyhton
+```python
 import umap
 import numpy as np
 import matplotlib.pyplot as plt
@@ -137,27 +154,33 @@ import matplotlib.pyplot as plt
 
 # projected_dataset_embeddings = project_embeddings(embeddings, umap_transform)
 
-# # Plotting function (simplified from notebook)
-# def plot_retrieval(query, projected_dataset_embeddings, umap_transform, chroma_collection, embedding_function):
-#   query_embedding = embedding_function([query])[0]
-#   results = chroma_collection.query(query_texts=[query], n_results=5, include=['embeddings'])
-#   retrieved_embeddings = results['embeddings'][0]
+# Plotting function
+def plot_retrieval(query, projected_dataset_embeddings, umap_transform, chroma_collection, embedding_function):
+  query_embedding = embedding_function([query])[0]
+  results = chroma_collection.query(query_texts=[query], n_results=5, include=['embeddings'])
+  retrieved_embeddings = results['embeddings'][0]
 
-#   projected_query_embedding = project_embeddings([query_embedding], umap_transform)
-#   projected_retrieved_embeddings = project_embeddings(retrieved_embeddings, umap_transform)
+  projected_query_embedding = project_embeddings([query_embedding], umap_transform)
+  projected_retrieved_embeddings = project_embeddings(retrieved_embeddings, umap_transform)
 
-#   plt.figure()
-#   plt.scatter(projected_dataset_embeddings[:, 0], projected_dataset_embeddings[:, 1], s=10, color='gray', alpha=0.7, label="Dataset document")
-#   plt.scatter(projected_query_embedding[:, 0], projected_query_embedding[:, 1], s=150, marker='x', color='r', label="User Query")
-#   plt.scatter(projected_retrieved_embeddings[:, 0], projected_retrieved_embeddings[:, 1], s=80, facecolors='none', edgecolors='g', label="Retrieved document")
-#   plt.legend()
-#   plt.title(query)
-#   plt.axis('off')
-#   plt.show()
+  plt.figure()
+  plt.scatter(projected_dataset_embeddings[:, 0], projected_dataset_embeddings[:, 1], s=10, color='gray', alpha=0.7, label="Dataset document")
+  plt.scatter(projected_query_embedding[:, 0], projected_query_embedding[:, 1], s=150, marker='x', color='r', label="User Query")
+  plt.scatter(projected_retrieved_embeddings[:, 0], projected_retrieved_embeddings[:, 1], s=80, facecolors='none', edgecolors='g', label="Retrieved document")
+  plt.legend()
+  plt.title(query)
+  plt.axis('off')
+  plt.show()
 
 # plot_retrieval("What is the total revenue?", projected_dataset_embeddings, umap_transform, chroma_collection, embedding_function)
 
 ```
+
+The following visualizations highlight why simply picking the top-k nearest neighbors isn't always optimal. This is obvious when the query has nothig to do with the dataset, but even if it's relevant the selected documents may not have usefull information for generating a final response.
+
+|Relevant query|Irrelevant query|
+|-|-|
+|![Embeddings plot for query 1]({{ "/assets/2025/05/20250524-query-1.png" | absolute_url }})|![Embeddings plot for query 2]({{ "/assets/2025/05/20250524-query-2.png" | absolute_url }})|
 
 Visualizations like these highlight why simply picking the top-k nearest neighbors isn't always optimal.
 
