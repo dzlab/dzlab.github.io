@@ -9,8 +9,6 @@ toc: true
 img_excerpt:
 ---
 
-
-
 Retrieval Augmented Generation (RAG) has become a cornerstone for building powerful AI applications that can leverage vast amounts of information.
 
 At its heart, RAG relies on vector databases as a knowledge source, storing information as embeddings (i.e. numerical vectors) that represent the semantic meaning of text, images, or other data types in a high-dimensional space. These embeddings are used to query and retrieve relevant information before generating a response from the LLM, improving the model's ability to provide contextually accurate answers.
@@ -327,12 +325,16 @@ The following UMAP plot shows how the adapter can shift queries into denser, mor
 ![Adapted Embeddings]({{ "/assets/2025/05/20250524-Adapted-Embeddings.png" | absolute_url }}){: .center-image }
 
 ## Conclusion
-This exploration demonstrates that moving beyond basic vector search can significantly improve the quality and relevance of documents retrieved for RAG. Techniques like:
+The field of retrieval is rapidly evolving. Beyond simple embeddings-based retrieval techniques, ongoing research explores fine-tuning the base embedding models, fine-tuning the LLM itself to better handle retrieved context, using more complex neural networks for adapters and re-rankers, and developing intelligent methods for optimal document chunking.
+
+In this article we demonstrated that moving beyond basic vector search can significantly improve the quality and relevance of documents retrieved for RAG. Techniques like:
 
 - Query Expansion (HyDE-like and multi-query): Help bridge the semantic gap and retrieve a broader set of potentially relevant documents.
 - Cross-Encoder Re-ranking: Provides a more accurate relevance scoring for a candidate set.
 - Embedding Adaptors: Offer a powerful way to fine-tune retrieval for specific domains.
 
-By combining these strategies, we can build more robust, accurate, and helpful AI applications. The notebook provides a fantastic hands-on guide to experimenting with these advanced retrieval methods. Happy coding!
+By combining these strategies, we can build more robust, accurate, and helpful AI applications, unlocking the full potential of combining large language models with vast amounts of external information.
+
+## That's all folks
 
 I hope you enjoyed this article, feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc).
