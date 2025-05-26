@@ -257,67 +257,74 @@ The following UMAP plots show how this combined input (user query with sub-queri
 
 
 ## Refining Results: Cross-Encoder Re-ranking
-Retrieving a larger set of candidate documents (either through basic search or query expansion) is often followed by a re-ranking step. The notebook introduces cross-encoders for this:
+After retrieving a potentially large set of documents (perhaps from query expansion or simply by requesting a longer tail of results from the vector database), the next challenge is to identify and prioritize the most relevant ones for the original query. This is where cross-encoder re-ranking comes in.
 
-- Cross-Encoders vs. Bi-Encoders: Unlike bi-encoders (like sentence transformers used for initial retrieval) which embed query and document independently, cross-encoders take both the query and a document as a single input and output a relevance score. They are computationally more expensive but generally more accurate for re-ranking a smaller set of candidates.
+Unlike the bi-encoder models (like sentence transformers) used for initial embedding and similarity search (which encode query and documents separately), a cross-encoder takes a pair of inputs – the query and a retrieved document – and outputs a single relevancy score. By applying a cross-encoder to score each retrieved document against the *original* query, we can re-rank the results, placing the most relevant documents at the top. This is particularly useful after using query expansion, allowing us to filter the combined results from multiple augmented queries down to the most relevant set for the initial user intent.
+
+Cross-encoders are often more computationally intensive than bi-encoders but provide a more nuanced relevancy score because they consider the interaction between the query and the document.
 
 ```python
 from sentence_transformers import CrossEncoder
-# cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
 
-# # Assuming 'retrieved_documents' is a list of documents from ChromaDB
-# # and 'original_query' is the user's query
-# pairs = [[original_query, doc] for doc in retrieved_documents]
-# scores = cross_encoder.predict(pairs)
+cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
 
-# # Sort documents by these new scores
-# new_order = np.argsort(scores)[::-1]
-# reranked_documents = [retrieved_documents[i] for i in new_order]
+# Assuming 'retrieved_documents' is a list of documents from ChromaDB
+# and 'original_query' is the user's query
+pairs = [[original_query, doc] for doc in retrieved_documents]
+scores = cross_encoder.predict(pairs)
+
+# Sort documents by these new scores
+new_order = np.argsort(scores)[::-1]
+reranked_documents = [retrieved_documents[i] for i in new_order]
 ```
 
-The notebook demonstrates that re-ranking the combined results from multiple query expansion often yields the most relevant documents at the top.
+## Customizing Retrieval with Feedback: Embedding Adaptors
+Another advanced technique focuses on directly modifying the query embedding based on feedback, effectively customizing the retrieval system to your specific application or user behavior. A small neural network (or even a linear transformation matrix) inserted into the retrieval pipeline after the initial query embedding but before the similarity search. This lightweight model is trained to *adapt* the query embeddings to better suit the specific domain of the documents. It uses a training dataset of queries, retrieved documents, and relevancy labels (e.g., +1 for relevant, -1 for irrelevant). The training objective is to adjust the query embedding so that it moves geometrically closer to relevant document embeddings and further away from irrelevant ones in the embedding space. This 'adapting' process can stretch or squeeze different dimensions of the embedding vector, emphasizing those most relevant to finding useful results for the types of queries and documents in your specific domain.
 
-## Going Deeper: Embedding Adaptors
-For even finer control, the notebook touches upon the concept of "Embedding Adaptors." This is a more advanced technique where a small neural network (or even a linear transformation matrix) is trained to "adapt" the query embeddings to better suit the specific domain of the documents.
+This method requires collecting feedback data, which can be generated synthetically using an LLM or, ideally, gathered from actual user interactions with the RAG system.
 
-1. Dataset Creation: A dataset of (query, document, relevance_label) triples is needed. The notebook simulates this by generating queries and then using an LLM (PaLM) to label the relevance of retrieved documents for those queries (1 for relevant, -1 for irrelevant).
+Here are the steps to implement an Embedding Adaptor:
 
-2. Adapter Model: A simple linear adapter is a matrix W. The adapted query embedding is projected_query_embedding = W * query_embedding.
+1. **Dataset Creation:** A dataset of (query, document, relevance_label) triples is needed. The notebook simulates this by generating queries and then using an LLM (PaLM) to label the relevance of retrieved documents for those queries (1 for relevant, -1 for irrelevant).
 
-3. Training: The goal is to train W such that the cosine similarity between projected_query_embedding and document_embedding is high for relevant pairs and low for irrelevant ones. Mean Squared Error (MSE) loss is used.
+2. **Adapter Model:** A simple linear adapter is a matrix W. The adapted query embedding is `projected_query_embedding = W * query_embedding`.
+
+3. **Training:** The goal is to train W such that the cosine similarity between `projected_query_embedding` and `document_embedding` is high for relevant pairs and low for irrelevant ones. Mean Squared Error (MSE) loss is used.
 
 ```python
 import torch
 from torch.utils.data import TensorDataset
 
 # adapter_query_embeddings, adapter_doc_embeddings, adapter_labels are prepared
-# dataset = TensorDataset(adapter_query_embeddings, adapter_doc_embeddings, adapter_labels)
+dataset = TensorDataset(adapter_query_embeddings, adapter_doc_embeddings, adapter_labels)
 
-# mat_size = len(adapter_query_embeddings[0])
-# adapter_matrix = torch.randn(mat_size, mat_size, requires_grad=True)
+mat_size = len(adapter_query_embeddings[0])
+adapter_matrix = torch.randn(mat_size, mat_size, requires_grad=True)
 
-# def model(query_embedding, document_embedding, weights):
-#   projected_query_embedding = torch.matmul(weights, query_embedding)
-#   predictions = torch.cosine_similarity(projected_query_embedding, document_embedding, dim=0)
-#   return predictions
+def model(query_embedding, document_embedding, weights):
+  projected_query_embedding = torch.matmul(weights, query_embedding)
+  predictions = torch.cosine_similarity(projected_query_embedding, document_embedding, dim=0)
+  return predictions
 
-# def mse_loss(predictions, labels):
-#   return torch.nn.MSELoss()(predictions, labels)
+def mse_loss(predictions, labels):
+  return torch.nn.MSELoss()(predictions, labels)
 
-# # Training loop (simplified)
-# epochs = 100
-# lr = 0.01
-# for epoch in tqdm(range(epochs)):
-#   for query_embedding, document_embedding, label in dataset:
-#     prediction = model(query_embedding, document_embedding, adapter_matrix)
-#     loss = mse_loss(prediction, label)
-#     loss.backward()
-#     with torch.no_grad():
-#       adapter_matrix -= lr * adapter_matrix.grad
-#       adapter_matrix.grad.zero_()
+# Training loop (simplified)
+epochs = 100
+lr = 0.01
+for epoch in tqdm(range(epochs)):
+  for query_embedding, document_embedding, label in dataset:
+    prediction = model(query_embedding, document_embedding, adapter_matrix)
+    loss = mse_loss(prediction, label)
+    loss.backward()
+    with torch.no_grad():
+      adapter_matrix -= lr * adapter_matrix.grad
+      adapter_matrix.grad.zero_()
 ```
 
-Visualizing the original vs. adapted query embeddings with UMAP shows how the adapter can shift queries into denser, more relevant regions of the embedding space.
+The following UMAP plot shows how the adapter can shift queries into denser, more relevant regions of the embedding space.
+
+![Adapted Embeddings]({{ "/assets/2025/05/20250524-Adapted-Embeddings.png" | absolute_url }}){: .center-image }
 
 ## Conclusion
 This exploration demonstrates that moving beyond basic vector search can significantly improve the quality and relevance of documents retrieved for RAG. Techniques like:
