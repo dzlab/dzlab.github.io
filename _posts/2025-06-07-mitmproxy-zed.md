@@ -162,7 +162,8 @@ This section directs the assistant on how to use external APIs. It includes:
 This provides basic system information like operating system and shell, which might be relevant for certain tool invocations.
 
 <details>
-<summary>Full Zed's System Prompt</summary>
+
+<summary>Full Zed System Prompt</summary>
 
 ~~~markdown
 You are a highly skilled software engineer with extensive knowledge in many programming languages, frameworks, design patterns, and best practices.
