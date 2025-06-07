@@ -107,13 +107,62 @@ Some interesting observations:
 - When the user click the submit button on Zed's UI, an API call is sent to [`streamGenerateContent` API](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference) containing the user prompt as well as Zed's System Prompt.
 - A final following API call is made to `streamGenerateContent` to generate a title for the user thread.
 
-#### Peek into Zed's System Prompt
+#### Analyzing Zed's System Prompt
 As we saw in the previous section, when Zed's sends a request for the LLM to answer the user prompt, it also includes a System Prompt, which you can find the full content below.
 
-This system prompt is designed to guide the LLM, in how to interact with a user and utilize specific tools.  Let's break down its key aspects
+This system prompt is designed to guide the LLM, in how to interact with a user and utilize specific tools. It can be breaking down into the following key aspects:
+
+**I. Role and Responsibilities:**
+
+The prompt establishes the assistant role as a highly skilled software engineer, emphasizing expertise in various programming aspects. It dictates a professional yet conversational communication style and strict adherence to truthfulness. The prompt strongly discourages apologies for unexpected outcomes, focusing instead on problem-solving and explanation.
+
+**II. Tool Usage:**
+
+This section provides rigorous guidelines for using provided tools. It mandates:
+
+* **Adherence to schemas:** must correctly use the APIs provided, including supplying all necessary parameters.
+* **Contextual awareness:** shouldn't use tools to access information readily available in the context.
+* **Availability checks:** Only available tools should be utilized. This implies dynamic tool availability; the prompt suggests tools can be enabled or disabled.
+* **Process management:** is explicitly forbidden from running long-running background processes like servers or file watchers.
+
+**III. Searching and Reading:**
+
+This section details the assistant's approach to file system navigation and code searching.  It emphasizes:
+
+* **Proactive information gathering:** When unsure, it should use tools to acquire information.
+* **Project structure awareness:** understands the project's root directories (`kvwc` in this case).
+* **Path specificity:** Paths provided to tools must originate from one of the root directories. No guessing of paths is allowed.
+* **Tool preference:** The `grep` tool is preferred for code symbol searches, while `find_path` is used for path-based searches.
+
+**IV. Code Block Formatting:**
+
+This section enforces a *very* specific format for code blocks: ` ```path/to/Something.blah#L123-456 (code goes here) ```.  The path is mandatory, even for example code not directly related to the project. This rigid format is likely necessary due to limitations in the Markdown parser being used, implying the system has specific constraints not directly defined in the system prompt itself.
+
+**V. Diagnostics Handling:**
+
+This section outlines the assistant's approach to fixing software diagnostics (errors, warnings):
+
+* **Limited attempts:** should attempt to fix diagnostics only a couple of times before seeking user input.
+* **Code preservation:** should not unnecessarily simplify or modify generated code to resolve diagnostics.
+
+**VI. Debugging:**
+
+The prompt encourages best practices for debugging: addressing root causes, adding logging, and employing test functions.
+
+**VII. External API Usage:**
+
+This section directs the assistant on how to use external APIs. It includes:
+
+* **Proactive usage:** should use suitable external APIs without explicit user permission.
+* **Version selection:** must choose API versions compatible with the project's dependency management; otherwise, it must choose the latest version available.
+* **API key handling:** is cautioned about secure API key management.
+
+**VIII. System Information:**
+
+This provides basic system information like operating system and shell, which might be relevant for certain tool invocations.
 
 <details>
-<summary>Zed's System Prompt</summary>
+<summary>Full Zed's System Prompt</summary>
 
 ~~~markdown
 You are a highly skilled software engineer with extensive knowledge in many programming languages, frameworks, design patterns, and best practices.
