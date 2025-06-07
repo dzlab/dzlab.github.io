@@ -306,8 +306,7 @@ Default Shell: /bin/zsh
 
 ### Conclusion
 
-Reverse engineering Zed's AI coding assistant using `mitmproxy` provides valuable insights into its internal workings.  By analyzing its API calls, we gain a deeper understanding of its prompt engineering strategies, the efficiency of its API interactions, and potential areas for enhancement. This approach empowers developers to make more informed decisions about utilizing Zed, potentially leading to more efficient and effective workflows.  Remember to always respect Zed's terms of service and privacy policy when conducting such analyses.
-
+We have seen how reverse engineering Zed's AI coding assistant using `mitmproxy` provides valuable insights into its internal workings. This approach can be used to analyze other assistants. By analyzing the API calls, we gained a better understanding of the prompt engineering strategies, the API interactions with the LLM provider, and potential areas for enhancement. Furthermore, it empowers us developers to make agents of our own that are inspired by the approach and strategies employed by such AI coding assistant, potentially leading to more efficient and effective workflows.
 
 
 ---
