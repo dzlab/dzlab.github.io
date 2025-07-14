@@ -165,13 +165,35 @@ _Check overall cache hit ratios_
 **Claude**'s response:
 
 ```markdown
-I'll check the overall cache hit ratios for your PostgreSQL database.The cache hit ratios are showing null values, which might indicate that the pg_stat_statements extension isn't properly configured or there isn't enough query activity yet. Let me try checking the individual table and index cache hit rates:Let me also check the index usage statistics:The cache hit ratio queries aren't returning data, which suggests either:
+I'll check the overall cache hit ratios for your PostgreSQL database.
+- `cache_hit`
+
+The cache hit ratios are showing null values, which might indicate that the `pg_stat_statements` extension isn't properly configured or there isn't enough query activity yet. 
+
+Let me try checking the individual table and index cache hit rates:
+- `table_cache_hit`
+- `index_cache_hit`
+
+Let me also check the index usage statistics:
+- `index_usage`
+
+The cache hit ratio queries aren't returning data, which suggests either:
 
 1. The database hasn't had enough query activity to generate meaningful statistics
 2. The `pg_stat_statements` extension may not be installed or enabled
 3. The statistics may have been recently reset
 
-Let me check if the necessary extensions are available:Good! The `pg_stat_statements` extension is installed. Let me check the database connections and activity:There are active connections, so the database is being used. Let me try to add the necessary extensions and then check the cache hit rates again:## Cache Hit Ratio Summary
+Let me check if the necessary extensions are available:
+- `extensions`
+
+Good! The `pg_stat_statements` extension is installed. Let me check the database connections and activity:
+- `connections`
+
+There are active connections, so the database is being used. Let me try to add the necessary extensions and then check the cache hit rates again:
+- `add_extensions`
+- `cache_hit`
+
+## Cache Hit Ratio Summary
 
 The cache hit ratios are currently showing null values, which indicates one of the following situations:
 
