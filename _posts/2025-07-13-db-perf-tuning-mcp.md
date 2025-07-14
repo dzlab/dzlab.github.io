@@ -21,8 +21,8 @@ In this hands-on guide, you'll learn:
 - Advanced techniques for optimizing queries and reducing lock contention
 - Battle-tested strategies for managing database bloat and storage efficiency
 
-## pg-extras-mcp
-The [pg-extras-mcp](https://github.com/dzlab/snippets/tree/master/pg-extras-mcp) tool provides access to PostgreSQL's internal statistics through simple function calls. Each exposed method queries PostgreSQL's system tables to provide insights into database performance.
+## MCP Tools for performance tuning
+[pg-extras-mcp](https://github.com/dzlab/snippets/tree/master/pg-extras-mcp) provides access to PostgreSQL's internal statistics through simple function calls. Each exposed function runs query PostgreSQL's system tables to provide insights into database performance.
 
 Below is the full list of available tools split into: performance, storage, indexing, connections, and maintenance aspects.
 
@@ -83,6 +83,72 @@ Below is the full list of available tools split into: performance, storage, inde
 
 ### Statistics Management
 - **pg_stat_statements_reset** - Resets statistics gathered by `pg_stat_statements` extension
+
+## Getting Started with pg-extras-mcp
+
+To be able to use **pg-extras-mcp**, follow the installation steps from the project's [README.md](https://github.com/dzlab/snippets/blob/master/pg-extras-mcp/README.md).
+First clone the repository then install denpendecies:
+
+```bash
+git clone https://github.com/dzlab/snippets
+cd pg-extras-mcp
+
+uv sync # install dependencies
+```
+
+Update the `.env` file with the Postgres connection information
+
+```python
+PG_DATABASE=your_database_name
+PG_USER=your_username
+PG_PASSWORD=your_password
+```
+
+Configure Claude with **pg-extras-mcp** by editing `claude_desktop_config.json` as follows:
+
+```json
+{
+  "mcpServers": {
+    "pg-extras": {
+      "command": "/opt/homebrew/bin/uv",
+      "args": [
+		"--directory",
+		"/path/to/snippets/pg-extras-mcp",
+        "run",
+        "server.py"
+      ]
+    }
+  }
+}
+```
+
+### Enable `pg_stat_statements` extension
+
+Many **pg-extras-mcp** methods depend on the `pg_stat_statements` extension. So before trying to run any diagnosis, first check if the extension is already enabled by simply asking Claude: 
+
+_what are the installed extensions?_
+
+Below is Claude's response:
+
+```markdown
+I'll check what extensions are installed in your PostgreSQL database.Your PostgreSQL database has the following **installed extensions**:
+
+1. **plpgsql** (v1.0) - PL/pgSQL procedural language
+2. **pg_trgm** (v1.3) - Text similarity measurement and index searching based on trigrams  
+3. **pg_stat_statements** (v1.6) - Track execution statistics of all SQL statements executed
+
+There are also several **available but not installed** extensions, including:
+- amcheck - Functions for verifying relation integrity
+- autoinc - Functions for autoincrementing fields  
+- bloom - Bloom access method signature file based index
+- dict_int - Text search dictionary template for integers
+- intarray - Functions, operators, and index support for 1-D arrays of integers
+- btree_gin - Support for indexing common datatypes in GIN
+- intagg - Integer aggregator and enumerator (obsolete)
+
+The installed extensions provide essential functionality for procedural language support, text similarity searches, and query performance monitoring.
+```
+
 
 ---
 
