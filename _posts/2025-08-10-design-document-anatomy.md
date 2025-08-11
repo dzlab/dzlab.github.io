@@ -55,8 +55,9 @@ Here is a proven structure that you can adapt for your needs.
 This is the simplest part. Include the title of the project, the author(s), the designated reviewers, and the date of the last update.
 
 *   **Title**: A clear, descriptive name for the project.
-*   **Author(s)**: The engineer(s) writing the doc and likely implementing the solution.
-*   **Reviewer(s)**: Senior engineers, tech leads, or stakeholders who will provide feedback.
+*   **Author(s) (Responsible)**: The engineer(s) writing the doc and likely implementing the solution.
+*   **Accountable**: The person ultimately answerable for the project's success (e.g., Tech Lead, Engineering Manager).
+*   **Reviewer(s) (Consulted)**: Senior engineers, tech leads, or stakeholders who will provide feedback.
 *   **Last Updated**: The date the document was last meaningfully changed.
 
 ---
@@ -107,7 +108,7 @@ Start with the big picture and then drill down into the details. Consider these 
 
 #### **7. Alternative Solutions Considered**
 
-To demonstrate rigor, you must show that you've considered other options.
+To demonstrate rigor, you must show that you've considered other options. A good practice is to "steel-man" the alternatives—that is, to represent them in their strongest possible form. This demonstrates intellectual honesty and ensures the chosen solution is truly the best one, not just the one you initially favored.
 
 *   **Alternative 1: [Name]**: Briefly describe the alternative.
     *   *Pros*: What are the benefits of this approach?
@@ -121,6 +122,7 @@ To demonstrate rigor, you must show that you've considered other options.
 This section addresses the operational realities of running a system in production.
 
 *   **Security**: How does the design prevent common vulnerabilities (e.g., OWASP Top 10)? How is data encrypted at rest and in transit? What are the authentication and authorization strategies?
+*   **Data Privacy**: Does this design handle user data? If so, what personally identifiable information (PII) is stored, and how are we protecting it, managing user consent, and complying with regulations like GDPR or CCPA?
 *   **Scalability and Performance**: What are the expected load and performance targets (e.g., RPM, latency)? How will the system scale?
 *   **Reliability and Availability**: What are the SLOs (Service Level Objectives)? How does the design handle failures? Is there a disaster recovery plan?
 *   **Testability**: How will the system be tested? Describe the strategy for unit, integration, and end-to-end testing.
