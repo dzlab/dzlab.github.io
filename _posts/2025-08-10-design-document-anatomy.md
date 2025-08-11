@@ -18,11 +18,29 @@ A well-crafted design document serves as a blueprint for implementation, a commu
 
 Before diving into the structure, let's establish some principles for clear and persuasive technical writing, inspired by the strong writing cultures at tech companies like Amazon.
 
-*   **Replace Adjectives with Data**: Instead of saying a system is "fast" or "scalable," quantify it. For example, "The API will have a P99 latency of less than 200ms under 5,000 requests per second."
-*   **Use Short, Direct Sentences**: Aim for clarity and conciseness. Each sentence should convey a single, clear idea. Think subject-verb-object.
-*   **Eliminate Weasel Words**: Words like "might," "could," "perhaps," or "it seems" weaken your statements. Be decisive and specific.
+*   **Write for Your Audience**: Adjust the level of technical detail for your readers. A document for your immediate team can be dense with technical specifics, while a document for leadership should focus more on impact and business goals.
+    *   ***Why?***: Tailoring your writing ensures that your message is understood and that you get the right kind of feedback from the right people.
+
+*   **Replace Adjectives with Data**: Instead of saying a system is "fast" or "scalable," quantify it.
+    *   ***Why?***: Data provides objective evidence and removes ambiguity, setting clear and measurable goals for the project.
+    *   **Before**: The new service will be very fast and significantly more scalable.
+    *   **After**: The new service will have a P99 latency of <200ms for up to 10,000 requests per second.
+
+*   **Use Short, Direct Sentences**: Aim for clarity and conciseness. Each sentence should convey a single, clear idea.
+    *   ***Why?***: Shorter sentences reduce cognitive load, making the document easier to read and understand. Think subject-verb-object.
+
+*   **Eliminate Weasel Words**: Words like "might," "could," "perhaps," or "it seems" weaken your statements and create uncertainty.
+    *   ***Why?***: A design document should be a decisive plan. Be assertive and specific about your proposed solution.
+    *   **Before**: It seems like this approach could potentially improve performance.
+    *   **After**: This approach will reduce query latency by 50% by introducing a caching layer.
+
 *   **Avoid Jargon and Acronyms**: Write for a broad audience. If you must use a technical term or acronym, define it on its first use.
+    *   ***Why?***: Writing for a broad audience makes your document more inclusive and durable as the organization grows and changes.
+    *   **Before**: We'll use an ELB to route traffic to the ECS cluster.
+    *   **After**: We'll use an Elastic Load Balancer (ELB) to route traffic to the Elastic Container Service (ECS) cluster.
+
 *   **Use an Appendix for Digressions**: If you need to include a complex calculation, a detailed data analysis, or a tangential thought, move it to an appendix. The main body should flow uninterrupted.
+    *   ***Why?***: This keeps the main narrative focused and easy to follow, while still making supporting information available to those who need it.
 
 ## The Anatomy of a Design Document
 
