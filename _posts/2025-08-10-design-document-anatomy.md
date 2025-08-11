@@ -168,4 +168,6 @@ graph TD
 
 ---
 
+A great design document is more than a project blueprint; it's a tool for thinking. The process of writing it forces you to clarify your ideas, anticipate challenges, and align your team. By focusing on clarity and embracing a structured approach, you can create documents that not only guide implementation but also build a shared understanding and lead to better engineering outcomes.
+
 _I hope you enjoyed this article. Feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc)._
