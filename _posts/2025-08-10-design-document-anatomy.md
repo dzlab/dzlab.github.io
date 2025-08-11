@@ -138,4 +138,34 @@ Be transparent about what you don't know. List any open issues, known unknowns, 
 
 ---
 
+## The Lifecycle of a Design Document
+
+A design document is not a static artifact that is written once and then archived. It is a dynamic tool that evolves with the project. Understanding its lifecycle helps set expectations and makes the process more effective.
+
+```mermaid
+graph TD
+    A[Drafting & Iteration] --> B{Review Process};
+    B -- Feedback --> A;
+    B -- Agreement --> C[Approval];
+    C --> D[Implementation<br>];
+    D -- Changes --> A
+    D -- Project Complete --> E[Historical Record];
+
+    style A fill:#f2f2f2,stroke:#333
+    style B fill:#e6e6ff,stroke:#333
+    style C fill:#d4edda,stroke:#28a745
+    style D fill:#fff3cd,stroke:#333
+    style E fill:#d1ecf1,stroke:#0c5460
+```
+
+*   **Drafting & Iteration**: The first draft is rarely perfect. It's a starting point for discussion and clarification. Expect to go through several revisions as you refine your ideas, gather more data, and respond to initial feedback. The goal of the initial phase is to create a solid foundation for a productive review.
+
+*   **The Review Process**: The review is where the design is pressure-tested. Start with a small, trusted group of reviewers (e.g., your immediate team or tech lead) to catch major issues early. Once the document is in a more stable state, expand the review to a wider audience of stakeholders, including other teams that might be impacted, security experts, and senior engineers.
+
+*   **Approval**: "Approval" doesn't mean the design is frozen forever. It signifies that the key stakeholders have reviewed the document, their major concerns have been addressed, and they agree that the proposed path is a reasonable one to take. It is an agreement to proceed with implementation, with the shared understanding that minor details may change as new information emerges.
+
+*   **A Living Document**: During implementation, the design document should be updated to reflect any significant changes or decisions made. This keeps it relevant and useful for the team. After the project is complete, the document becomes an invaluable historical record. It provides context for future engineers who will work on the system, explaining the "why" behind the design and the trade-offs that were made.
+
+---
+
 _I hope you enjoyed this article. Feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc)._
