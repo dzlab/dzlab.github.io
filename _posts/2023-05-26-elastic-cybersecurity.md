@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: Elasticsearch Use Cases in Cybersecurity: A Technical Deep Dive
+title: "Elasticsearch Use Cases in Cybersecurity: A Technical Deep Dive"
 excerpt: Learn about the different use cases for Elasticsearch in a cybersecurity context and how to implement them effectively
 tags: [elasticsearch,cybersecurity,security operations,threat intelligence,vulnerability management]
 toc: true
@@ -142,6 +142,7 @@ Integration with Elasticsearch enables orchestration tools like open-source OSBa
 
 **Example: Webhook Trigger for Vulnerability Orchestration**
 
+{% raw %}
 ```json
 PUT _watcher/watch/high_severity_vuln
 {
@@ -193,6 +194,7 @@ PUT _watcher/watch/high_severity_vuln
   }
 }
 ```
+{% endraw %}
 
 ## Personalized Notifications
 
@@ -200,6 +202,7 @@ Leveraging machine learning capabilities, Elasticsearch can assist in generating
 
 **Example: Customized Alerts Based on Team Responsibility**
 
+{% raw %}
 ```json
 PUT _watcher/watch/team_specific_alerts
 {
@@ -294,6 +297,7 @@ PUT _watcher/watch/team_specific_alerts
   }
 }
 ```
+{% endraw %}
 
 # Security Information and Event Management (SIEM) Use Cases
 

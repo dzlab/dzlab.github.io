@@ -93,6 +93,7 @@ receivers:
 
 Third, optionally define prometheus alerts in `alert_rules.yml`. To define some alerts based on metrics in Prometheus, you can group then into a `alert_rules.yml` so you could validate those alerts are properly triggered in your local setup before configuring them in the production instance. For instance the following configration defines an alert on heap memory used vs max ratio when it crosses 80%
 
+{% raw %}
 ```yaml
 ## alert_rules.yml ##
 
@@ -110,6 +111,7 @@ groups:
         labels:
           severity: 'critical'
 ```
+{% endraw %}
 
 Forth, and most importantly define Prometheus configuration in `prometheus.yml` file. This will defines:
 - the global settings like scrapping interval and rules evaluation interval
