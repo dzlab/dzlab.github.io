@@ -8,7 +8,9 @@ layout: default
     {{ page.date | date_to_string }} by <a href="{{site.author.twitter}}">{{site.author.name}}</a>
   </span>
   {% if page.toc %}
-    {% include toc.html html=content %}
+    <nav class="post-toc" aria-label="Table of contents">
+      {% include toc.html html=content %}
+    </nav>
   {% endif %}
   {{ content }}
 </div>

@@ -352,6 +352,49 @@ tbody tr:nth-child(odd) th {
   color: #5a5a5a;
 }
 
+/* Table of contents */
+.post-toc {
+  margin-bottom: 1.5rem;
+  padding: .75rem 1rem;
+  font-size: .8rem;
+  line-height: 1.35;
+  background-color: #f9f9f9;
+  border-left: .25rem solid #e5e5e5;
+}
+.post-toc::before {
+  display: block;
+  margin-bottom: .5rem;
+  font-weight: bold;
+  color: #303030;
+  content: "Contents";
+}
+.post-toc ul {
+  margin-bottom: 0;
+  padding-left: 1rem;
+}
+.post-toc > ul {
+  padding-left: 0;
+}
+.post-toc li {
+  margin: .25rem 0;
+}
+.post-toc a {
+  color: #268bd2;
+}
+
+@media (min-width: 80em) {
+  .post-toc {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 1rem;
+    float: right;
+    width: 12rem;
+    max-height: calc(100vh - 2rem);
+    margin: 0 0 1rem 1.5rem;
+    overflow-y: auto;
+  }
+}
+
 /* Related posts */
 .related {
   padding-top: 2rem;
