@@ -1,0 +1,49 @@
+{%- assign heading_nodes = include.html | split: '<h' -%}
+{%- assign has_toc = false -%}
+{%- assign has_h2 = false -%}
+{%- assign in_sublist = false -%}
+
+{%- capture toc_html -%}
+<ul id="toc" class="section-nav">
+{%- for node in heading_nodes -%}
+  {%- assign level = node | slice: 0, 1 -%}
+  {%- if level == '2' or level == '3' -%}
+    {%- assign id_parts = node | split: 'id="' -%}
+    {%- if id_parts.size > 1 -%}
+      {%- assign heading_id = id_parts[1] | split: '"' | first -%}
+      {%- assign heading_text = node | split: '>' | slice: 1, 999 | join: '>' | split: '</h' | first | strip_html | strip -%}
+      {%- if heading_id != '' and heading_text != '' -%}
+        {%- assign has_toc = true -%}
+        {%- if level == '2' -%}
+          {%- if in_sublist -%}
+</ul>
+            {%- assign in_sublist = false -%}
+          {%- endif -%}
+          {%- if has_h2 -%}
+</li>
+          {%- endif -%}
+<li class="toc-entry toc-h2"><a href="#{{ heading_id }}">{{ heading_text }}</a>
+          {%- assign has_h2 = true -%}
+        {%- else -%}
+          {%- unless in_sublist -%}
+<ul>
+            {%- assign in_sublist = true -%}
+          {%- endunless -%}
+<li class="toc-entry toc-h3"><a href="#{{ heading_id }}">{{ heading_text }}</a></li>
+        {%- endif -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- if in_sublist -%}
+</ul>
+{%- endif -%}
+{%- if has_h2 -%}
+</li>
+{%- endif -%}
+</ul>
+{%- endcapture -%}
+
+{%- if has_toc -%}
+{{ toc_html }}
+{%- endif -%}

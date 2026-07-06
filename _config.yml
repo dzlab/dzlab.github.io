@@ -30,7 +30,6 @@ github:
 plugins:
   - jekyll-feed
   - jekyll-gist
-  - jekyll-toc
   - jekyll-paginate
   - jekyll-sitemap
 

@@ -7,7 +7,10 @@ layout: default
   <span class="post-date">
     {{ page.date | date_to_string }} by <a href="{{site.author.twitter}}">{{site.author.name}}</a>
   </span>
-  {{ content | toc }}
+  {% if page.toc %}
+    {% include toc.html html=content %}
+  {% endif %}
+  {{ content }}
 </div>
 
 <!-- mathjax (to render equations) -->
