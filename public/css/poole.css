@@ -382,7 +382,7 @@ tbody tr:nth-child(odd) th {
   color: #268bd2;
 }
 
-@media (min-width: 80em) {
+@media (min-width: 112em) {
   .post-toc {
     position: -webkit-sticky;
     position: sticky;
@@ -390,7 +390,7 @@ tbody tr:nth-child(odd) th {
     float: right;
     width: 12rem;
     max-height: calc(100vh - 2rem);
-    margin: 0 0 1rem 1.5rem;
+    margin: 0 -14rem 1rem 2rem;
     overflow-y: auto;
   }
 }
