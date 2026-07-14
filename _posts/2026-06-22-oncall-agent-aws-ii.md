@@ -10,7 +10,7 @@ img_excerpt:
 mermaid: true
 ---
 
-In [Part 1]({{ "2026/06/22/oncall-agent-aws-i/" }}), we designed the overall architecture and AWS infrastructure for a production-grade oncall agent. We created the AgentCore runtimes, MCP gateway, Lambda tool targets, secrets, networking, runtime manifest, and rate-limit interceptor.
+In [Part 1]({{ "genai/2026/06/22/oncall-agent-aws-i/" | absolute_url }}), we designed the overall architecture and AWS infrastructure for a production-grade oncall agent. We created the AgentCore runtimes, MCP gateway, Lambda tool targets, secrets, networking, runtime manifest, and rate-limit interceptor.
 
 This second part focuses on implementation. We will build the agent entrypoint, load tools from the MCP gateway, compose prompts, expose SRE systems as Lambda-backed MCP tools, orchestrate specialist agents, and add tests and CI gates.
 
