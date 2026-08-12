@@ -12,6 +12,15 @@ mermaid: true
 
 AI coding assistants make it easy to generate more code than a team can carefully review by hand. That changes the bottleneck. The hard question is no longer only "can we write the code?", but also "can we review it with enough context to catch missed requirements, security gaps, and codebase-specific pattern violations?"
 
+The experiment compares four reviewer designs:
+
+| Reviewer design | What it does |
+|---|---|
+| **Diff-only reviewer** | Reviews only the pull request title, task context, and changed lines. This is the cheapest baseline and mirrors what a reviewer can do from a patch alone, but it cannot reliably catch violations of repository-specific patterns that are not visible in the diff. |
+| **Full-context reviewer** | Sends the entire synthetic repository alongside the PR diff. This gives the model access to every local convention and reference implementation, making it useful as an upper-bound context baseline, but it is expensive and becomes noisy as the codebase grows. |
+| **Selective-context reviewer** | Indexes the repository into AST-based chunks, embeds those chunks, and retrieves only the most relevant code for each PR. This tests whether retrieval can preserve most of the useful repository evidence while avoiding the token cost and distraction of full-context review. |
+| **Specialized reviewer ensemble** | Runs narrower reviewers for security and codebase-pattern compliance, then combines overlapping and high-signal findings. This design tests whether focused reviewer roles can improve recall without simply concatenating every possible comment into a noisy final review. |
+
 The complete ai review agent code is split among these files:
 
 | Content | What it covers |
@@ -22,13 +31,6 @@ The complete ai review agent code is split among these files:
 | [Reviewer implementations](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py) | The general reviewer, security specialist, pattern specialist, parser, deduplication logic, and ensemble combiner. |
 | [Evaluation harness](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py) | Matching generated findings against expected issues and computing precision, recall, F1, true positives, false positives, and false negatives. |
 | [Experiment runner](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/run_experiment.py) | The command-line entry point that wires fixtures, context strategies, reviewers, and metrics together. |
-
-The code compares four reviewer designs:
-
-1. A **diff-only reviewer**.
-2. A **full-context reviewer**.
-3. A **selective-context reviewer** backed by retrieval.
-4. A **specialized reviewer ensemble**.
 
 ## What We Are Building
 
