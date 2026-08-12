@@ -12,7 +12,9 @@ mermaid: true
 
 AI coding assistants make it easy to generate more code than a team can carefully review by hand. That changes the bottleneck. The hard question is no longer only "can we write the code?", but also "can we review it with enough context to catch missed requirements, security gaps, and codebase-specific pattern violations?"
 
-The experiment compares four reviewer designs:
+## What We Are Building
+
+The system receives a pull request title, a diff, and optional task requirements. The experiment compares four reviewer designs:
 
 | Reviewer design | What it does |
 |---|---|
@@ -20,26 +22,6 @@ The experiment compares four reviewer designs:
 | **Full-context reviewer** | Sends the entire synthetic repository alongside the PR diff. This gives the model access to every local convention and reference implementation, making it useful as an upper-bound context baseline, but it is expensive and becomes noisy as the codebase grows. |
 | **Selective-context reviewer** | Indexes the repository into AST-based chunks, embeds those chunks, and retrieves only the most relevant code for each PR. This tests whether retrieval can preserve most of the useful repository evidence while avoiding the token cost and distraction of full-context review. |
 | **Specialized reviewer ensemble** | Runs narrower reviewers for security and codebase-pattern compliance, then combines overlapping and high-signal findings. This design tests whether focused reviewer roles can improve recall without simply concatenating every possible comment into a noisy final review. |
-
-The complete ai review agent code is split among these files:
-
-| Content | What it covers |
-|---|---|
-| [Project README](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents) | Setup instructions, `uv` commands, CLI options, and examples for running the benchmark. |
-| [Review fixtures](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/data.py) | The synthetic FastAPI repository, the 15 deliberately flawed pull requests, and the expected issues used for evaluation. |
-| [Context retrieval](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/context.py) | AST chunking, embedding generation, Chroma indexing, and retrieval of relevant code snippets for each PR. |
-| [Reviewer implementations](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py) | The general reviewer, security specialist, pattern specialist, parser, deduplication logic, and ensemble combiner. |
-| [Evaluation harness](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py) | Matching generated findings against expected issues and computing precision, recall, F1, true positives, false positives, and false negatives. |
-| [Experiment runner](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/run_experiment.py) | The command-line entry point that wires fixtures, context strategies, reviewers, and metrics together. |
-
-## What We Are Building
-
-The system receives a pull request title, a diff, and optional task requirements. It can review the change in several modes:
-
-- **Diff-only**: the model sees only the changed code.
-- **Full-context**: the model also sees the full synthetic repository.
-- **Selective-context**: the system retrieves only the most relevant repository chunks.
-- **Specialized ensemble**: security and pattern-compliance reviewers run separately, then their findings are combined.
 
 The high-level flow looks like this:
 
@@ -58,6 +40,17 @@ flowchart TD
     P --> E
     E --> F[Final review findings]
 ```
+
+The complete ai review agent code is split among these files:
+
+| Content | What it covers |
+|---|---|
+| [Project README](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents) | Setup instructions, `uv` commands, CLI options, and examples for running the benchmark. |
+| [Review fixtures](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/data.py) | The synthetic FastAPI repository, the 15 deliberately flawed pull requests, and the expected issues used for evaluation. |
+| [Context retrieval](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/context.py) | AST chunking, embedding generation, Chroma indexing, and retrieval of relevant code snippets for each PR. |
+| [Reviewer implementations](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py) | The general reviewer, security specialist, pattern specialist, parser, deduplication logic, and ensemble combiner. |
+| [Evaluation harness](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py) | Matching generated findings against expected issues and computing precision, recall, F1, true positives, false positives, and false negatives. |
+| [Experiment runner](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/run_experiment.py) | The command-line entry point that wires fixtures, context strategies, reviewers, and metrics together. |
 
 ## Run The Experiment
 
