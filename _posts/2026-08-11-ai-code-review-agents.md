@@ -12,7 +12,7 @@ mermaid: true
 
 AI coding assistants make it easy to generate more code than a team can carefully review by hand. That changes the bottleneck. The hard question is no longer only "can we write the code?", but also "can we review it with enough context to catch missed requirements, security gaps, and codebase-specific pattern violations?"
 
-This article focuses on the reviewer implementation. The complete runnable experiment lives in the snippets repository:
+The complete ai review agent code is split among these files:
 
 | Content | What it covers |
 |---|---|
