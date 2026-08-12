@@ -14,12 +14,14 @@ AI coding assistants make it easy to generate more code than a team can carefull
 
 This article focuses on the reviewer implementation. The complete runnable experiment lives in the snippets repository:
 
-- [README](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents)
-- [data.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/data.py)
-- [context.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/context.py)
-- [reviewers.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py)
-- [evaluation.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py)
-- [run_experiment.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/run_experiment.py)
+| Content | What it covers |
+|---|---|
+| [Project README](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents) | Setup instructions, `uv` commands, CLI options, and examples for running the benchmark. |
+| [Review fixtures](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/data.py) | The synthetic FastAPI repository, the 15 deliberately flawed pull requests, and the expected issues used for evaluation. |
+| [Context retrieval](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/context.py) | AST chunking, embedding generation, Chroma indexing, and retrieval of relevant code snippets for each PR. |
+| [Reviewer implementations](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py) | The general reviewer, security specialist, pattern specialist, parser, deduplication logic, and ensemble combiner. |
+| [Evaluation harness](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py) | Matching generated findings against expected issues and computing precision, recall, F1, true positives, false positives, and false negatives. |
+| [Experiment runner](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/run_experiment.py) | The command-line entry point that wires fixtures, context strategies, reviewers, and metrics together. |
 
 The code compares four reviewer designs:
 
