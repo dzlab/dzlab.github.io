@@ -384,16 +384,16 @@ flowchart TD
 
 A production version should add:
 
-- repository indexing by commit SHA;
-- semantic and lexical retrieval;
-- CODEOWNERS and ownership metadata;
-- framework-aware chunking;
-- test and migration awareness;
-- severity calibration;
-- duplicate suppression;
-- stable JSON output;
-- human feedback capture;
-- regression evaluation before prompt or model changes.
+- **Repository indexing by commit SHA**: build and query the index for the exact revision under review, so findings cite code that actually existed when the PR was analyzed.
+- **Semantic and lexical retrieval**: combine embedding search with keyword or symbol search, because security rules, framework names, migrations, and error messages are often easier to find lexically.
+- **CODEOWNERS and ownership metadata**: use ownership signals to prioritize local conventions, route findings to the right reviewers, and avoid treating all files as equally important.
+- **Framework-aware chunking**: chunk routes, models, serializers, migrations, templates, and tests according to framework boundaries instead of relying only on generic AST nodes.
+- **Test and migration awareness**: retrieve related tests and database changes so the reviewer can detect missing coverage, unsafe rollout paths, and schema/application mismatches.
+- **Severity calibration**: map findings to team-specific severity rules so blocking issues, warnings, and optional cleanup comments are separated consistently.
+- **Duplicate suppression**: merge overlapping findings across specialists and repeated code locations so developers receive one actionable comment per underlying issue.
+- **Stable JSON output**: require predictable structured output so findings can be parsed, filtered, compared across runs, and posted as review comments without brittle text scraping.
+- **Human feedback capture**: record accepted, dismissed, and edited findings so future prompts, retrieval rules, and severity policies can be tuned from real reviewer behavior.
+- **Regression evaluation before prompt or model changes**: run a golden benchmark before changing prompts, retrieval settings, or models so quality changes are measured instead of guessed.
 
 The most important design principle is that the reviewer should cite evidence: relevant task requirements, local patterns, file paths, and changed lines. Without evidence, the model becomes a second opinion generator. With evidence, it becomes a review assistant.
 
