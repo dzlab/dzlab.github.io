@@ -48,7 +48,7 @@ The complete ai review agent code is split among these files:
 | [Project README](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents) | Setup instructions, `uv` commands, CLI options, and examples for running the benchmark. |
 | [Review fixtures](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/data.py) | The synthetic FastAPI repository, the 15 deliberately flawed pull requests, and the expected issues used for evaluation. |
 | [Context retrieval](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/context.py) | AST chunking, embedding generation, Chroma indexing, and retrieval of relevant code snippets for each PR. |
-| [Reviewer implementations](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py) | The general reviewer, security specialist, pattern specialist, parser, deduplication logic, and ensemble combiner. |
+| [Agentic reviewer code](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py) | The general reviewer, security specialist, pattern specialist, parser, deduplication logic, and ensemble combiner. |
 | [Evaluation harness](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py) | Matching generated findings against expected issues and computing precision, recall, F1, true positives, false positives, and false negatives. |
 | [Experiment runner](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/run_experiment.py) | The command-line entry point that wires fixtures, context strategies, reviewers, and metrics together. |
 
@@ -77,7 +77,7 @@ uv run python run_experiment.py --mode all
 
 The benchmark uses a synthetic FastAPI service and 15 deliberately flawed pull requests. The service fixture contains 11 known-good files that encode the local patterns an AI reviewer should use as evidence: authentication, authorization, parameterized SQL, rate limiting, secrets, safe file paths, upload validation, inventory locking, HTML escaping, JSON serialization, Pydantic constraints, generic error responses, explicit CORS origins, constant-time secret comparison, and redirect allowlists.
 
-The PR fixture covers those same concerns. The point is not to model a real application perfectly; it is to create a stable benchmark where reviewer implementations can be compared against known expected issues.
+The PR fixture covers those same concerns. The point is not to model a real application perfectly; it is to create a stable benchmark where agentic reviewer designs can be compared against known expected issues.
 
 The fixture code is intentionally outside the article body:
 
@@ -89,9 +89,9 @@ The fixture code is intentionally outside the article body:
 | [`evaluation.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py) | Metric calculation and expected-issue matching. |
 | [`run_experiment.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/run_experiment.py) | Command-line runner. |
 
-## Reviewer Implementations
+## Agentic Code Reviewer
 
-The reviewer implementations share the same inputs and output schema. They differ in how much context they use and how narrowly the reviewer is prompted.
+The agentic code reviewer is implemented as a set of reviewer variants. They share the same inputs and output schema, but differ in how much context they use and how narrowly each reviewer is prompted.
 
 ### General Reviewer
 
