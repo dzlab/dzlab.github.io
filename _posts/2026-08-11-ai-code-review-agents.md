@@ -73,7 +73,7 @@ uv run python run_experiment.py --mode all
 
 `uv sync` creates the virtual environment and installs dependencies. Use `--limit` while iterating to control token usage. The dry run validates the fixture and chunking without making API calls.
 
-## Review Fixture
+## Benchmark Dataset
 
 The benchmark uses a synthetic FastAPI service and 15 deliberately flawed pull requests. The service fixture contains 11 known-good files that encode the local patterns an AI reviewer should use as evidence: authentication, authorization, parameterized SQL, rate limiting, secrets, safe file paths, upload validation, inventory locking, HTML escaping, JSON serialization, Pydantic constraints, generic error responses, explicit CORS origins, constant-time secret comparison, and redirect allowlists.
 
