@@ -15,10 +15,10 @@ AI coding assistants make it easy to generate more code than a team can carefull
 This article focuses on the reviewer implementation. The complete runnable experiment lives in the snippets repository:
 
 - [README](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents)
-- [data.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/ai_code_review_agents/data.py)
-- [context.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/ai_code_review_agents/context.py)
-- [reviewers.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/ai_code_review_agents/reviewers.py)
-- [evaluation.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/ai_code_review_agents/evaluation.py)
+- [data.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/data.py)
+- [context.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/context.py)
+- [reviewers.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py)
+- [evaluation.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py)
 - [run_experiment.py](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/run_experiment.py)
 
 The code compares four reviewer designs:
@@ -88,10 +88,10 @@ The fixture code is intentionally outside the article body:
 
 | File | Purpose |
 |---|---|
-| [`data.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/ai_code_review_agents/data.py) | Synthetic repository and 15 pull requests. |
-| [`context.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/ai_code_review_agents/context.py) | Chunking, embedding, and retrieval. |
-| [`reviewers.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/ai_code_review_agents/reviewers.py) | General, specialist, and ensemble reviewers. |
-| [`evaluation.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/ai_code_review_agents/evaluation.py) | Metric calculation and expected-issue matching. |
+| [`data.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/data.py) | Synthetic repository and 15 pull requests. |
+| [`context.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/context.py) | Chunking, embedding, and retrieval. |
+| [`reviewers.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py) | General, specialist, and ensemble reviewers. |
+| [`evaluation.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py) | Metric calculation and expected-issue matching. |
 | [`run_experiment.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/run_experiment.py) | Command-line runner. |
 
 ## Reviewer Implementations
@@ -102,7 +102,7 @@ The reviewer implementations share the same inputs and output schema. They diffe
 
 The first reviewer is deliberately simple. It can run in diff-only mode or context-aware mode. The code path is the same; the only difference is whether `context` is empty.
 
-The important part is the prompt assembly in [`reviewers.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/ai_code_review_agents/reviewers.py):
+The important part is the prompt assembly in [`reviewers.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py):
 
 ```python
 def review(pr, openai_client, model, context=None, task_context=None, custom_prompt=None):
@@ -155,7 +155,7 @@ This is useful as a baseline because it is easy to reason about. It is also the 
 
 ### Selective-Context Reviewer
 
-Selective context uses retrieval to pass only the code chunks most relevant to the PR. The companion project implements this in [`context.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/ai_code_review_agents/context.py).
+Selective context uses retrieval to pass only the code chunks most relevant to the PR. The companion project implements this in [`context.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/context.py).
 
 ```mermaid
 flowchart LR
@@ -247,7 +247,7 @@ The narrow prompts make the model's job clearer. The security reviewer does not 
 
 A naive ensemble would concatenate every finding from every specialist. That improves recall, but it can flood the developer with noisy comments.
 
-The combiner in [`reviewers.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/ai_code_review_agents/reviewers.py) uses agreement as the core signal, then adds a bounded number of unique high or medium severity findings:
+The combiner in [`reviewers.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py) uses agreement as the core signal, then adds a bounded number of unique high or medium severity findings:
 
 ```python
 def review_ensemble(pr, openai_client, model, context, task_context):
@@ -276,7 +276,7 @@ This is stricter than concatenation. It preserves the benefit of specialization 
 
 The evaluation harness compares generated findings against expected issues using keyword overlap. It is intentionally lightweight; the point is to make reviewer designs comparable, not to build a perfect grader.
 
-The core matching function in [`evaluation.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/ai_code_review_agents/evaluation.py) looks like this:
+The core matching function in [`evaluation.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py) looks like this:
 
 ```python
 def issues_match(expected: str, found: str, threshold: float = 0.30) -> bool:
