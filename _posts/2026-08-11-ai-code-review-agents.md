@@ -57,26 +57,24 @@ flowchart TD
 
 ## Run The Experiment
 
-Clone the snippets repository and run the companion project:
+Install `uv` first if it is not already available. Then clone the snippets repository and run the companion project:
 
 ```bash
 git clone https://github.com/dzlab/snippets.git
 cd snippets/ai-code-review-agents
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+uv sync
 cp .env.example .env
 ```
 
 Set `OPENAI_API_KEY` in `.env`, then run:
 
 ```bash
-python run_experiment.py --dry-run
-python run_experiment.py --mode all --limit 3
-python run_experiment.py --mode all
+uv run python run_experiment.py --dry-run
+uv run python run_experiment.py --mode all --limit 3
+uv run python run_experiment.py --mode all
 ```
 
-Use `--limit` while iterating to control token usage. The dry run validates the fixture and chunking without making API calls.
+`uv sync` creates the virtual environment and installs dependencies. Use `--limit` while iterating to control token usage. The dry run validates the fixture and chunking without making API calls.
 
 ## Review Fixture
 
