@@ -46,7 +46,9 @@ The complete ai review agent code is split among these files:
 | Content | What it covers |
 |---|---|
 | [Project README](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents) | Setup instructions, `uv` commands, CLI options, and examples for running the benchmark. |
-| [Review fixtures](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/data.py) | The synthetic FastAPI repository, the 15 deliberately flawed pull requests, and the expected issues used for evaluation. |
+| [Repository fixture](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents/fixtures/repository) | The synthetic FastAPI application files used as the baseline codebase. |
+| [Pull request fixtures](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents/fixtures/prs) | The 15 deliberately flawed pull requests stored as standalone diff files. |
+| [Fixture loaders](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/data.py) | Helper functions that load repository files and PR diffs, plus PR metadata and expected issues used for evaluation. |
 | [Context retrieval](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/context.py) | AST chunking, embedding generation, Chroma indexing, and retrieval of relevant code snippets for each PR. |
 | [Agentic reviewer code](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py) | The general reviewer, security specialist, pattern specialist, parser, deduplication logic, and ensemble combiner. |
 | [Evaluation harness](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py) | Matching generated findings against expected issues and computing precision, recall, F1, true positives, false positives, and false negatives. |
@@ -83,7 +85,9 @@ The fixture code is intentionally outside the article body:
 
 | File | Purpose |
 |---|---|
-| [`data.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/data.py) | Synthetic repository and 15 pull requests. |
+| [`fixtures/repository/`](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents/fixtures/repository) | The synthetic FastAPI application files. |
+| [`fixtures/prs/`](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents/fixtures/prs) | The 15 pull request diffs. |
+| [`data.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/data.py) | Fixture loading helpers, PR metadata, and expected issues. |
 | [`context.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/context.py) | Chunking, embedding, and retrieval. |
 | [`reviewers.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py) | General, specialist, and ensemble reviewers. |
 | [`evaluation.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py) | Metric calculation and expected-issue matching. |
