@@ -12,18 +12,9 @@ mermaid: true
 
 AI coding assistants make it easy to generate more code than a team can carefully review by hand. That changes the bottleneck. The hard question is no longer only "can we write the code?", but also "can we review it with enough context to catch missed requirements, security gaps, and codebase-specific pattern violations?"
 
-## What We Are Building
+## AI Review
 
-The system receives a pull request title, a diff, and optional task requirements. The experiment compares four reviewer designs:
-
-| Reviewer design | What it does |
-|---|---|
-| **Diff-only reviewer** | Reviews only the pull request title, task context, and changed lines. This is the cheapest baseline and mirrors what a reviewer can do from a patch alone, but it cannot reliably catch violations of repository-specific patterns that are not visible in the diff. |
-| **Full-context reviewer** | Sends the entire synthetic repository alongside the PR diff. This gives the model access to every local convention and reference implementation, making it useful as an upper-bound context baseline, but it is expensive and becomes noisy as the codebase grows. |
-| **Selective-context reviewer** | Indexes the repository into AST-based chunks, embeds those chunks, and retrieves only the most relevant code for each PR. This tests whether retrieval can preserve most of the useful repository evidence while avoiding the token cost and distraction of full-context review. |
-| **Specialized reviewer ensemble** | Runs narrower reviewers for security and codebase-pattern compliance, then combines overlapping and high-signal findings. This design tests whether focused reviewer roles can improve recall without simply concatenating every possible comment into a noisy final review. |
-
-The high-level flow looks like this:
+In this article, we will build an agentic AI Review system that receives a pull request to generate a code review. It will use different strategies to improve the quality of reviews, the high-level flow looks like this:
 
 ```mermaid
 flowchart TD
@@ -41,18 +32,16 @@ flowchart TD
     E --> F[Final review findings]
 ```
 
-The complete ai review agent code is split among these files:
+We will use this system to run different experiments in which the agent will rely on different type of information about the Pull Requst (title, diff, some context) and then we compare the results. The different agents and the information they will be using are explained below:
 
-| Content | What it covers |
+| Reviewer design | What it does |
 |---|---|
-| [Project README](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents) | Setup instructions, `uv` commands, CLI options, and examples for running the benchmark. |
-| [Repository fixture](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents/fixtures/repository) | The synthetic FastAPI application files used as the baseline codebase. |
-| [Pull request fixtures](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents/fixtures/prs) | The 15 deliberately flawed pull requests stored as standalone diff files. |
-| [Fixture loaders](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/data.py) | Helper functions that load repository files and PR diffs, plus PR metadata and expected issues used for evaluation. |
-| [Context retrieval](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/context.py) | AST chunking, embedding generation, Chroma indexing, and retrieval of relevant code snippets for each PR. |
-| [Agentic reviewer code](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py) | The general reviewer, security specialist, pattern specialist, parser, deduplication logic, and ensemble combiner. |
-| [Evaluation harness](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py) | Matching generated findings against expected issues and computing precision, recall, F1, true positives, false positives, and false negatives. |
-| [Experiment runner](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/run_experiment.py) | The command-line entry point that wires fixtures, context strategies, reviewers, and metrics together. |
+| **Diff-only reviewer** | Reviews only the pull request title, task context, and changed lines. This is the cheapest baseline and mirrors what a reviewer can do from a patch alone, but it cannot reliably catch violations of repository-specific patterns that are not visible in the diff. |
+| **Full-context reviewer** | Sends the entire synthetic repository alongside the PR diff. This gives the model access to every local convention and reference implementation, making it useful as an upper-bound context baseline, but it is expensive and becomes noisy as the codebase grows. |
+| **Selective-context reviewer** | Indexes the repository into AST-based chunks, embeds those chunks, and retrieves only the most relevant code for each PR. This tests whether retrieval can preserve most of the useful repository evidence while avoiding the token cost and distraction of full-context review. |
+| **Specialized reviewer ensemble** | Runs narrower reviewers for security and codebase-pattern compliance, then combines overlapping and high-signal findings. This design tests whether focused reviewer roles can improve recall without simply concatenating every possible comment into a noisy final review. |
+
+The complete ai review agent code can be found in [ai-code-review-agents](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents).
 
 ## Run The Experiment
 
@@ -77,21 +66,14 @@ uv run python run_experiment.py --mode all
 
 ## Benchmark Dataset
 
-The benchmark uses a synthetic FastAPI service and 15 deliberately flawed pull requests. The service fixture contains 11 known-good files that encode the local patterns an AI reviewer should use as evidence: authentication, authorization, parameterized SQL, rate limiting, secrets, safe file paths, upload validation, inventory locking, HTML escaping, JSON serialization, Pydantic constraints, generic error responses, explicit CORS origins, constant-time secret comparison, and redirect allowlists.
+The benchmark dataset used for comparison consists of a synthetic FastAPI service and 15 deliberately flawed pull requests. The [service fixtures](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents/fixtures/repository) contains 11 known-good files that encode the local patterns an AI reviewer should use as evidence: authentication, authorization, parameterized SQL, rate limiting, secrets, safe file paths, upload validation, inventory locking, HTML escaping, JSON serialization, Pydantic constraints, generic error responses, explicit CORS origins, constant-time secret comparison, and redirect allowlists.
+The [pull request fixtures](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents/fixtures/prs) covers 15 pull request diffs.
 
-The PR fixture covers those same concerns. The point is not to model a real application perfectly; it is to create a stable benchmark where agentic reviewer designs can be compared against known expected issues.
 
-The fixture code is intentionally outside the article body:
+The point of this dataset is not to model a real application perfectly; but to create a stable benchmark where agentic reviewer designs can be compared against known expected issues.
 
-| File | Purpose |
-|---|---|
-| [`fixtures/repository/`](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents/fixtures/repository) | The synthetic FastAPI application files. |
-| [`fixtures/prs/`](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents/fixtures/prs) | The 15 pull request diffs. |
-| [`data.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/data.py) | Fixture loading helpers, PR metadata, and expected issues. |
-| [`context.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/context.py) | Chunking, embedding, and retrieval. |
-| [`reviewers.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/reviewers.py) | General, specialist, and ensemble reviewers. |
-| [`evaluation.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/src/evaluation.py) | Metric calculation and expected-issue matching. |
-| [`run_experiment.py`](https://github.com/dzlab/snippets/blob/master/ai-code-review-agents/run_experiment.py) | Command-line runner. |
+The complete fixture code can be found [here](https://github.com/dzlab/snippets/tree/master/ai-code-review-agents/fixtures).
+
 
 ## Agentic Code Reviewer
 
@@ -218,26 +200,70 @@ The companion implementation has two specialists:
 The implementation uses the same `review(...)` function with different prompt templates:
 
 ```python
-def review_security(pr, openai_client, model, context, task_context):
-    return review(
-        pr,
-        openai_client=openai_client,
-        model=model,
-        context=context,
-        task_context=task_context,
-        custom_prompt=SECURITY_AGENT_PROMPT,
-    )
+ECURITY_AGENT_PROMPT = """You are a security expert.
+Your only focus is finding security vulnerabilities in code changes.
 
+PR Title: {title}
 
-def review_pattern(pr, openai_client, model, context, task_context):
-    return review(
-        pr,
-        openai_client=openai_client,
-        model=model,
-        context=context,
-        task_context=task_context,
-        custom_prompt=PATTERN_AGENT_PROMPT,
-    )
+{task_section}
+
+Code Changes:
+{diff}
+
+{context_section}
+
+Security analysis checklist:
+- SQL injection through string-built queries.
+- XSS through unescaped user-controlled content.
+- Authentication bypass.
+- Missing authorization checks.
+- Hardcoded secrets or credentials.
+- Weak randomness or weak cryptography.
+- Path traversal.
+- Insecure deserialization.
+- CORS misconfiguration.
+- Timing attacks in secret comparison.
+- Open redirects.
+- Information disclosure.
+- Sensitive data in logs.
+
+For each security vulnerability found, respond exactly as:
+
+ISSUE: <brief security issue>
+SEVERITY: <high|medium|low>
+
+Report only real security vulnerabilities and missing required security controls.
+```
+
+```python
+PATTERN_AGENT_PROMPT = """You are a codebase pattern compliance reviewer.
+Your only focus is finding violations of task requirements and established codebase patterns.
+
+PR Title: {title}
+
+{task_section}
+
+Code Changes:
+{diff}
+
+{context_section}
+
+Pattern analysis checklist:
+- Authentication and authorization patterns.
+- Parameterized database query patterns.
+- Error handling and logging patterns.
+- Input validation patterns.
+- Secrets management patterns.
+- Transaction and locking patterns.
+- Rate limiting patterns.
+- Safe file path construction.
+
+For each pattern violation found, respond exactly as:
+
+ISSUE: <brief pattern violation>
+SEVERITY: <high|medium|low>
+
+Report only task requirement violations or deviations from established codebase patterns."""
 ```
 
 The narrow prompts make the model's job clearer. The security reviewer does not need to comment on style. The pattern reviewer does not need to rediscover generic vulnerability classes unless they also violate local policy.
@@ -293,7 +319,7 @@ def issues_match(expected: str, found: str, threshold: float = 0.30) -> bool:
     return keyword_score >= threshold
 ```
 
-The runner compares every reviewer against the same `SAMPLE_PRS` fixture:
+And the benchmark runner compares every reviewer against the same `SAMPLE_PRS` fixture:
 
 ```python
 def run_benchmark(args):
@@ -327,15 +353,9 @@ def run_benchmark(args):
     }
 ```
 
-### Benchmark Reproducibility
-
-The reference numbers below come from one controlled run with `gpt-4o-mini`, `temperature=0`, `text-embedding-3-large`, `n_results=10` retrieved chunks, and the keyword-overlap matcher in the evaluation harness. Hosted model behavior can still change over time, so treat the percentages as reference results for comparing approaches, not permanent constants.
-
-Production evaluation should use a reviewed golden set with line-level expected findings, severity labels, duplicate-finding rules, and human adjudication for borderline matches.
-
 ### Benchmark Comparison
 
-Against the 15 pull requests in the companion fixture, the implementations behaved like this:
+Against the 15 pull requests in the companion fixture, the different AI reviewer implementations behaved like this:
 
 | Implementation | Context strategy | Precision | Recall | F1 Score |
 |---|---|---:|---:|---:|
@@ -345,6 +365,13 @@ Against the 15 pull requests in the companion fixture, the implementations behav
 | Specialized ensemble reviewer | Retrieved top chunks + security/pattern specialists | 60.00% | 90.00% | 72.00% |
 
 The progression shows three useful effects. First, adding repository context improves recall because the reviewer can see requirements and local patterns that are absent from the diff. Second, selective retrieval beats dumping all context because fewer irrelevant chunks distract the model. Third, the ensemble trades a small amount of recall for much higher precision, which is usually the better direction for code review tooling.
+
+### Benchmark Reproducibility
+
+The previous reference numbers come from one controlled run with `gpt-4o-mini`, `temperature=0`, `text-embedding-3-large`, `n_results=10` retrieved chunks, and the keyword-overlap matcher in the evaluation harness. If you rerun the benchmark with a different review model, the exact percentages may shift slightly even when the prompts, fixtures, and retrieval settings stay the same. Hosted model behavior can also change over time, so treat the percentages as reference results for comparing approaches, not permanent constants.
+
+Production evaluation should use a reviewed golden set with line-level expected findings, severity labels, duplicate-finding rules, and human adjudication for borderline matches.
+
 
 ## Why Context Changes The Review
 
@@ -367,7 +394,7 @@ That is the difference between generic review and codebase-aware review. The fir
 
 ## Production Architecture
 
-The toy implementation is intentionally small, but the architecture maps to a production system:
+The implementation in this article is intentionally small, but the core architecture can be used to build a production system. For instance, we can extend it to something like below:
 
 ```mermaid
 flowchart TD
@@ -386,7 +413,7 @@ flowchart TD
     E --> CM[Review comments]
 ```
 
-A production version should add:
+This production-grade version adds the following components:
 
 - **Repository indexing by commit SHA**: build and query the index for the exact revision under review, so findings cite code that actually existed when the PR was analyzed.
 - **Semantic and lexical retrieval**: combine embedding search with keyword or symbol search, because security rules, framework names, migrations, and error messages are often easier to find lexically.
@@ -421,7 +448,7 @@ The final reviewer is not just the model. It is the model plus filtering, dedupl
 
 ### Evaluation Needs A Golden Set
 
-You cannot improve an AI reviewer by vibe. Save examples of:
+We cannot improve an AI reviewer by vibe. Save examples of:
 
 - security regressions caught in review;
 - incidents caused by code changes;
