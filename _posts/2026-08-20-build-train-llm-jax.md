@@ -207,18 +207,10 @@ flowchart LR
 
 ## Training Data
 
-The training data starts as a `TinyStories-1000.txt` file split on the `<|endoftext|>` delimiter. It contains 1,000 stories; in this sample the shortest story has 61 whitespace-separated words, the longest has 837, and the average is about 184 words.
+The training data used here is a small dataset of short stories where each story ends with `<|endoftext|>` delimiter. There are 1,000 stories; with the shortest story has 61 whitespace-separated words, the longest has 837, and the average is about 184 words.
 
-For a quick run, use a smaller 100-story subset:
 
-```text
-Loading data from TinyStories-1000.txt (max 100 stories)
-Loaded 100 stories
-Estimated batches per epoch: 3
-Created DataLoader with batch_size=32, maxlen=128
-```
-
-A compact loader for this small text file is:
+First, we need to define a helper function to read stories text file:
 
 ```python
 def load_stories_from_file(file_path, max_stories=None):
@@ -235,34 +227,7 @@ def load_stories_from_file(file_path, max_stories=None):
     return stories
 ```
 
-Each story becomes a fixed-length token sequence. Longer stories are truncated to the context length, and shorter stories are right-padded with zeros. Right padding matters because the generation function later uses the same alignment when it predicts the next token from a shorter prompt.
-
-The `StoryDataset` transformation is intentionally simple: load one story, encode it with the GPT-2 tokenizer, normalize it to `maxlen`, and let Grain stack those rows into a training batch. For example, the first TinyStories sample begins with "One day, a little girl...", which tokenizes to IDs starting with `[3198, 1110, 11, 257, 1310, 2576, ...]`.
-
-```mermaid
-flowchart LR
-    A["Raw story text<br/>One day, a little girl named Lily..."] --> B["Story record<br/>append &lt;|endoftext|&gt;"]
-    B --> C["GPT-2 tokenizer<br/>tokenizer.encode(..., allowed_special=...)"]
-    C --> D["Token IDs<br/>[3198, 1110, 11, 257, 1310, 2576, ...]"]
-    D --> E{"More than maxlen tokens?"}
-    E -- yes --> F["Truncate<br/>tokens[:128]"]
-    E -- no --> G["Keep encoded story"]
-    F --> H["Right pad with 0<br/>until length = 128"]
-    G --> H
-    H --> I["StoryDataset row<br/>[token_0, ..., token_127]"]
-    I --> J["Grain batch<br/>batch_size x maxlen"]
-
-    classDef text fill:#e8f4ff,stroke:#1677b9,color:#0b2d42;
-    classDef tokenize fill:#fff4cc,stroke:#b58100,color:#3d2b00;
-    classDef branch fill:#fdeee2,stroke:#bf5b17,color:#4a2105;
-    classDef shape fill:#e8f8ef,stroke:#23834d,color:#0e3d24;
-    classDef batch fill:#efe8ff,stroke:#6a45b8,color:#241340;
-    class A,B text;
-    class C,D tokenize;
-    class E,F,G branch;
-    class H,I shape;
-    class J batch;
-```
+During transformation, each story becomes a fixed-length token sequence. Longer stories are truncated to the context length, and shorter stories are right-padded with zeros. Right padding matters because the generation function later uses the same alignment when it predicts the next token from a shorter prompt. This is implemented as follows:
 
 ```python
 class StoryDataset:
@@ -292,7 +257,8 @@ class StoryDataset:
         return tokens
 ```
 
-Grain supplies the sampler and the fixed-size batching operation. The important choice is `drop_remainder=True`, which keeps every training batch the same shape and makes JIT compilation simpler.
+Next, we use the [Grain library](https://github.com/google/grain) to implement a Data loader that will create batches for training from the raw text.
+
 
 ```python
 def create_dataloader(stories, tokenizer, maxlen, batch_size,
@@ -319,6 +285,35 @@ def create_dataloader(stories, tokenizer, maxlen, batch_size,
     )
 
     return dataloader, estimated_batches
+```
+
+> The parameter `drop_remainder=True` helps keep every batch of the same shape and makes JIT compilation simpler.
+
+The transformation is depicted by the following diagram: load one story, encode it with the GPT-2 tokenizer, normalize it to `maxlen`, and let Grain stack those rows into a training batch.
+
+```mermaid
+flowchart LR
+    A["Raw story text<br/>One day, a little girl named Lily..."] --> B["Story record<br/>append &lt;|endoftext|&gt;"]
+    B --> C["GPT-2 tokenizer<br/>tokenizer.encode(..., allowed_special=...)"]
+    C --> D["Token IDs<br/>[3198, 1110, 11, 257, 1310, 2576, ...]"]
+    D --> E{"More than maxlen tokens?"}
+    E -- yes --> F["Truncate<br/>tokens[:128]"]
+    E -- no --> G["Keep encoded story"]
+    F --> H["Right pad with 0<br/>until length = 128"]
+    G --> H
+    H --> I["StoryDataset row<br/>[token_0, ..., token_127]"]
+    I --> J["Grain batch<br/>batch_size x maxlen"]
+
+    classDef text fill:#e8f4ff,stroke:#1677b9,color:#0b2d42;
+    classDef tokenize fill:#fff4cc,stroke:#b58100,color:#3d2b00;
+    classDef branch fill:#fdeee2,stroke:#bf5b17,color:#4a2105;
+    classDef shape fill:#e8f8ef,stroke:#23834d,color:#0e3d24;
+    classDef batch fill:#efe8ff,stroke:#6a45b8,color:#241340;
+    class A,B text;
+    class C,D tokenize;
+    class E,F,G branch;
+    class H,I shape;
+    class J batch;
 ```
 
 ## Training Loop
