@@ -432,7 +432,7 @@ When running this loop over 2,000,000 stories for 3 epochs, the loss drops quick
 
 ## Checkpointing
 
-Once the model has trained, save the NNX model state with Orbax:
+Once the model has trained, we can use [Orbax](https://orbax.readthedocs.io/) to save the NNX model state:
 
 ```python
 from pathlib import Path
@@ -443,7 +443,7 @@ checkpointer = orbax.checkpoint.PyTreeCheckpointer()
 checkpointer.save(checkpoint_path, nnx.state(model), force=True)
 ```
 
-The inference lesson restores a checkpoint onto a CPU device by building matching restore arguments for the model state PyTree:
+Then during inference we can restore the checkpoint onto a CPU device:
 
 ```python
 from orbax import checkpoint
@@ -458,11 +458,11 @@ restore_args = jax.tree_util.tree_map(
 )
 ```
 
-That restore step is important because the checkpoint is not just a flat file. It is structured model state, and each array needs sharding information when it is loaded.
+> Note: A checkpoint is not just a flat file, it is structured model state, and each array needs sharding information when it is loaded.
 
-## Generation
+## Inference
 
-Generation is a loop around next-token prediction. The function keeps a growing token list, slices the latest model context, right-pads if the prompt is shorter than `maxlen`, runs the model, and selects the next token.
+During inference, we simply loop around next-token prediction: keep track of the growing token list, slices the latest model context, right-pads if the prompt is shorter than `maxlen`, runs the model, and selects the next token.
 
 ```python
 def generate_text(model, start_tokens, max_new_tokens=50, temperature=1.0):
@@ -510,22 +510,8 @@ The restored model generates a short TinyStories-like continuation:
 Once upon a time a big bear ops were in the forest. He was very happy and he was always looking for something to do. One day, he saw a big, shiny rock
 ```
 
-The text is imperfect, which is expected from a compact teaching model. The point is that the full pipeline is working: prompt tokens go in, logits come out, the loop chooses new tokens, and the tokenizer turns those tokens back into text.
+Depending on the input prompt, the model may generate garbage or an imperfect text that look like a story, but this is expected considering how small the model is as well as the training.
 
-## Practical Notes
+---
 
-For local experimentation, the main practical lessons are:
-
-| Concern | Practical choice |
-|---|---|
-| Fixed shapes | Use truncation, padding, and `drop_remainder=True` so JIT compilation sees stable batch shapes. |
-| Short runs | Keep the 100-story run for fast feedback, but do not judge model quality from 9 update steps. |
-| Longer training | Use larger data and more steps to see a meaningful loss curve. |
-| Checkpoints | Save and restore structured NNX state with Orbax rather than trying to serialize ad hoc arrays. |
-| Generation | Match inference padding to the training-time data layout. |
-
-## Takeaways
-
-The value of this MiniGPT project is that it makes the language-model stack concrete. JAX provides the differentiable array runtime, Flax NNX gives the model a clean stateful shape, Grain makes token batches explicit, Optax defines the training objective and optimizer, and Orbax preserves learned state.
-
-For a production LLM, each of these sections becomes much deeper: larger datasets, more complete transformer blocks, distributed training, evaluation, sampling strategies, checkpoint management, and serving infrastructure. But the skeleton is already here, and that makes the larger system easier to reason about.
+_I hope you enjoyed this article. Feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc)._
