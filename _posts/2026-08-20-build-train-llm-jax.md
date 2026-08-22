@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: "Build and Train a MiniGPT with JAX"
-excerpt: "A practical walkthrough of a MiniGPT workflow with Flax NNX, Grain, Optax, Orbax, and TinyStories."
+excerpt: "A practical walkthrough of building and training a MiniGPT with Flax NNX, Grain, Optax, Orbax, and TinyStories."
 categories: genai
 tags: [ai,llm,jax,flax]
 toc: true
@@ -10,13 +10,8 @@ img_excerpt:
 mermaid: true
 ---
 
-Training a language model is easier to understand when the whole system is small enough to fit on one page, but still complete enough to show the real moving parts. The key pieces are the decoder architecture, tokenized data pipeline, differentiable training step, checkpoint handling, and an inference loop that turns token logits back into text.
+In this article, we will build a workflow for training a language-model using JAX ecosystem. Specifically, we will build a compact GPT-style language model with JAX and Flax NNX, train it on a small text dataset called TinyStories, use Orbax for checkpointing, and run text generation from the restored model.
 
-In this article, we will build a compact GPT-style language model with JAX and Flax NNX, train it on TinyStories, save a checkpoint with Orbax, and run text generation from the restored model. The companion source material is available in [Build and Train an LLM with JAX](https://github.com/dzlab/deeplearning.ai/tree/main/2026/03/BuildandTrainanLLMwithJAX), but the implementation flow below is self-contained.
-
-## Workflow
-
-The project follows the same path as a production language-model training workflow, but at teaching scale:
 
 ```mermaid
 flowchart LR
@@ -42,19 +37,13 @@ flowchart LR
     class H inference;
 ```
 
-The useful part of this exercise is not that the model becomes a strong storyteller in a few minutes. It is that every major system boundary is visible:
+Although the model is small, we still can cover the core pieces of a language model: the decoder architecture, tokenized data pipeline, differentiable training step, checkpoint handling, and an inference loop that turns token logits back into text.
 
-| Stage | Library | Role |
-|---|---|---|
-| Model definition | Flax NNX | Defines stateful modules for embeddings, attention blocks, and the output projection. |
-| Array computation | JAX | Handles array operations, automatic differentiation, vectorization, and JIT compilation. |
-| Data loading | Grain | Samples stories and batches fixed-shape token arrays. |
-| Optimization | Optax | Provides cross-entropy, AdamW, and a warmup cosine learning-rate schedule. |
-| Checkpointing | Orbax | Saves and restores model state as a PyTree. |
+The complete source material is available in [Build and Train an LLM with JAX](https://github.com/dzlab/deeplearning.ai/tree/main/2026/03/BuildandTrainanLLMwithJAX).
 
 ## Setup
 
-The examples use the following Python dependencies:
+First, install the following Python dependencies:
 
 ```text
 jax==0.6.2
@@ -67,7 +56,9 @@ jupyter==1.1.1
 matplotlib==3.10.8
 ```
 
-The core imports and model constants are:
+> Note: If Orbax was not pulled in by the Flax/JAX stack, it can be install by adding explicitly these dependencies `optax` and `orbax-checkpoint`.
+
+Then, imports the libraries and set global constants:
 
 ```python
 import jax
@@ -90,7 +81,15 @@ batch_size = 32
 num_epochs = 3
 ```
 
-The course environment also has Orbax available for checkpointing. In a fresh local environment, install `optax` and `orbax-checkpoint` explicitly if they are not pulled in by the Flax/JAX stack.
+We will use these libraries to implement various stages of the training workflow:
+
+| Stage | Library | Role |
+|---|---|---|
+| Model definition | Flax NNX | Defines stateful modules for embeddings, attention blocks, and the output projection. |
+| Array computation | JAX | Handles array operations, automatic differentiation, vectorization, and JIT compilation. |
+| Data loading | Grain | Samples stories and batches fixed-shape token arrays. |
+| Optimization | Optax | Provides cross-entropy, AdamW, and a warmup cosine learning-rate schedule. |
+| Checkpointing | Orbax | Saves and restores model state as a PyTree. |
 
 ## Model Architecture
 
