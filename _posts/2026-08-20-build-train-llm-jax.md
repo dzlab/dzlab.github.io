@@ -318,7 +318,7 @@ flowchart LR
 
 ## Training Loop
 
-The training objective is next-token prediction. The model receives the input sequence and learns to predict the target sequence. The target is the same token sequence shifted left by one position:
+For training the model we need first to define the training objective which is next-token prediction. Our model receives an input sequence and learns to predict the target sequence. The target is the same token sequence shifted left by one position which can be implemented in JAX as:
 
 ```python
 prep_target_batch = jax.vmap(
@@ -326,7 +326,72 @@ prep_target_batch = jax.vmap(
 )
 ```
 
-The full loop repeatedly pulls a batch from Grain, builds input and target arrays, runs the JIT-compiled training step, updates metrics, and advances until every epoch has been consumed.
+Next we define the loss function for the training. Using [Optax](https://optax.readthedocs.io/) we compute token-level softmax cross-entropy and averages it across the batch.
+
+```python
+def loss_fn(model, batch):
+    inputs, targets = batch
+    logits = model(inputs)
+    loss = optax.softmax_cross_entropy_with_integer_labels(
+        logits, targets
+    ).mean()
+    return loss, logits
+```
+
+Next we step the Learning Rate schedule (a warmup cosine schedule) and the optimizer (AdamW):
+
+```python
+total_steps = batches_per_epoch * num_epochs
+warmup_steps = max(1, total_steps // 10)
+
+lr_schedule = optax.warmup_cosine_decay_schedule(
+    init_value=0.0,
+    peak_value=3e-4,
+    warmup_steps=warmup_steps,
+    decay_steps=total_steps,
+    end_value=1e-5,
+)
+
+optimizer = nnx.Optimizer(
+    model,
+    optax.adamw(learning_rate=lr_schedule, weight_decay=0.01),
+)
+```
+
+Next we define the training step with `@nnx.jit` to compile it. We perform a forward pass, use `nnx.value_and_grad` to compute the loss and gradients, the use `metrics.update` to record training metrics, and finally `optimizer.update` to mutate the model parameters through the NNX optimizer wrapper.
+
+```python
+@nnx.jit
+def train_step(model, optimizer, metrics, batch):
+    grad_fn = nnx.value_and_grad(loss_fn, has_aux=True)
+    (loss, logits), grads = grad_fn(model, batch)
+
+    metrics.update(loss=loss, logits=logits, labels=batch[1])
+    optimizer.update(grads)
+```
+
+Finally, we defind the training loop: convert each Grain batch into JAX integer arrays, builds the shifted targets, calls the JIT-compiled training step, and record the metrics:
+
+```python
+metrics_history = {"train_loss": []}
+
+for epoch in range(num_epochs):
+    step = 0
+    for batch in text_dl:
+        input_batch = jnp.array(jnp.array(batch).T).astype(jnp.int32)
+        target_batch = prep_target_batch(input_batch).astype(jnp.int32)
+
+        train_step(model, optimizer, metrics, (input_batch, target_batch))
+
+        if (step + 1) % 2 == 0:
+            for metric, value in metrics.compute().items():
+                metrics_history[f"train_{metric}"].append(value)
+            metrics.reset()
+
+        step += 1
+```
+
+The following diagram puts together the different parts of the training loop:
 
 ```mermaid
 flowchart LR
@@ -361,83 +426,7 @@ flowchart LR
     class N output;
 ```
 
-Optax computes token-level softmax cross-entropy and averages it across the batch.
-
-```python
-def loss_fn(model, batch):
-    inputs, targets = batch
-    logits = model(inputs)
-    loss = optax.softmax_cross_entropy_with_integer_labels(
-        logits, targets
-    ).mean()
-    return loss, logits
-```
-
-The training setup builds a warmup cosine schedule over the available steps and uses AdamW:
-
-```python
-total_steps = batches_per_epoch * num_epochs
-warmup_steps = max(1, total_steps // 10)
-
-lr_schedule = optax.warmup_cosine_decay_schedule(
-    init_value=0.0,
-    peak_value=3e-4,
-    warmup_steps=warmup_steps,
-    decay_steps=total_steps,
-    end_value=1e-5,
-)
-
-optimizer = nnx.Optimizer(
-    model,
-    optax.adamw(learning_rate=lr_schedule, weight_decay=0.01),
-)
-```
-
-The compact training step is where JAX starts to pay off. `nnx.value_and_grad` computes the loss and gradients, `metrics.update` records training metrics, and `optimizer.update` mutates the model parameters through the NNX optimizer wrapper. `@nnx.jit` compiles that whole step.
-
-```python
-@nnx.jit
-def train_step(model, optimizer, metrics, batch):
-    grad_fn = nnx.value_and_grad(loss_fn, has_aux=True)
-    (loss, logits), grads = grad_fn(model, batch)
-
-    metrics.update(loss=loss, logits=logits, labels=batch[1])
-    optimizer.update(grads)
-```
-
-The loop converts each Grain batch into JAX integer arrays, builds the shifted targets, and calls the compiled step:
-
-```python
-metrics_history = {"train_loss": []}
-
-for epoch in range(num_epochs):
-    step = 0
-    for batch in text_dl:
-        input_batch = jnp.array(jnp.array(batch).T).astype(jnp.int32)
-        target_batch = prep_target_batch(input_batch).astype(jnp.int32)
-
-        train_step(model, optimizer, metrics, (input_batch, target_batch))
-
-        if (step + 1) % 2 == 0:
-            for metric, value in metrics.compute().items():
-                metrics_history[f"train_{metric}"].append(value)
-            metrics.reset()
-
-        step += 1
-```
-
-For the quick run, 100 stories, batch size 32, and 3 epochs produce 9 total steps:
-
-```text
-Total training steps: 9
-Warmup steps: 1
-
-Epoch: 1, Step 2, Loss: 10.8881, LR: 3.00e-04
-Epoch: 2, Step 2, Loss: 10.5748, LR: 3.00e-04
-Epoch: 3, Step 2, Loss: 10.2045, LR: 3.00e-04
-```
-
-The lesson also includes a longer run over 2,000,000 stories for 3 epochs. The loss drops quickly in the early steps and then flattens near 2.
+When running this loop over 2,000,000 stories for 3 epochs, the loss drops quickly in the early steps and then flattens near 2.
 
 ![Training loss for the extended MiniGPT run]({{ "/assets/2026/08/20260820-jax-llm-training-loss.png" | absolute_url }}){: .center-image }
 
