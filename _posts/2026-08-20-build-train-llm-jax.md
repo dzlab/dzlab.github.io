@@ -93,7 +93,7 @@ We will use these libraries to implement various stages of the training workflow
 
 ## Model Architecture
 
-The model is intentionally small: a 20.2M parameter decoder with the GPT-2 tokenizer vocabulary, a context length of 128 tokens, and six causal attention blocks. That makes it big enough to expose realistic tensor shapes while still being manageable on a local machine.
+The model we will be building is small in size, a 20.2M parameter decoder with the GPT-2 tokenizer vocabulary, a context length of 128 tokens, and six causal attention blocks. The different model parameters are as follows:
 
 | Setting | Value |
 |---|---:|
@@ -105,7 +105,73 @@ The model is intentionally small: a 20.2M parameter decoder with the GPT-2 token
 | Feed-forward dimension setting | 512 |
 | Parameters | 20,212,608 |
 
-At runtime, each batch starts as token IDs with shape `batch_size x maxlen`. The model turns those IDs into embeddings, applies the causal decoder blocks, and projects every position back to the GPT-2 vocabulary. During training, the resulting logits are compared with the same batch shifted one token to the left.
+The first block of the model is the embedding layer that combines token identity with position. The token embedding maps GPT-2 token IDs into dense vectors, while the positional embedding gives the model an order signal. It is defined as:
+
+```python
+class TokenAndPositionEmbedding(nnx.Module):
+    def __init__(self, maxlen, vocab_size, embed_dim, *, rngs):
+        self.token_emb = nnx.Embed(vocab_size, embed_dim, rngs=rngs)
+        self.pos_emb = nnx.Embed(maxlen, embed_dim, rngs=rngs)
+
+    def __call__(self, x):
+        seq_len = x.shape[1]
+        positions = jnp.arange(seq_len)[None, :]
+        return self.token_emb(x) + self.pos_emb(positions)
+```
+
+The attention block uses Flax NNX's `MultiHeadAttention`. A causal mask prevents each token from attending to future tokens, which is the core rule that makes next-token prediction work. It is defined as:
+
+```python
+class TransformerBlock(nnx.Module):
+    def __init__(self, embed_dim, num_heads, ff_dim, *, rngs):
+        self.attention = nnx.MultiHeadAttention(
+            num_heads=num_heads,
+            in_features=embed_dim,
+            qkv_features=embed_dim,
+            out_features=embed_dim,
+            decode=False,
+            rngs=rngs,
+        )
+
+    def __call__(self, x, mask=None):
+        attn_out = self.attention(x, mask=mask)
+        x = x + attn_out
+        return x
+```
+
+The full `MiniGPT` model wires together embeddings, repeated attention blocks, and a final vocabulary projection. It returns one logit vector per position in the input sequence. It is defined as:
+
+```python
+class MiniGPT(nnx.Module):
+    def __init__(self, maxlen, vocab_size, embed_dim, num_heads,
+                 feed_forward_dim, num_transformer_blocks, *, rngs):
+        self.maxlen = maxlen
+        self.embedding = TokenAndPositionEmbedding(
+            maxlen, vocab_size, embed_dim, rngs=rngs
+        )
+        self.transformer_blocks = [
+            TransformerBlock(embed_dim, num_heads, feed_forward_dim, rngs=rngs)
+            for _ in range(num_transformer_blocks)
+        ]
+        self.output_layer = nnx.Linear(
+            embed_dim, vocab_size, use_bias=False, rngs=rngs
+        )
+
+    def causal_attention_mask(self, seq_len):
+        return jnp.tril(jnp.ones((seq_len, seq_len)))
+
+    def __call__(self, token_ids):
+        seq_len = token_ids.shape[1]
+        mask = self.causal_attention_mask(seq_len)
+        x = self.embedding(token_ids)
+
+        for block in self.transformer_blocks:
+            x = block(x, mask=mask)
+
+        return self.output_layer(x)
+```
+
+During training/inference, as depicted by the diagram below, the data will flow through the model in batches of token IDs with shape `batch_size x maxlen`. The model, first turns those IDs into embeddings, then applies a succession of causal decoder blocks, and finally projects every position back to the GPT-2 vocabulary. During training, the resulting logits are compared with the same batch shifted one token to the left.
 
 ```mermaid
 flowchart LR
@@ -138,74 +204,6 @@ flowchart LR
     class L output;
     class C loss;
 ```
-
-The embedding layer combines token identity with position. The token embedding maps GPT-2 token IDs into dense vectors, while the positional embedding gives the model an order signal.
-
-```python
-class TokenAndPositionEmbedding(nnx.Module):
-    def __init__(self, maxlen, vocab_size, embed_dim, *, rngs):
-        self.token_emb = nnx.Embed(vocab_size, embed_dim, rngs=rngs)
-        self.pos_emb = nnx.Embed(maxlen, embed_dim, rngs=rngs)
-
-    def __call__(self, x):
-        seq_len = x.shape[1]
-        positions = jnp.arange(seq_len)[None, :]
-        return self.token_emb(x) + self.pos_emb(positions)
-```
-
-The attention block uses Flax NNX's `MultiHeadAttention`. A causal mask prevents each token from attending to future tokens, which is the core rule that makes next-token prediction work.
-
-```python
-class TransformerBlock(nnx.Module):
-    def __init__(self, embed_dim, num_heads, ff_dim, *, rngs):
-        self.attention = nnx.MultiHeadAttention(
-            num_heads=num_heads,
-            in_features=embed_dim,
-            qkv_features=embed_dim,
-            out_features=embed_dim,
-            decode=False,
-            rngs=rngs,
-        )
-
-    def __call__(self, x, mask=None):
-        attn_out = self.attention(x, mask=mask)
-        x = x + attn_out
-        return x
-```
-
-The full `MiniGPT` model wires together embeddings, repeated attention blocks, and a final vocabulary projection. It returns one logit vector per position in the input sequence.
-
-```python
-class MiniGPT(nnx.Module):
-    def __init__(self, maxlen, vocab_size, embed_dim, num_heads,
-                 feed_forward_dim, num_transformer_blocks, *, rngs):
-        self.maxlen = maxlen
-        self.embedding = TokenAndPositionEmbedding(
-            maxlen, vocab_size, embed_dim, rngs=rngs
-        )
-        self.transformer_blocks = [
-            TransformerBlock(embed_dim, num_heads, feed_forward_dim, rngs=rngs)
-            for _ in range(num_transformer_blocks)
-        ]
-        self.output_layer = nnx.Linear(
-            embed_dim, vocab_size, use_bias=False, rngs=rngs
-        )
-
-    def causal_attention_mask(self, seq_len):
-        return jnp.tril(jnp.ones((seq_len, seq_len)))
-
-    def __call__(self, token_ids):
-        seq_len = token_ids.shape[1]
-        mask = self.causal_attention_mask(seq_len)
-        x = self.embedding(token_ids)
-
-        for block in self.transformer_blocks:
-            x = block(x, mask=mask)
-
-        return self.output_layer(x)
-```
-
-This is not a full modern production GPT block. For example, this compact version keeps the block minimal and does not turn the feed-forward dimension into a full MLP sublayer. That simplification is useful for learning because it keeps the focus on causal attention, model state, batching, and training mechanics.
 
 ## Training Data
 
