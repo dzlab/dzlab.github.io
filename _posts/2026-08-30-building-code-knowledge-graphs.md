@@ -14,7 +14,7 @@ Flat search is still the first tool I reach for when I need to find a file quick
 
 That is the gap a code knowledge graph tries to close. Instead of treating a repository as an unstructured pile of text, it stores files and symbols as nodes, links them with typed edges, and then uses graph traversal to surface files that are structurally related to the query even when they do not share the same words.
 
-This post shows how to build a portable version of that idea with standard-library Python, `sqlite3`, `ast`, `git`, and an optional OpenAI-compatible API. The companion implementation for this post lives in the local `code-knowledge-graph/` directory. For general repository context, the public home is [dzlab/snippets](https://github.com/dzlab/snippets).
+This post shows how to build a portable version of that idea with standard-library Python, `sqlite3`, `ast`, `git`, and an optional OpenAI-compatible API. The companion implementation for this post is the local `snippets/code-knowledge-graph/` project extracted in this workspace.
 
 ## Why a graph helps
 
@@ -317,4 +317,4 @@ The good news is that each tradeoff is local and understandable. You can tune co
 
 The most interesting part of this pattern is not PageRank by itself. It is the combination of simple ingredients: AST edges, Git co-edits, a portable SQLite store, lexical anchors, and a structure map that a human or model can inspect. That is enough to turn a repository from "documents with filenames" into a lightweight structural memory.
 
-If you want the full runnable version, including the CLI, tests, offline recall harness, and OpenAI-compatible A/B flow, start from the local `code-knowledge-graph/` companion directory used for this post. For general repository context, the public home is [dzlab/snippets](https://github.com/dzlab/snippets).
+If you want the full runnable version, including the CLI, tests, offline recall harness, and OpenAI-compatible A/B flow, start from the local `snippets/code-knowledge-graph/` companion project used for this post.
