@@ -14,7 +14,7 @@ Flat search is still the first tool I reach for when I need to find a file quick
 
 That is the gap a code knowledge graph tries to close. Instead of treating a repository as an unstructured pile of text, it stores files and symbols as nodes, links them with typed edges, and then uses graph traversal to surface files that are structurally related to the query even when they do not share the same words.
 
-This post shows how to build a portable version of that idea with standard-library Python, `sqlite3`, `ast`, `git`, and an optional OpenAI-compatible API. The companion implementation for this post is the local `snippets/code-knowledge-graph/` project extracted in this workspace.
+This post shows how to build a portable version of that idea with standard-library Python, `sqlite3`, `ast`, `git`, and an optional OpenAI-compatible API. The complete runnable implementation used for these examples is kept in the companion project under `snippets/code-knowledge-graph/`.
 
 ## Why a graph helps
 
@@ -28,7 +28,7 @@ The lesson material behind this post used the graph in a hybrid way: first find 
 
 ## What goes into the graph
 
-The portable implementation projects everything down to files for retrieval, but it still extracts symbol-level structure first so it can preserve call and containment relationships.
+The portable implementation projects retrieval down to files, but it still extracts symbol-level structure first so it can retain call and containment information in the raw graph.
 
 | Kind | Source -> Target | How it is extracted | Why it matters |
 |---|---|---|---|
@@ -128,7 +128,7 @@ connection.executescript(
 )
 ```
 
-That schema is enough because the retriever later projects symbol-level edges back onto file paths. A `call` between two symbols becomes a weighted relationship between the files that own those symbols. `contains` edges do the same, which lets the structure map explain why a file is visible instead of only returning a score.
+That schema is enough because the retriever later projects symbol-level edges back onto file paths. A `call` between two symbols becomes a weighted relationship between the files that own those symbols. `contains` is still useful in the raw symbol graph for ownership and nesting, but the current file-level projection drops same-file self-relationships, so `contains` does not currently explain file visibility in retrieval output.
 
 ## Anchors first, then PageRank
 
@@ -165,7 +165,7 @@ The result is not "graph search instead of text search." It is "text search to f
 
 ## Rendering a structure map for an LLM
 
-Once the graph-ranked files are selected, the tool renders a compact Markdown structure map. It includes the query, lexical anchors, selected files, and grouped neighbors such as `imports`, `calls`, `contains`, and `co_edit`.
+Once the graph-ranked files are selected, the tool renders a compact Markdown structure map. It includes the query, lexical anchors, selected files, and grouped neighbors such as `imports`, `calls`, and `co_edit`. The raw symbol graph retains `contains` edges for ownership and nesting, but the current file-level projection drops same-file self-relationships, so the rendered structure map may not emit `contains` neighbors.
 
 That output is useful even without an LLM because it gives a human-readable explanation of why each file is in scope. When you do send it to a model, it acts more like a navigation hint than a magical answer key.
 
@@ -317,4 +317,4 @@ The good news is that each tradeoff is local and understandable. You can tune co
 
 The most interesting part of this pattern is not PageRank by itself. It is the combination of simple ingredients: AST edges, Git co-edits, a portable SQLite store, lexical anchors, and a structure map that a human or model can inspect. That is enough to turn a repository from "documents with filenames" into a lightweight structural memory.
 
-If you want the full runnable version, including the CLI, tests, offline recall harness, and OpenAI-compatible A/B flow, start from the local `snippets/code-knowledge-graph/` companion project used for this post.
+The complete runnable implementation used for these examples is kept in the companion project under `snippets/code-knowledge-graph/`.
