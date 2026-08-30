@@ -67,11 +67,11 @@ The original lesson code explored a heavier graph-backed setup, but the companio
 
 That makes the tool suitable for arbitrary GitHub checkouts, quick local experiments, and reproducible smoke tests.
 
-## Extracting files, symbols, imports, calls, and co-edits
+## Extracting graph edges
 
-The parser does two passes. First it collects file and symbol nodes. Then it resolves references so imports and calls become edges. During symbol collection it also emits `contains` edges, which keep the nested structure of the code intact.
+The parser does two passes. First it collects file and symbol nodes. Then it resolves references so `import`, `call`, and `contains` relationships become graph edges. During symbol collection it also emits `contains` edges, which keep the nested structure of the code intact.
 
-This excerpt shows the core AST edge extraction:
+This excerpt shows the core AST reference collection:
 
 ```python
 def visit_Import(self, node: ast.Import) -> None:
@@ -96,7 +96,7 @@ def visit_Call(self, node: ast.Call) -> None:
     self.generic_visit(node)
 ```
 
-`visit_Import` links a source file to an internal imported module when the target resolves inside the checkout. `visit_Call` links the current symbol scope to another internal symbol when the callee can be resolved. That is what gives the graph its multi-hop behavior: a query can land on one symbol or file and then propagate through imports, calls, and eventually file-level projections.
+`visit_Import` links a source file to an internal imported module when the target resolves inside the checkout. `visit_Call` links the current symbol scope to another internal symbol when the callee can be resolved. In the parser these are recorded as raw `imports` and `calls` keys, then normalized by the file-graph projection into the canonical edge kinds `import` and `call`. That is what gives the graph its multi-hop behavior: a query can land on one symbol or file and then propagate through those relationships to related files.
 
 Historical coupling comes from Git rather than syntax. The implementation walks recent commits, collects files changed together, and converts those pairs into weighted `co_edit` edges. That signal is noisy if you feed it giant formatting commits, which is why the CLI bounds both commit depth and maximum files per commit.
 
@@ -165,7 +165,7 @@ The result is not "graph search instead of text search." It is "text search to f
 
 ## Rendering a structure map for an LLM
 
-Once the graph-ranked files are selected, the tool renders a compact Markdown structure map. It includes the query, lexical anchors, selected files, and grouped neighbors such as `imports`, `calls`, `contains`, and `co_edit`.
+Once the graph-ranked files are selected, the tool renders a compact Markdown structure map. It includes the query, lexical anchors, selected files, and grouped neighbors such as `import`, `call`, `contains`, and `co_edit`.
 
 That output is useful even without an LLM because it gives a human-readable explanation of why each file is in scope. When you do send it to a model, it acts more like a navigation hint than a magical answer key.
 
@@ -290,7 +290,7 @@ I ran the companion CLI locally against its own repository as a smoke test befor
 
 That is a useful caution, not a contradiction. On easy tasks with obvious vocabulary overlap, flat lexical ranking can be hard to beat. The graph tends to pay for itself when the query is structurally right but lexically incomplete: multi-hop dependencies, helper indirection, and co-edit history are exactly the cases where text overlap starts running out of signal.
 
-The lesson benchmark materials point in the same direction, but with mixed effects rather than a universal win. Some tasks showed lower tool calls, fewer tokens, and faster time-to-first-correct-edit when graph hints were injected into the agent context. Other tasks did not improve, some ablations suggested the lexical anchors explained most of the gain, and the small multi-task suite did not establish a statistically reliable overall effect. That is the right mental model: a code knowledge graph is a pragmatic retrieval aid, not a guaranteed speedup.
+The portable harness is designed to test whether graph context helps on a given set of localization tasks by comparing the same task and candidate inventory with and without the structure map. That is the right mental model: graph hints are useful to test and sometimes useful to apply, but they are not guaranteed improvements.
 
 ## Practical limitations
 
