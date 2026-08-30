@@ -14,7 +14,7 @@ Flat search is still the first tool I reach for when I need to find a file quick
 
 That is the gap a code knowledge graph tries to close. Instead of treating a repository as an unstructured pile of text, it stores files and symbols as nodes, links them with typed edges, and then uses graph traversal to surface files that are structurally related to the query even when they do not share the same words.
 
-This post shows how to build a portable version of that idea with standard-library Python, `sqlite3`, `ast`, `git`, and an optional OpenAI-compatible API. The full implementation is available in the [companion repo](https://github.com/dzlab/snippets/tree/master/code-knowledge-graph).
+This post shows how to build a portable version of that idea with standard-library Python, `sqlite3`, `ast`, `git`, and an optional OpenAI-compatible API. The full implementation lives in the `code-knowledge-graph/` companion directory inside the public [dzlab/snippets](https://github.com/dzlab/snippets) repository.
 
 ## Why a graph helps
 
@@ -69,7 +69,7 @@ That makes the tool suitable for arbitrary GitHub checkouts, quick local experim
 
 ## Extracting graph edges
 
-The parser does two passes. First it collects file and symbol nodes. Then it resolves references so `import`, `call`, and `contains` relationships become graph edges. During symbol collection it also emits `contains` edges, which keep the nested structure of the code intact.
+The parser does two passes. First it collects file and symbol nodes, and that symbol-collection pass emits the `contains` edges that keep nesting intact. The second pass resolves imports and calls across the collected nodes.
 
 This excerpt shows the core AST reference collection:
 
@@ -96,7 +96,7 @@ def visit_Call(self, node: ast.Call) -> None:
     self.generic_visit(node)
 ```
 
-`visit_Import` links a source file to an internal imported module when the target resolves inside the checkout. `visit_Call` links the current symbol scope to another internal symbol when the callee can be resolved. In the parser these are recorded as raw `imports` and `calls` keys, then normalized by the file-graph projection into the canonical edge kinds `import` and `call`. That is what gives the graph its multi-hop behavior: a query can land on one symbol or file and then propagate through those relationships to related files.
+`visit_Import` links a source file to an internal imported module when the target resolves inside the checkout. `visit_Call` links the current symbol scope to another internal symbol when the callee can be resolved. In the parser these are recorded as raw `imports` and `calls` keys, then normalized by the file-graph projection into the canonical edge kinds `import` and `call`. Retrieval itself seeds file anchors first, then propagates through the projected symbol and file relationships to surface related files.
 
 Historical coupling comes from Git rather than syntax. The implementation walks recent commits, collects files changed together, and converts those pairs into weighted `co_edit` edges. That signal is noisy if you feed it giant formatting commits, which is why the CLI bounds both commit depth and maximum files per commit.
 
@@ -165,7 +165,7 @@ The result is not "graph search instead of text search." It is "text search to f
 
 ## Rendering a structure map for an LLM
 
-Once the graph-ranked files are selected, the tool renders a compact Markdown structure map. It includes the query, lexical anchors, selected files, and grouped neighbors such as `import`, `call`, `contains`, and `co_edit`.
+Once the graph-ranked files are selected, the tool renders a compact Markdown structure map. It includes the query, lexical anchors, selected files, and grouped neighbors such as `imports`, `calls`, `contains`, and `co_edit`.
 
 That output is useful even without an LLM because it gives a human-readable explanation of why each file is in scope. When you do send it to a model, it acts more like a navigation hint than a magical answer key.
 
@@ -313,4 +313,4 @@ The good news is that each tradeoff is local and understandable. You can tune co
 
 The most interesting part of this pattern is not PageRank by itself. It is the combination of simple ingredients: AST edges, Git co-edits, a portable SQLite store, lexical anchors, and a structure map that a human or model can inspect. That is enough to turn a repository from "documents with filenames" into a lightweight structural memory.
 
-If you want the full runnable version, including the CLI, tests, offline recall harness, and OpenAI-compatible A/B flow, start with the [companion repo](https://github.com/dzlab/snippets/tree/master/code-knowledge-graph).
+If you want the full runnable version, including the CLI, tests, offline recall harness, and OpenAI-compatible A/B flow, start with the public [dzlab/snippets](https://github.com/dzlab/snippets) repository and look under the `code-knowledge-graph/` companion directory.
