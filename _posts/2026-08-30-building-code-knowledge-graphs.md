@@ -43,11 +43,15 @@ The portable implementation projects retrieval down to files, but it still extra
 
 The concrete walkthrough uses the TypeScript-heavy `chess-studio` repository. The indexer scans its source files, extracts a conservative set of TypeScript/JavaScript symbols and relative imports, and adds bounded Git co-edit edges. At the checkout revision used for this article, the resulting SQLite database contained 532 file nodes, 1,876 function nodes, 23 class nodes, 87 exported-variable nodes, and 7,563 edges: 295 imports, 1,495 calls, 1,986 containment edges, and 3,787 co-edits.
 
-The figure below is a bounded query neighborhood, not a drawing of every node in the repository. That distinction matters: a large codebase is better understood through small, query-specific views than through one unreadable hairball.
+The first chart shows the complete indexed graph, with parallel typed edges collapsed for readability. The second chart is a bounded file-layer hub neighborhood. Together they provide both the scale of the repository and a readable view of the files around its busiest hubs.
 
-![Whole-graph and file-layer zoom of the chess-studio repository]({{ "/assets/2026/08/20260830-code-kg-file-graph.png" | absolute_url }}){: .center-image }
+![Full graph of the chess-studio repository]({{ "/assets/2026/08/20260830-code-kg-full-graph.png" | absolute_url }}){: .center-image }
 
-_Figure 1: The same whole-graph and file-layer views used in the notebook: square nodes are files, triangles are symbols, color indicates the dominant relationship, and the right panel makes a hub neighborhood readable._
+_Figure 1: Full `chess-studio` graph in the notebook's NetworkX/Matplotlib style. Square nodes are files, triangles are symbols, color indicates the dominant relationship, and parallel typed edges are collapsed for this overview._
+
+![File-layer hub neighborhood in the chess-studio repository]({{ "/assets/2026/08/20260830-code-kg-file-layer.png" | absolute_url }}){: .center-image }
+
+_Figure 2: A readable file-layer hub neighborhood from the same real index. Core files are colored by their dominant relationship; ghost files show surrounding context._
 
 ## End-to-end workflow
 
@@ -146,9 +150,13 @@ Retrieval is hybrid. The query is tokenized and scored lexically first. The top 
 
 The comparison below uses the same three explicit `chess-studio` tasks for both methods. Keyword search ranks files by token overlap. PageRank starts from the top three keyword anchors and propagates through the file graph. The graph method is therefore not an independent semantic oracle: it inherits the quality of its lexical starting point.
 
-![Anchor walk and keyword-versus-PageRank scorecard for chess-studio retrieval tasks]({{ "/assets/2026/08/20260830-code-kg-retrieval.png" | absolute_url }}){: .center-image }
+![Anchor walk for a chess-studio retrieval query]({{ "/assets/2026/08/20260830-code-kg-anchor-walk.png" | absolute_url }}){: .center-image }
 
-_Figure 2: The notebook's anchor-walk visual paired with a direct keyword-versus-PageRank scorecard. The right-hand panel reports recall at several cutoffs for the three-task sample; it is an experiment result, not a universal benchmark._
+_Figure 3: The notebook's anchor-walk visual, rendered from the real `chess-studio` file graph. The orange ring marks the lexical anchor; blue rings mark files reached near the top of the personalized walk._
+
+![Keyword-versus-PageRank recall for chess-studio tasks]({{ "/assets/2026/08/20260830-code-kg-retrieval-comparison.png" | absolute_url }}){: .center-image }
+
+_Figure 4: Aggregate recall at three cutoffs for the three-task sample. It is an experiment result, not a universal benchmark._
 
 ```python
 lexical = lexical_rank(query, file_graph)
@@ -207,28 +215,21 @@ response = self._post_json("/chat/completions", payload)
 
 This keeps the comparison honest. The control arm gets the task plus the candidate file inventory. The treatment arm gets the same inventory plus the generated structure map. That isolates whether structural context changes ranking behavior without turning the experiment into a full autonomous coding benchmark.
 
-## A coding-workflow example: Django
+## A repository benchmark: chess-studio
 
-The repository retrieval experiment above is deliberately offline. The lesson also included a separate coding-workflow benchmark on Django, where an agent received either a bare repository or a graph-derived structure hint while implementing a real cache-control change. This is a different kind of evidence: it measures an end-to-end coding workflow, not just whether a file appears in a ranked list.
+The benchmark remains deliberately narrow and reproducible: it measures file localization on three real `chess-studio` tasks, not whether an agent can edit and test a complete feature. Each task has explicit repository-relative gold files, and both methods are evaluated against the same index.
 
-![Signed Django coding-workflow improvements and the ten-task suite spread]({{ "/assets/2026/08/20260830-code-kg-django-workflow.png" | absolute_url }}){: .center-image }
+![Chess-studio task-level retrieval benchmark]({{ "/assets/2026/08/20260830-code-kg-chess-studio-benchmark.png" | absolute_url }}){: .center-image }
 
-_Figure 3: The notebook's signed improvement bars for the Django hero task alongside its per-task time spread. Positive values mean the structure-map treatment is better._
+_Figure 5: Task-level recall@5 from the real `chess-studio` experiment. The chart compares the same keyword and PageRank methods without importing measurements from another repository or workflow._
 
-For this one task, both arms passed the acceptance test in all five runs. The structure-map arm used fewer resources on average:
+| Task | Query | Gold files | Keyword recall@5 | PageRank recall@5 |
+|---|---|---:|---:|---:|
+| 1 | PGN parsing and worker handoff | 2 | 0.50 | 0.00 |
+| 2 | Dexie schema for games, imports, profiles, and tree edges | 1 | 1.00 | 1.00 |
+| 3 | Opening-tree indexing and study-workspace rendering | 2 | 0.00 | 0.00 |
 
-| Metric | Bare repository | Structure map | Change |
-|---|---:|---:|---:|
-| Total time | 212.6 s | 174.6 s | −17.9% |
-| Total tokens | 3.02 M | 2.53 M | −16.3% |
-| Tool calls | 57.2 | 47.6 | −16.8% |
-| Calls to first correct edit | 14.4 | 12.0 | −16.7% |
-| Cost | $0.4829 | $0.4218 | −12.7% |
-| Acceptance | 100% | 100% | unchanged |
-
-That is a useful example because the task has a concrete correctness endpoint. It is not enough to say that the model saw more related files; the edited Django checkout also had to pass the task's acceptance tests. Still, the result is a five-run case study. The `anchors_only` ablation performed at least as well as the full graph map on several effort metrics, so this experiment does not isolate PageRank as the cause of the improvement.
-
-Across the broader ten-task suite, the median time improvement was 11.0%, but the pooled exact test was not statistically conclusive (`p = 0.2324` for time). The honest conclusion is that structural context can be useful navigation assistance, while the current evidence does not establish a reliable correctness or speedup guarantee.
+The result is a useful caution. On the second task, both methods find the gold file within five results. On the first, keyword overlap finds one of two files while the graph ranking misses both at that cutoff. On the third, neither method finds the two gold files. The graph is a navigation aid, not a correctness oracle, and this small repository sample does not support a claim that PageRank improves retrieval universally.
 
 ## Run it on any checkout
 
