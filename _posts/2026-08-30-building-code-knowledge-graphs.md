@@ -24,7 +24,7 @@ Keyword search is useful because most software tasks begin with names: a class, 
 - It does not encode containment, so finding a file does not automatically tell you which symbols inside it matter.
 - It does not use historical co-edits, which are often a strong hint that two files participate in the same change surface.
 
-The lesson material behind this post used the graph in a hybrid way: first find lexical anchors, then walk the graph outward from those anchors. That design matters because it preserves the speed of flat search while giving the retriever a way to reach files that text overlap alone would miss.
+The implementation uses the graph in a hybrid way: first find lexical anchors, then walk the graph outward from those anchors. That design matters because it preserves the speed of flat search while giving the retriever a way to reach files that text overlap alone would miss.
 
 ## What goes into the graph
 
@@ -41,13 +41,13 @@ The portable implementation projects retrieval down to files, but it still extra
 
 ## Start with a real repository
 
-The companion implementation can index any GitHub checkout, including the Django repository used by the L4 coding-workflow study. It extracts files, symbols, imports, calls, containment, and bounded Git co-edit edges into SQLite. The benchmark charts later in this post use the committed L4 Django results; the runnable commands show how to build a fresh graph for a checkout you control.
+The companion implementation can index any GitHub checkout, including the Django repository used by the coding-workflow benchmark. It extracts files, symbols, imports, calls, containment, and bounded Git co-edit edges into SQLite. The benchmark charts later in this post use committed Django results; the runnable commands show how to build a fresh graph for a checkout you control.
 
-The graph is easier to reason about when we can see its shape. This is the same encoding used in the L4 notebook: squares are files, triangles are symbols, larger nodes are hubs, and colour shows whether dependency edges or co-edit edges dominate a node. Both graph figures below use one modest but real repository, `agent-harness` (208 files and 1,467 graph nodes), rather than a hand-built toy. The Django data appears separately in the coding-workflow benchmark because that experiment measures a different end-to-end task.
+The graph is easier to reason about when we can see its shape. The renderer uses a consistent encoding: squares are files, triangles are symbols, larger nodes are hubs, and colour shows whether dependency edges or co-edit edges dominate a node. Both graph figures below use one modest but real repository, `agent-harness` (208 files and 1,467 graph nodes), rather than a hand-built toy. The Django data appears separately in the coding-workflow benchmark because that experiment measures a different end-to-end task.
 
 ![Full code knowledge graph]({{ "/assets/2026/08/20260830-code-kg-full-graph.png" | absolute_url }}){: .center-image }
 
-_Figure 1: A full code knowledge graph rendered from the L4 notebook's `agent-harness` repository export. The dense view is useful for seeing hubs and broad clusters; later retrieval views narrow the graph to the files relevant to a query._
+_Figure 1: A full code knowledge graph rendered from the `agent-harness` repository export. The dense view is useful for seeing hubs and broad clusters; later retrieval views narrow the graph to the files relevant to a query._
 
 The full graph is intentionally dense. For a view that is easier to inspect, the renderer also projects the graph onto files and shows a hub neighborhood with a small ghost halo for surrounding context.
 
@@ -73,13 +73,13 @@ The important design choice is that SQLite is the durable center of the pipeline
 
 ## Portable architecture
 
-The original lesson code explored a heavier graph-backed setup, but the companion implementation intentionally reduces the moving parts:
+A heavier graph-backed setup is possible, but the companion implementation intentionally reduces the moving parts:
 
 - Parsing uses the Python standard library: `ast`, `pathlib`, regular expressions, and `dataclasses`. Python is parsed with `ast`; TypeScript/JavaScript uses a deliberately conservative extractor for declarations and relative imports.
 - Storage uses `sqlite3`, so the graph is just one portable file.
 - History signals come from `git log`, not a hosted SCM API.
 - LLM comparison is optional and uses an OpenAI-compatible `/v1/chat/completions` endpoint.
-- There is no Oracle dependency, no notebook runtime requirement, and no dependency on private local paths.
+- There is no Oracle dependency, no interactive runtime requirement, and no dependency on private local paths.
 
 That makes the tool suitable for arbitrary GitHub checkouts, quick local experiments, and reproducible smoke tests.
 
@@ -150,7 +150,7 @@ That schema is enough because the retriever later projects symbol-level edges ba
 
 Retrieval is hybrid. The query is tokenized and scored lexically first. The top lexical hits become anchors. Then a Personalized PageRank-style walk redistributes probability mass across the graph.
 
-Keyword search ranks files by token overlap. PageRank starts from lexical anchors and propagates through the file graph. The graph method is therefore not an independent semantic oracle: it inherits the quality of its lexical starting point. The L4 benchmark uses this structure-aware context inside a coding workflow; the companion CLI also exposes the two retrieval methods directly for offline experiments.
+Keyword search ranks files by token overlap. PageRank starts from lexical anchors and propagates through the file graph. The graph method is therefore not an independent semantic oracle: it inherits the quality of its lexical starting point. The coding-workflow benchmark uses this structure-aware context inside an editing workflow; the companion CLI also exposes the two retrieval methods directly for offline experiments.
 
 ```python
 lexical = lexical_rank(query, file_graph)
@@ -209,15 +209,15 @@ This keeps the comparison honest. The control arm gets the task plus the candida
 
 ## A coding-workflow example: Django
 
-The repository retrieval experiment above is deliberately offline. The L4 notebook also includes a separate coding-workflow benchmark on Django, where an agent received either a bare repository or a graph-derived structure hint while implementing a real cache-control change. This is different evidence: it measures an end-to-end coding workflow, not just whether a file appears in a ranked list.
+The repository retrieval experiment above is deliberately offline. The coding-workflow benchmark on Django gives an agent either a bare repository or a graph-derived structure hint while implementing a real cache-control change. This is different evidence: it measures an end-to-end coding workflow, not just whether a file appears in a ranked list.
 
 ![Django coding-workflow improvement bars]({{ "/assets/2026/08/20260830-code-kg-benchmark-hero.png" | absolute_url }}){: .center-image }
 
-_Figure 3: The L4 notebook's signed improvement bars for the five-run Django cache-control hero task. Positive values mean the structure-map treatment is better._
+_Figure 3: Signed improvement bars for the five-run Django cache-control hero task. Positive values mean the structure-map treatment is better._
 
 ![Django coding-workflow suite time spread]({{ "/assets/2026/08/20260830-code-kg-benchmark-suite.png" | absolute_url }}){: .center-image }
 
-_Figure 4: The L4 notebook's per-task time-improvement spread across ten Django tasks. Red bars are slower with the graph context; green bars are faster._
+_Figure 4: Per-task time-improvement spread across ten Django tasks. Red bars are slower with the graph context; green bars are faster._
 
 For the hero task, both arms passed the acceptance test in all five runs. The structure-map arm used fewer resources on average:
 
@@ -333,7 +333,7 @@ Repeated runs matter only for the LLM A/B path. A model can vary its ranking eve
 
 It is also important to keep the benchmark scoped correctly: this is a localization and ranking harness, not an autonomous editing benchmark. A model can rank the right files and still fail to implement the change. Conversely, a coding agent can sometimes discover the right files by reading code interactively even when the initial graph ranking was mediocre.
 
-## Lessons from the L4 benchmark
+## Lessons from the coding-workflow benchmark
 
 The Django results show why graph context should be evaluated as navigation assistance rather than treated as a correctness oracle. The treatment arm used fewer resources on the hero task, while the ten-task suite included both wins and regressions. On easy tasks with obvious vocabulary overlap, flat lexical search can be hard to beat; graph context is most promising when dependency structure and historical coupling add signal that the task wording does not contain.
 
