@@ -67,6 +67,19 @@ flowchart LR
     D --> E[PageRank]
     E --> F[Structure Map]
     F --> G[Optional OpenAI-compatible A/B]
+
+    classDef input fill:#e8f4ff,stroke:#1677b9,color:#0b2d42;
+    classDef extraction fill:#fff4cc,stroke:#b58100,color:#3d2b00;
+    classDef storage fill:#e8f8ef,stroke:#23834d,color:#0e3d24;
+    classDef retrieval fill:#efe8ff,stroke:#6a45b8,color:#241340;
+    classDef context fill:#ffe8ec,stroke:#c43e5c,color:#4b1420;
+    classDef llm fill:#fdeee2,stroke:#bf5b17,color:#4a2105;
+    class A input;
+    class B extraction;
+    class C storage;
+    class D,E retrieval;
+    class F context;
+    class G llm;
 ```
 
 The important design choice is that SQLite is the durable center of the pipeline. Once the graph is indexed, retrieval, structure-map rendering, offline evaluation, and prompt experiments all run from the same local database file.
