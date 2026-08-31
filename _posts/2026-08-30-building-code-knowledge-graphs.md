@@ -43,6 +43,18 @@ The portable implementation projects retrieval down to files, but it still extra
 
 The companion implementation can index any GitHub checkout, including the Django repository used by the L4 coding-workflow study. It extracts files, symbols, imports, calls, containment, and bounded Git co-edit edges into SQLite. The benchmark charts later in this post use the committed L4 Django results; the runnable commands show how to build a fresh graph for a checkout you control.
 
+The graph is easier to reason about when we can see its shape. This is the same encoding used in the L4 notebook: squares are files, triangles are symbols, larger nodes are hubs, and colour shows whether dependency edges or co-edit edges dominate a node. The example is a real 1,467-node codebase graph rather than a hand-built toy.
+
+![Full code knowledge graph]({{ "/assets/2026/08/20260830-code-kg-full-graph.png" | absolute_url }}){: .center-image }
+
+_Figure 1: A full code knowledge graph rendered from the L4 notebook's real repository export. The dense view is useful for seeing hubs and broad clusters; later retrieval views narrow the graph to the files relevant to a query._
+
+The full graph is intentionally dense. For a view that is easier to inspect, the renderer also projects the graph onto files and shows a hub neighborhood with a small ghost halo for surrounding context.
+
+![File-layer knowledge graph neighborhood]({{ "/assets/2026/08/20260830-code-kg-file-layer.png" | absolute_url }}){: .center-image }
+
+_Figure 2: The file-layer projection of the same real graph. Core files are labelled and coloured by their dominant relationship; pale ghost files show how the readable neighborhood connects back to the rest of the repository._
+
 ## End-to-end workflow
 
 The overall pipeline is small enough to run locally and portable enough to use on any checkout.
@@ -201,11 +213,11 @@ The repository retrieval experiment above is deliberately offline. The L4 notebo
 
 ![Django coding-workflow improvement bars]({{ "/assets/2026/08/20260830-code-kg-benchmark-hero.png" | absolute_url }}){: .center-image }
 
-_Figure 5: The L4 notebook's signed improvement bars for the five-run Django cache-control hero task. Positive values mean the structure-map treatment is better._
+_Figure 3: The L4 notebook's signed improvement bars for the five-run Django cache-control hero task. Positive values mean the structure-map treatment is better._
 
 ![Django coding-workflow suite time spread]({{ "/assets/2026/08/20260830-code-kg-benchmark-suite.png" | absolute_url }}){: .center-image }
 
-_Figure 6: The L4 notebook's per-task time-improvement spread across ten Django tasks. Red bars are slower with the graph context; green bars are faster._
+_Figure 4: The L4 notebook's per-task time-improvement spread across ten Django tasks. Red bars are slower with the graph context; green bars are faster._
 
 For the hero task, both arms passed the acceptance test in all five runs. The structure-map arm used fewer resources on average:
 
