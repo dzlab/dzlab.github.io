@@ -61,12 +61,15 @@ The overall pipeline is small enough to run locally and portable enough to use o
 
 ```mermaid
 flowchart LR
-    A[Checkout] --> B[AST/Git Extraction]
-    B --> C[SQLite]
-    C --> D[Lexical Anchors]
-    D --> E[PageRank]
-    E --> F[Structure Map]
-    F --> G[Optional OpenAI-compatible A/B]
+    subgraph BUILD["Build the knowledge graph"]
+        A[Git repository] --> B[AST/Git extraction] --> C[SQLite graph storage]
+    end
+
+    subgraph QUERY["Query the knowledge graph"]
+        Q[User query] --> D[Lexical anchors] --> E[PageRank] --> F[Structure map] --> G[Optional OpenAI-compatible A/B]
+    end
+
+    C -. "indexed graph" .-> E
 
     classDef input fill:#e8f4ff,stroke:#1677b9,color:#0b2d42;
     classDef extraction fill:#fff4cc,stroke:#b58100,color:#3d2b00;
@@ -74,7 +77,7 @@ flowchart LR
     classDef retrieval fill:#efe8ff,stroke:#6a45b8,color:#241340;
     classDef context fill:#ffe8ec,stroke:#c43e5c,color:#4b1420;
     classDef llm fill:#fdeee2,stroke:#bf5b17,color:#4a2105;
-    class A input;
+    class A,Q input;
     class B extraction;
     class C storage;
     class D,E retrieval;
