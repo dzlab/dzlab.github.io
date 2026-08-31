@@ -41,17 +41,7 @@ The portable implementation projects retrieval down to files, but it still extra
 
 ## Start with a real repository
 
-The concrete walkthrough uses the TypeScript-heavy `chess-studio` repository. The indexer scans its source files, extracts a conservative set of TypeScript/JavaScript symbols and relative imports, and adds bounded Git co-edit edges. At the checkout revision used for this article, the resulting SQLite database contained 532 file nodes, 1,876 function nodes, 23 class nodes, 87 exported-variable nodes, and 7,563 edges: 295 imports, 1,495 calls, 1,986 containment edges, and 3,787 co-edits.
-
-The first chart shows the complete indexed graph, with parallel typed edges collapsed for readability. The second chart is a bounded file-layer hub neighborhood. Together they provide both the scale of the repository and a readable view of the files around its busiest hubs.
-
-![Full graph of the chess-studio repository]({{ "/assets/2026/08/20260830-code-kg-full-graph.png" | absolute_url }}){: .center-image }
-
-_Figure 1: Full `chess-studio` graph in the notebook's NetworkX/Matplotlib style. Square nodes are files, triangles are symbols, color indicates the dominant relationship, and parallel typed edges are collapsed for this overview._
-
-![File-layer hub neighborhood in the chess-studio repository]({{ "/assets/2026/08/20260830-code-kg-file-layer.png" | absolute_url }}){: .center-image }
-
-_Figure 2: A readable file-layer hub neighborhood from the same real index. Core files are colored by their dominant relationship; ghost files show surrounding context._
+The companion implementation can index any GitHub checkout, including the Django repository used by the L4 coding-workflow study. It extracts files, symbols, imports, calls, containment, and bounded Git co-edit edges into SQLite. The benchmark charts later in this post use the committed L4 Django results; the runnable commands show how to build a fresh graph for a checkout you control.
 
 ## End-to-end workflow
 
@@ -148,15 +138,7 @@ That schema is enough because the retriever later projects symbol-level edges ba
 
 Retrieval is hybrid. The query is tokenized and scored lexically first. The top lexical hits become anchors. Then a Personalized PageRank-style walk redistributes probability mass across the graph.
 
-The comparison below uses the same three explicit `chess-studio` tasks for both methods. Keyword search ranks files by token overlap. PageRank starts from the top three keyword anchors and propagates through the file graph. The graph method is therefore not an independent semantic oracle: it inherits the quality of its lexical starting point.
-
-![Anchor walk for a chess-studio retrieval query]({{ "/assets/2026/08/20260830-code-kg-anchor-walk.png" | absolute_url }}){: .center-image }
-
-_Figure 3: The notebook's anchor-walk visual, rendered from the real `chess-studio` file graph. The orange ring marks the lexical anchor; blue rings mark files reached near the top of the personalized walk._
-
-![Keyword-versus-PageRank recall for chess-studio tasks]({{ "/assets/2026/08/20260830-code-kg-retrieval-comparison.png" | absolute_url }}){: .center-image }
-
-_Figure 4: Aggregate recall at three cutoffs for the three-task sample. It is an experiment result, not a universal benchmark._
+Keyword search ranks files by token overlap. PageRank starts from lexical anchors and propagates through the file graph. The graph method is therefore not an independent semantic oracle: it inherits the quality of its lexical starting point. The L4 benchmark uses this structure-aware context inside a coding workflow; the companion CLI also exposes the two retrieval methods directly for offline experiments.
 
 ```python
 lexical = lexical_rank(query, file_graph)
@@ -186,8 +168,6 @@ Two details are worth noticing.
 First, the walk is personalized, not global. It starts from the lexical anchors instead of treating every file equally. Second, connected files get a small self-loop in the transition builder, which prevents all anchor mass from immediately washing out into neighbors. In practice that makes the ranking steadier on small graphs.
 
 The result is not "graph search instead of text search." It is "text search to find a starting point, then graph propagation to discover structurally related files."
-
-For the three-task `chess-studio` sample, lexical recall at 5 was `0.50` and graph recall at 5 was `0.33`; both methods reached `0.33` at 3. That is exactly the kind of result worth showing: graph propagation changes the order and neighborhood, but it does not automatically improve every easy localization task.
 
 ## Rendering a structure map for an LLM
 
@@ -341,11 +321,9 @@ Repeated runs matter only for the LLM A/B path. A model can vary its ranking eve
 
 It is also important to keep the benchmark scoped correctly: this is a localization and ranking harness, not an autonomous editing benchmark. A model can rank the right files and still fail to implement the change. Conversely, a coding agent can sometimes discover the right files by reading code interactively even when the initial graph ranking was mediocre.
 
-## Lessons from the repository run and prior evidence
+## Lessons from the L4 benchmark
 
-I ran the companion CLI against the `chess-studio` checkout before writing this post. The index step produced `2,518` nodes and `7,563` edges, including TypeScript/JavaScript declarations and relative imports as well as Git history. On the three explicit repository tasks, lexical recall at 5 was `0.50` and graph recall at 5 was `0.33`.
-
-That is a useful caution, not a contradiction. On easy tasks with obvious vocabulary overlap, flat lexical ranking can be hard to beat. The graph tends to pay for itself when the query is structurally right but lexically incomplete: multi-hop dependencies, helper indirection, and co-edit history are exactly the cases where text overlap starts running out of signal.
+The Django results show why graph context should be evaluated as navigation assistance rather than treated as a correctness oracle. The treatment arm used fewer resources on the hero task, while the ten-task suite included both wins and regressions. On easy tasks with obvious vocabulary overlap, flat lexical search can be hard to beat; graph context is most promising when dependency structure and historical coupling add signal that the task wording does not contain.
 
 The portable harness is designed to test whether graph context helps on a given set of localization tasks by comparing the same task and candidate inventory with and without the structure map. That is the right mental model: graph hints are useful to test and sometimes useful to apply, but they are not guaranteed improvements.
 
