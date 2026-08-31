@@ -215,21 +215,32 @@ response = self._post_json("/chat/completions", payload)
 
 This keeps the comparison honest. The control arm gets the task plus the candidate file inventory. The treatment arm gets the same inventory plus the generated structure map. That isolates whether structural context changes ranking behavior without turning the experiment into a full autonomous coding benchmark.
 
-## A repository benchmark: chess-studio
+## A coding-workflow example: Django
 
-The benchmark remains deliberately narrow and reproducible: it measures file localization on three real `chess-studio` tasks, not whether an agent can edit and test a complete feature. Each task has explicit repository-relative gold files, and both methods are evaluated against the same index.
+The repository retrieval experiment above is deliberately offline. The L4 notebook also includes a separate coding-workflow benchmark on Django, where an agent received either a bare repository or a graph-derived structure hint while implementing a real cache-control change. This is different evidence: it measures an end-to-end coding workflow, not just whether a file appears in a ranked list.
 
-![Chess-studio task-level retrieval benchmark]({{ "/assets/2026/08/20260830-code-kg-chess-studio-benchmark.png" | absolute_url }}){: .center-image }
+![Django coding-workflow improvement bars]({{ "/assets/2026/08/20260830-code-kg-django-hero.png" | absolute_url }}){: .center-image }
 
-_Figure 5: Task-level recall@5 from the real `chess-studio` experiment. The chart compares the same keyword and PageRank methods without importing measurements from another repository or workflow._
+_Figure 5: The L4 notebook's signed improvement bars for the five-run Django cache-control hero task. Positive values mean the structure-map treatment is better._
 
-| Task | Query | Gold files | Keyword recall@5 | PageRank recall@5 |
-|---|---|---:|---:|---:|
-| 1 | PGN parsing and worker handoff | 2 | 0.50 | 0.00 |
-| 2 | Dexie schema for games, imports, profiles, and tree edges | 1 | 1.00 | 1.00 |
-| 3 | Opening-tree indexing and study-workspace rendering | 2 | 0.00 | 0.00 |
+![Django coding-workflow suite time spread]({{ "/assets/2026/08/20260830-code-kg-django-suite.png" | absolute_url }}){: .center-image }
 
-The result is a useful caution. On the second task, both methods find the gold file within five results. On the first, keyword overlap finds one of two files while the graph ranking misses both at that cutoff. On the third, neither method finds the two gold files. The graph is a navigation aid, not a correctness oracle, and this small repository sample does not support a claim that PageRank improves retrieval universally.
+_Figure 6: The L4 notebook's per-task time-improvement spread across ten Django tasks. Red bars are slower with the graph context; green bars are faster._
+
+For the hero task, both arms passed the acceptance test in all five runs. The structure-map arm used fewer resources on average:
+
+| Metric | Bare repository | Structure map | Change |
+|---|---:|---:|---:|
+| Total time | 212.6 s | 174.6 s | −17.9% |
+| Total tokens | 3.02 M | 2.53 M | −16.3% |
+| Tool calls | 57.2 | 47.6 | −16.8% |
+| Calls to first correct edit | 14.4 | 12.0 | −16.7% |
+| Cost | $0.4829 | $0.4218 | −12.7% |
+| Acceptance | 100% | 100% | unchanged |
+
+That is a useful example because the task has a concrete correctness endpoint. It is not enough to say that the model saw more related files; the edited Django checkout also had to pass the task's acceptance tests. Still, it is a five-run case study. The `anchors_only` ablation performed at least as well as the full graph map on several effort metrics, so this experiment does not isolate PageRank as the cause of the improvement.
+
+Across the broader ten-task suite, the median time improvement was 11.0%, but the pooled exact test was not statistically conclusive (`p = 0.2324` for time). The honest conclusion is that structural context can be useful navigation assistance, while the current evidence does not establish a reliable correctness or speedup guarantee.
 
 ## Run it on any checkout
 
