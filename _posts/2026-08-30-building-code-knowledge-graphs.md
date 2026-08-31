@@ -66,7 +66,7 @@ flowchart LR
     end
 
     subgraph QUERY["Query the knowledge graph"]
-        Q[User query] --> D[Lexical anchors] --> E[PageRank] --> F[Structure map] --> G[Optional OpenAI-compatible A/B]
+        Q[User query] --> D[Lexical anchors] --> E[PageRank] --> F[Structure map]
     end
 
     C -. "indexed graph" .-> E
@@ -76,13 +76,11 @@ flowchart LR
     classDef storage fill:#e8f8ef,stroke:#23834d,color:#0e3d24;
     classDef retrieval fill:#efe8ff,stroke:#6a45b8,color:#241340;
     classDef context fill:#ffe8ec,stroke:#c43e5c,color:#4b1420;
-    classDef llm fill:#fdeee2,stroke:#bf5b17,color:#4a2105;
     class A,Q input;
     class B extraction;
     class C storage;
     class D,E retrieval;
     class F context;
-    class G llm;
 ```
 
 The important design choice is that SQLite is the durable center of the pipeline. Once the graph is indexed, retrieval, structure-map rendering, offline evaluation, and prompt experiments all run from the same local database file.
