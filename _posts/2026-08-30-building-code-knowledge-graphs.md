@@ -43,11 +43,11 @@ The portable implementation projects retrieval down to files, but it still extra
 
 The companion implementation can index any GitHub checkout, including the Django repository used by the L4 coding-workflow study. It extracts files, symbols, imports, calls, containment, and bounded Git co-edit edges into SQLite. The benchmark charts later in this post use the committed L4 Django results; the runnable commands show how to build a fresh graph for a checkout you control.
 
-The graph is easier to reason about when we can see its shape. This is the same encoding used in the L4 notebook: squares are files, triangles are symbols, larger nodes are hubs, and colour shows whether dependency edges or co-edit edges dominate a node. The example is a real 1,467-node codebase graph rather than a hand-built toy.
+The graph is easier to reason about when we can see its shape. This is the same encoding used in the L4 notebook: squares are files, triangles are symbols, larger nodes are hubs, and colour shows whether dependency edges or co-edit edges dominate a node. Both graph figures below use one modest but real repository, `agent-harness` (208 files and 1,467 graph nodes), rather than a hand-built toy. The Django data appears separately in the coding-workflow benchmark because that experiment measures a different end-to-end task.
 
 ![Full code knowledge graph]({{ "/assets/2026/08/20260830-code-kg-full-graph.png" | absolute_url }}){: .center-image }
 
-_Figure 1: A full code knowledge graph rendered from the L4 notebook's real repository export. The dense view is useful for seeing hubs and broad clusters; later retrieval views narrow the graph to the files relevant to a query._
+_Figure 1: A full code knowledge graph rendered from the L4 notebook's `agent-harness` repository export. The dense view is useful for seeing hubs and broad clusters; later retrieval views narrow the graph to the files relevant to a query._
 
 The full graph is intentionally dense. For a view that is easier to inspect, the renderer also projects the graph onto files and shows a hub neighborhood with a small ghost halo for surrounding context.
 
