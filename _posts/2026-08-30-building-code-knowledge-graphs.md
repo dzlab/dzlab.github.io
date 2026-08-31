@@ -45,9 +45,9 @@ The concrete walkthrough uses the TypeScript-heavy `chess-studio` repository. Th
 
 The figure below is a bounded query neighborhood, not a drawing of every node in the repository. That distinction matters: a large codebase is better understood through small, query-specific views than through one unreadable hairball.
 
-![A bounded file-level graph from the chess-studio repository, showing the PGN import worker neighborhood]({{ "/assets/2026/08/20260830-code-kg-file-graph.svg" | absolute_url }}){: .center-image }
+![Whole-graph and file-layer zoom of the chess-studio repository]({{ "/assets/2026/08/20260830-code-kg-file-graph.png" | absolute_url }}){: .center-image }
 
-_Figure 1: A real `chess-studio` file graph. Blue nodes are lexical anchors; purple nodes are files surfaced by personalized PageRank._
+_Figure 1: The same whole-graph and file-layer views used in the notebook: square nodes are files, triangles are symbols, color indicates the dominant relationship, and the right panel makes a hub neighborhood readable._
 
 ## End-to-end workflow
 
@@ -146,9 +146,9 @@ Retrieval is hybrid. The query is tokenized and scored lexically first. The top 
 
 The comparison below uses the same three explicit `chess-studio` tasks for both methods. Keyword search ranks files by token overlap. PageRank starts from the top three keyword anchors and propagates through the file graph. The graph method is therefore not an independent semantic oracle: it inherits the quality of its lexical starting point.
 
-![Keyword overlap and personalized PageRank rankings for chess-studio retrieval tasks]({{ "/assets/2026/08/20260830-code-kg-retrieval.svg" | absolute_url }}){: .center-image }
+![Anchor walk and keyword-versus-PageRank scorecard for chess-studio retrieval tasks]({{ "/assets/2026/08/20260830-code-kg-retrieval.png" | absolute_url }}){: .center-image }
 
-_Figure 2: A direct comparison on the real repository. The lower panel reports recall at several cutoffs for the three-task sample; it is an experiment result, not a universal benchmark._
+_Figure 2: The notebook's anchor-walk visual paired with a direct keyword-versus-PageRank scorecard. The right-hand panel reports recall at several cutoffs for the three-task sample; it is an experiment result, not a universal benchmark._
 
 ```python
 lexical = lexical_rank(query, file_graph)
@@ -211,9 +211,9 @@ This keeps the comparison honest. The control arm gets the task plus the candida
 
 The repository retrieval experiment above is deliberately offline. The lesson also included a separate coding-workflow benchmark on Django, where an agent received either a bare repository or a graph-derived structure hint while implementing a real cache-control change. This is a different kind of evidence: it measures an end-to-end coding workflow, not just whether a file appears in a ranked list.
 
-![Django coding-workflow benchmark comparing a bare repository with structure-map context]({{ "/assets/2026/08/20260830-code-kg-django-workflow.svg" | absolute_url }}){: .center-image }
+![Signed Django coding-workflow improvements and the ten-task suite spread]({{ "/assets/2026/08/20260830-code-kg-django-workflow.png" | absolute_url }}){: .center-image }
 
-_Figure 3: Five-run Django cache-control case study. Values are treatment as a percentage of control, so lower is better for the effort metrics._
+_Figure 3: The notebook's signed improvement bars for the Django hero task alongside its per-task time spread. Positive values mean the structure-map treatment is better._
 
 For this one task, both arms passed the acceptance test in all five runs. The structure-map arm used fewer resources on average:
 
