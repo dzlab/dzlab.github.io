@@ -199,11 +199,11 @@ This keeps the comparison honest. The control arm gets the task plus the candida
 
 The repository retrieval experiment above is deliberately offline. The L4 notebook also includes a separate coding-workflow benchmark on Django, where an agent received either a bare repository or a graph-derived structure hint while implementing a real cache-control change. This is different evidence: it measures an end-to-end coding workflow, not just whether a file appears in a ranked list.
 
-![Django coding-workflow improvement bars]({{ "/assets/2026/08/20260830-code-kg-django-hero.png" | absolute_url }}){: .center-image }
+![Django coding-workflow improvement bars]({{ "/assets/2026/08/20260830-code-kg-benchmark-hero.png" | absolute_url }}){: .center-image }
 
 _Figure 5: The L4 notebook's signed improvement bars for the five-run Django cache-control hero task. Positive values mean the structure-map treatment is better._
 
-![Django coding-workflow suite time spread]({{ "/assets/2026/08/20260830-code-kg-django-suite.png" | absolute_url }}){: .center-image }
+![Django coding-workflow suite time spread]({{ "/assets/2026/08/20260830-code-kg-benchmark-suite.png" | absolute_url }}){: .center-image }
 
 _Figure 6: The L4 notebook's per-task time-improvement spread across ten Django tasks. Red bars are slower with the graph context; green bars are faster._
 
