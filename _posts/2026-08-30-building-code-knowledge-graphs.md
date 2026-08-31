@@ -39,6 +39,16 @@ The portable implementation projects retrieval down to files, but it still extra
 | `contains` edge | file -> symbol, class -> method | symbol collection pass | preserves nesting and ownership |
 | `co_edit` edge | file -> file | `git log` commit co-occurrence | surfaces files that historically change together |
 
+## Start with a real repository
+
+The concrete walkthrough uses the TypeScript-heavy `chess-studio` repository. The indexer scans its source files, extracts a conservative set of TypeScript/JavaScript symbols and relative imports, and adds bounded Git co-edit edges. At the checkout revision used for this article, the resulting SQLite database contained 532 file nodes, 1,876 function nodes, 23 class nodes, 87 exported-variable nodes, and 7,563 edges: 295 imports, 1,495 calls, 1,986 containment edges, and 3,787 co-edits.
+
+The figure below is a bounded query neighborhood, not a drawing of every node in the repository. That distinction matters: a large codebase is better understood through small, query-specific views than through one unreadable hairball.
+
+![A bounded file-level graph from the chess-studio repository, showing the PGN import worker neighborhood]({{ "/assets/2026/08/20260830-code-kg-file-graph.svg" | absolute_url }}){: .center-image }
+
+_Figure 1: A real `chess-studio` file graph. Blue nodes are lexical anchors; purple nodes are files surfaced by personalized PageRank._
+
 ## End-to-end workflow
 
 The overall pipeline is small enough to run locally and portable enough to use on any checkout.
@@ -59,7 +69,7 @@ The important design choice is that SQLite is the durable center of the pipeline
 
 The original lesson code explored a heavier graph-backed setup, but the companion implementation intentionally reduces the moving parts:
 
-- Parsing uses the Python standard library: `ast`, `pathlib`, and `dataclasses`.
+- Parsing uses the Python standard library: `ast`, `pathlib`, regular expressions, and `dataclasses`. Python is parsed with `ast`; TypeScript/JavaScript uses a deliberately conservative extractor for declarations and relative imports.
 - Storage uses `sqlite3`, so the graph is just one portable file.
 - History signals come from `git log`, not a hosted SCM API.
 - LLM comparison is optional and uses an OpenAI-compatible `/v1/chat/completions` endpoint.
@@ -69,7 +79,7 @@ That makes the tool suitable for arbitrary GitHub checkouts, quick local experim
 
 ## Extracting graph edges
 
-The parser does two passes. First it collects file and symbol nodes, and that symbol-collection pass emits the `contains` edges that keep nesting intact. The second pass resolves imports and calls across the collected nodes.
+The parser does two passes. First it collects file and symbol nodes, and that symbol-collection pass emits the `contains` edges that keep nesting intact. The second pass resolves imports and calls across the collected nodes. For TypeScript/JavaScript, the extractor intentionally handles common declarations and relative imports without pretending to be a full compiler.
 
 This excerpt shows the core AST reference collection:
 
@@ -130,9 +140,15 @@ connection.executescript(
 
 That schema is enough because the retriever later projects symbol-level edges back onto file paths. A `call` between two symbols becomes a weighted relationship between the files that own those symbols. `contains` is still useful in the raw symbol graph for ownership and nesting, but the current file-level projection drops same-file self-relationships, so `contains` does not currently explain file visibility in retrieval output.
 
-## Anchors first, then PageRank
+## PageRank versus simple keyword search
 
 Retrieval is hybrid. The query is tokenized and scored lexically first. The top lexical hits become anchors. Then a Personalized PageRank-style walk redistributes probability mass across the graph.
+
+The comparison below uses the same three explicit `chess-studio` tasks for both methods. Keyword search ranks files by token overlap. PageRank starts from the top three keyword anchors and propagates through the file graph. The graph method is therefore not an independent semantic oracle: it inherits the quality of its lexical starting point.
+
+![Keyword overlap and personalized PageRank rankings for chess-studio retrieval tasks]({{ "/assets/2026/08/20260830-code-kg-retrieval.svg" | absolute_url }}){: .center-image }
+
+_Figure 2: A direct comparison on the real repository. The lower panel reports recall at several cutoffs for the three-task sample; it is an experiment result, not a universal benchmark._
 
 ```python
 lexical = lexical_rank(query, file_graph)
@@ -163,6 +179,8 @@ First, the walk is personalized, not global. It starts from the lexical anchors 
 
 The result is not "graph search instead of text search." It is "text search to find a starting point, then graph propagation to discover structurally related files."
 
+For the three-task `chess-studio` sample, lexical recall at 5 was `0.50` and graph recall at 5 was `0.33`; both methods reached `0.33` at 3. That is exactly the kind of result worth showing: graph propagation changes the order and neighborhood, but it does not automatically improve every easy localization task.
+
 ## Rendering a structure map for an LLM
 
 Once the graph-ranked files are selected, the tool renders a compact Markdown structure map. It includes the query, lexical anchors, selected files, and grouped neighbors such as `imports`, `calls`, and `co_edit`. The raw symbol graph retains `contains` edges for ownership and nesting, but the current file-level projection drops same-file self-relationships, so the rendered structure map may not emit `contains` neighbors.
@@ -188,6 +206,29 @@ response = self._post_json("/chat/completions", payload)
 ```
 
 This keeps the comparison honest. The control arm gets the task plus the candidate file inventory. The treatment arm gets the same inventory plus the generated structure map. That isolates whether structural context changes ranking behavior without turning the experiment into a full autonomous coding benchmark.
+
+## A coding-workflow example: Django
+
+The repository retrieval experiment above is deliberately offline. The lesson also included a separate coding-workflow benchmark on Django, where an agent received either a bare repository or a graph-derived structure hint while implementing a real cache-control change. This is a different kind of evidence: it measures an end-to-end coding workflow, not just whether a file appears in a ranked list.
+
+![Django coding-workflow benchmark comparing a bare repository with structure-map context]({{ "/assets/2026/08/20260830-code-kg-django-workflow.svg" | absolute_url }}){: .center-image }
+
+_Figure 3: Five-run Django cache-control case study. Values are treatment as a percentage of control, so lower is better for the effort metrics._
+
+For this one task, both arms passed the acceptance test in all five runs. The structure-map arm used fewer resources on average:
+
+| Metric | Bare repository | Structure map | Change |
+|---|---:|---:|---:|
+| Total time | 212.6 s | 174.6 s | −17.9% |
+| Total tokens | 3.02 M | 2.53 M | −16.3% |
+| Tool calls | 57.2 | 47.6 | −16.8% |
+| Calls to first correct edit | 14.4 | 12.0 | −16.7% |
+| Cost | $0.4829 | $0.4218 | −12.7% |
+| Acceptance | 100% | 100% | unchanged |
+
+That is a useful example because the task has a concrete correctness endpoint. It is not enough to say that the model saw more related files; the edited Django checkout also had to pass the task's acceptance tests. Still, the result is a five-run case study. The `anchors_only` ablation performed at least as well as the full graph map on several effort metrics, so this experiment does not isolate PageRank as the cause of the improvement.
+
+Across the broader ten-task suite, the median time improvement was 11.0%, but the pooled exact test was not statistically conclusive (`p = 0.2324` for time). The honest conclusion is that structural context can be useful navigation assistance, while the current evidence does not establish a reliable correctness or speedup guarantee.
 
 ## Run it on any checkout
 
@@ -288,9 +329,9 @@ Repeated runs matter only for the LLM A/B path. A model can vary its ranking eve
 
 It is also important to keep the benchmark scoped correctly: this is a localization and ranking harness, not an autonomous editing benchmark. A model can rank the right files and still fail to implement the change. Conversely, a coding agent can sometimes discover the right files by reading code interactively even when the initial graph ranking was mediocre.
 
-## Lessons from a verified smoke run and prior evidence
+## Lessons from the repository run and prior evidence
 
-I ran the companion CLI locally against its own repository as a smoke test before writing this post. On that small graph the index step produced `221` nodes and `521` edges. The offline example tasks were intentionally tiny, and the aggregate result came back with lexical `recall_at_5 = 1.0` versus graph `recall_at_5 = 0.33`.
+I ran the companion CLI against the `chess-studio` checkout before writing this post. The index step produced `2,518` nodes and `7,563` edges, including TypeScript/JavaScript declarations and relative imports as well as Git history. On the three explicit repository tasks, lexical recall at 5 was `0.50` and graph recall at 5 was `0.33`.
 
 That is a useful caution, not a contradiction. On easy tasks with obvious vocabulary overlap, flat lexical ranking can be hard to beat. The graph tends to pay for itself when the query is structurally right but lexically incomplete: multi-hop dependencies, helper indirection, and co-edit history are exactly the cases where text overlap starts running out of signal.
 
@@ -307,7 +348,7 @@ Before using this on a large codebase, I would keep these tradeoffs in mind:
 | co-edit history | noisy commits can add misleading edges |
 | graph freshness | a stale graph drifts away from the checkout you are actually editing |
 | incremental updates | frequent re-indexing matters if the repository changes faster than your retrieval cache |
-| language support | the companion parser currently focuses on Python |
+| language support | Python has AST extraction; TypeScript/JavaScript uses a conservative declaration/import extractor |
 | prompt size | structure maps can get too large if you expose too many files or neighbors |
 | API privacy and cost | `ab` can expose repository-relative file names and contextual hints to the configured provider |
 
