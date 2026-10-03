@@ -1,8 +1,8 @@
 ---
 layout: post
 comments: true
-title: "Building Code Knowledge Graphs with SQLite and PageRank"
-excerpt: "Build a portable code knowledge graph from a GitHub checkout and use it to retrieve structurally related files."
+title: "Building Code Knowledge Graphs"
+excerpt: "Build a code knowledge graph and use it to retrieve structurally related files."
 categories: genai
 tags: [ai, agents, code-search, knowledge-graph, rag]
 toc: true
@@ -10,21 +10,13 @@ img_excerpt:
 mermaid: true
 ---
 
-Flat search is still the first tool I reach for when I need to find a file quickly. Grepping for `Cache-Control`, `PageRank`, or `helper_value` is fast, cheap, and often good enough. The problem is that repository tasks are not always lexical. A bug report may mention a public function while the real fix lives two call edges away. A feature request may describe an entry point while the safest place to edit is a helper that tends to change with it in Git history.
+Grepping is a first choice tool to find a file containing some keywords. It is fast, cheap, and often good enough. But not enough for many software tasks, e.g. a bug report may mention a public function while the real fix lives two call edges away. A feature request may describe an entry point while the safest place to edit is a helper that tends to change with it in Git history.
 
-That is the gap a code knowledge graph tries to close. Instead of treating a repository as an unstructured pile of text, it stores files and symbols as nodes, links them with typed edges, and then uses graph traversal to surface files that are structurally related to the query even when they do not share the same words.
+That is the gap a code knowledge graph tries to fill. Instead of treating a repository as an unstructured pile of text, it stores files and symbols as nodes, links them with typed edges, and then uses graph traversal to surface files that are structurally related to the query even when they do not share the same keywords.
 
-This post shows how to build a portable version of that idea with standard-library Python, `sqlite3`, `ast`, `git`, and an optional OpenAI-compatible API. The complete runnable implementation used for these examples is kept in the companion project under `snippets/code-knowledge-graph/`.
+In the rest of this this article, we will build such a knowledge graph. Full source code can be found at [code-knowledge-graph](https://github.com/dzlab/snippets/tree/master/code-knowledge-graph).
 
-## Why a graph helps
 
-Keyword search is useful because most software tasks begin with names: a class, an endpoint, a config key, an error string. But lexical matching has predictable blind spots:
-
-- It does not naturally follow multi-hop structure such as file -> imported module -> called helper.
-- It does not encode containment, so finding a file does not automatically tell you which symbols inside it matter.
-- It does not use historical co-edits, which are often a strong hint that two files participate in the same change surface.
-
-The implementation uses the graph in a hybrid way: first find lexical anchors, then walk the graph outward from those anchors. That design matters because it preserves the speed of flat search while giving the retriever a way to reach files that text overlap alone would miss.
 
 ## What goes into the graph
 
@@ -38,6 +30,8 @@ The portable implementation projects retrieval down to files, but it still extra
 | `call` edge | symbol -> symbol | `ast.Call` resolution | follows behavior across helper layers |
 | `contains` edge | file -> symbol, class -> method | symbol collection pass | preserves nesting and ownership |
 | `co_edit` edge | file -> file | `git log` commit co-occurrence | surfaces files that historically change together |
+
+The implementation uses the graph in a hybrid way: first find lexical anchors, then walk the graph outward from those anchors. That design matters because it preserves the speed of flat search while giving the retriever a way to reach files that text overlap alone would miss.
 
 ## Start with a real repository
 
