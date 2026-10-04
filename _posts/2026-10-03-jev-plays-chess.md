@@ -14,11 +14,11 @@ mermaid: true
 
 In this article we explore [Jev Chess](https://github.com/dzlab/snippets/tree/master/jev-chess) a small TypeScript web app that uses Jev plays chess. An experiment exploring how to put a constrained decision model in a loop.
 
-IThe project leverages [chess.js](https://github.com/jhlywa/chess.js/) for chess rules and legal moves, [react-chessboard](https://github.com/Clariity/react-chessboard) for rendering, a server-side game loop, and a Jev client. At each game turn, Jev chooses from a set of move candidates prepared by the harness.
+The project leverages [chess.js](https://github.com/jhlywa/chess.js/) for chess rules and legal moves, [react-chessboard](https://github.com/Clariity/react-chessboard) for rendering, a server-side game loop, and a Jev client. At each game turn, Jev chooses from a set of move candidates prepared by the harness.
 
 ## Let code own the rules
 
-The first design choice was to keep the game state authoritative outside the model. The rules library knows which moves are legal, whether a move ends the game, and how a move updates the position. Jev gets a description of the current position and a choice question whose options refer to those legal moves.
+The first design choice was to keep the game state authoritative as part of the harness and away from the decision model. The harness uses `chess.js` library to find legal moves in a position, whether a move ends the game, and how a move updates the position. Jev gets a description of the current position and a choice question whose options refer to those legal moves.
 
 ```mermaid
 flowchart LR
@@ -35,7 +35,7 @@ flowchart LR
         validate --> apply --> board
     end
 
-    subgraph jev["Jev decision"]
+    subgraph jev["Decision model"]
         direction TB
         choose["Compare move descriptions"]
         response["Typed response<br/>answers.move.choice: move_017<br/>probabilities: one per option"]
@@ -60,9 +60,9 @@ flowchart LR
     class choose,response response;
 ```
 
-The harness builds a candidate list from `chess.js`, assigns each move an internal ID, and asks Jev to select one. When the response arrives, it looks up that ID in the original candidate list and passes the associated move back to `chess.js`. If the model returns an unknown ID, the turn fails instead of applying an arbitrary move. See the [Jev client](https://github.com/dzlab/snippets/blob/master/jev-chess/src/server/jev-client.ts) and [game runner](https://github.com/dzlab/snippets/blob/master/jev-chess/src/server/game-runner.ts).
+The diagram above explains the overall architecture; the harness builds a candidate list from `chess.js`, assigns each move an internal ID, and asks Jev to select one. When the response arrives, it looks up that ID in the original candidate list and passes the associated move back to `chess.js`. If the model returns an unknown ID, the turn fails instead of applying an arbitrary move. See the [Jev client](https://github.com/dzlab/snippets/blob/master/jev-chess/src/server/jev-client.ts) and [game runner](https://github.com/dzlab/snippets/blob/master/jev-chess/src/server/game-runner.ts).
 
-This division keeps the model's job narrow: judge the described options. The application keeps responsibility for legal play and game state.
+This design keeps the model's job limited to judging the described options. The harness keeps responsibility for legal play and game state.
 
 ## Make candidate moves easier to compare
 
