@@ -66,13 +66,13 @@ This design keeps the model's job limited to judging the described options. The 
 
 ## Make candidate moves easier to compare
 
-Legal moves are not equally easy to evaluate from their notation alone. A list of candidates such as `Nf3`, `Qxd4`, and `O-O` says what each move is called, but not necessarily what it threatens or leaves hanging. The harness therefore adds additional information. For a position, the harness summarizes the board, piece counts, and material using the simple values pawn 1, knight or bishop 3, rook 5, and queen 9. For each candidate move, it can describe captures, promotions, checks, immediate legal capture replies, whether the moved piece can be recaptured, and changes to attacks on occupied squares. It also checks whether the move allows an immediate checkmate or creates a threefold-repetition draw. The implementation is in [`decision-facts.ts`](https://github.com/dzlab/snippets/blob/master/jev-chess/src/server/decision-facts.ts).
+Sending Jev a list of candidates such as `Nf3`, `Qxd4`, and `O-O` that represent legal moves is not enough to make a decision, because the notation alone does not tell what the move threatens or leaves hanging. Therefore the harness needs to add additional information.
+
+For a position, the harness summarizes the board, piece counts, and material using the simple values pawn 1, knight or bishop 3, rook 5, and queen 9. For each candidate move, it can describe captures, promotions, checks, immediate legal capture replies, whether the moved piece can be recaptured, and changes to attacks on occupied squares. It also checks whether the move allows an immediate checkmate or creates a threefold-repetition draw. The implementation is in [`decision-facts.ts`](https://github.com/dzlab/snippets/blob/master/jev-chess/src/server/decision-facts.ts).
 
 The harness also applies two narrow safety rules. When at least one candidate avoids immediate mate, it removes moves that allow mate in one. When the side to move is ahead by at least three material points, it avoids an immediate threefold draw if a non-drawing move remains. If every move carries the relevant risk, Jev still receives the available moves and a warning.
 
-The request uses a typed `choice` question. Here are selected pieces of a concrete request built from the real position after `8...Nxc2+` in a recorded game. The harness sends a larger state too, including the move history, board summary, material, and tactical facts; these excerpts show the main inputs without hiding the actual values.
-
-The concrete request to Jev identifies the model name, and the state: the FEN encodes the board, side to move, castling rights, and move counters; the harness also marks that White is in check:
+Here is an example request sent to Jev; it specifies the model name, and the state: the FEN encodes the board, side to move, castling rights, and move counters; the harness also marks that White is in check:
 
 ```json
 {
@@ -108,7 +108,7 @@ The other part of the request `questions.move` asks Jev to select from the legal
 
 Here `move_000` is `Qxc2`, which captures the checking knight. The actual request combines this choice question with the fuller state above. Jev returns a candidate ID, and the game runner maps that ID back to the corresponding legal move rather than parsing generated chess notation.
 
-The client posts this JSON to `https://ai-gateway.vercel.sh/v1/evaluate` by default and sends its configured bearer token separately in the `Authorization` header. The API response names a candidate ID; the game runner maps it back to the legal move object rather than trusting generated text as notation.
+The client posts this JSON to `https://ai-gateway.vercel.sh/v1/evaluate`, the API response names a candidate ID; which gets mapped back to the legal move object by the game runner.
 
 If Jev returns `move_000`, the runner finds that ID in the supplied candidate list and applies the associated `from`, `to`, and promotion fields. If the response names an ID that was never offered, the turn errors instead of trying to parse it as a move.
 
@@ -141,7 +141,7 @@ This bracket was improved after reviewing an early game. At one position there w
 
 ## A bounded follow-up run
 
-After those changes, I recorded a short self-play run at the Quick setting. Jev applied 20 plies, or 10 moves per side. I paused the game while its next API decision was still in flight. The response selected `Ndb5`, but the runner discarded it because the game was paused. The position was still in progress.
+I recorded a short self-play run where Jev self-played 20 plies, or 10 moves per side, then collected some stats:
 
 | Measurement | Result |
 |---|---:|
@@ -153,7 +153,7 @@ After those changes, I recorded a short self-play run at the Quick setting. Jev 
 | Response latency, mean | 4.7 s |
 | Response latency, range | 212 ms to 26.4 s |
 
-The mean is pulled up by a few long responses; the median better represents a typical request in this small sample. All 20 applied moves were accepted by `chess.js`. The final response was valid but never applied.
+The mean is pulled up by a few long responses; the median better represents a typical request in this small sample. All 20 moves suggested by Jev were accepted by `chess.js`. Here is a recdoring of the game:
 
 <video controls preload="metadata" poster="https://raw.githubusercontent.com/dzlab/snippets/master/jev-chess/assets/jev-chess-run.png" width="100%">
   <source src="https://raw.githubusercontent.com/dzlab/snippets/master/jev-chess/assets/jev-chess-run.webm" type="video/webm">
@@ -162,15 +162,19 @@ The mean is pulled up by a few long responses; the median better represents a ty
 
 [Open or download the 20-ply recording](https://github.com/dzlab/snippets/blob/master/jev-chess/assets/jev-chess-run.webm).
 
-This run shows that the request-and-apply loop worked for 20 plies and that the interface could expose Jev's choice distribution. It does not establish playing strength. The probability distribution is Jev's relative weighting over the options it received, not a prediction of the chance of winning the game. One unfinished game and one earlier checkmate are far too little evidence for a strength claim.
+> Note: the probability distribution returned by Jev is a relative weighting over the options it received, not a prediction of the chance of winning the game.
 
-## What the experiment suggests
 
-The chess rules and safety checks are much easier to verify when implement in the harness. That does not make the resulting decisions automatically strong: Jev can only compare the facts and options the harness provides, and the harness's facts are intentionally limited. But it gives each part of the system a clear responsibility and makes a decision inspectable after the fact.
+## Improving the harness
 
-This experiment shows why application-level guardrails matter. A legal move can still lose immediately. Filtering an obvious mate-in-one risk is a useful boundary check, not a substitute for search. A stronger evaluation would need many games, controls such as Stockfish, colors and openings varied across trials, and a protocol for comparing results.
+This experiment shows that the chess rules and safety checks are much easier to verify when implemented in the harness. And that Jev can only compare the facts and options the harness provides.
 
-For now, Jev Chess is a small, reproducible integration experiment: code maintains a real game, Jev chooses among described legal candidates, and the logs make it possible to see what happened at each decision.
+Also having guardrails in the harness matter. A legal move can still lose immediately. Filtering an obvious mate-in-one risk is a useful boundary check, not a substitute for search.
+
+These observations matches the recommendation from TypeSafe's [building guidance](https://docs.typesafe.ai/concepts/how-to-build-with-system-one) that describes a useful pattern: keep control flow and deterministic rules in code, give Jev only the state needed for a narrow judgment, and combine its structured answers in the application. It also recommends using confidence to route uncertain cases instead of treating every valid answer as equally reliable.
+
+Jev Chess is a small experiment, which has a lot of room for improvement. For example, on the strategic judgments of Jev, we could try a few narrow, independent questions on the finalists—such as which move best improves king safety and which best creates a threat—and combine their results with the deterministic facts in code. TypeSafe documents parallel independent questions as a way to decompose a broad judgment without adding serial calls.
+
 
 ---
 
