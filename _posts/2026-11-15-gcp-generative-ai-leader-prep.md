@@ -137,4 +137,135 @@ Choose a small set of measures tied to the use case. Examples include task compl
 5. **Use sample questions to learn the format.** The official questions are untimed and can be repeated, but Google notes they do not represent the full range or difficulty of the exam and should not be used to predict your result. Your progress is not saved if you close the questions before finishing.
 6. **Review current product names before exam day.** Use Google's [certification page](https://cloud.google.com/learn/certification/generative-ai-leader) and [product naming reference](https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes) for the latest details.
 
+## Practice questions
+
+Try to answer each question before reading the explanations. Questions marked **Select all that apply** may have more than one correct answer. Use these for additional review alongside Google's official exam guide and sample questions.
+
+1. A healthcare organization is selecting a foundation model to summarize long patient histories that contain both text clinical notes and high-resolution radiological images in a single prompt. Which combination of model evaluation factors is most critical for this use case?
+
+   - A. Open-weights licensing and offline edge availability
+   - B. Prompt chaining efficiency and top-p nucleus limits
+   - C. Diffusion architecture and sampling temperature bounds
+   - D. Multimodality and context window capacity
+
+2. How do foundation models differ fundamentally from traditional supervised machine learning models during their initial training phase?
+
+   - A. Foundation models rely exclusively on human reinforcement feedback without initial pretraining.
+   - B. Foundation models bypass model deployment and monitoring stages of the ML lifecycle.
+   - C. Foundation models operate strictly on structured database tables, whereas traditional supervised models process unstructured audio and video.
+   - D. Foundation models are pretrained on massive amounts of unlabeled data to develop broad capabilities, whereas traditional supervised models rely on paired labeled datasets for narrower tasks.
+
+3. **Select all that apply.** An enterprise is auditing its data assets before a generative AI implementation. Which statements accurately distinguish structured data from unstructured data?
+
+   - A. Unstructured data accounts for a large portion of enterprise content, such as customer emails and support call transcripts, and may need specialized AI capabilities for analysis.
+   - B. Structured data cannot be used in generative AI applications because foundation models only accept raw text documents.
+   - C. All labeled data is structured, while all unlabeled data is unstructured.
+   - D. Structured data follows a defined format, such as relational tables, while unstructured data lacks a predefined data model and includes files such as PDFs, audio, and video.
+
+4. A software development firm wants an AI assistant that can be customized and deployed locally on private hardware to meet strict offline security policies. Which Google foundation model family best aligns with this requirement?
+
+   - A. Imagen
+   - B. Gemini Enterprise
+   - C. Gemma
+   - D. Veo
+
+5. **Select all that apply.** The generative AI ecosystem has distinct architectural layers. Which options correctly map a layer to its primary function?
+
+   - A. The Agents layer combines models with reasoning loops, tools, and memory to execute multi-step tasks.
+   - B. The Models layer includes pretrained foundation models such as Gemini, Gemma, and Imagen that provide generative capabilities.
+   - C. The Infrastructure layer supplies compute hardware such as TPUs, GPUs, and cloud data centers.
+   - D. The Platforms layer consists solely of physical networking hardware installed at customer sites.
+
+6. A research team wants to upload internal papers, contracts, and policies, then create a personalized assistant that synthesizes and answers questions from those documents. Which tool best fits this workflow?
+
+   - A. Gemini Notebook
+   - B. Speech-to-Text API
+   - C. CX Agent Studio
+   - D. Google Cloud Cybershield
+
+7. A development team wants to prototype and evaluate a generative prompt before building a production agent application. Which pair reflects the transition from rapid prototyping to production development?
+
+   - A. Gemini Advanced for API prototyping, then Model Garden for custom hardware provisioning
+   - B. Google AI Studio for rapid prototyping, then Agent Studio for production development
+   - C. Agent Studio for free initial testing, then Cloud SDK for model training
+   - D. Google Workspace Essentials for prompt testing, then Gemini Notebook for continuous integration
+
+8. **Select all that apply.** An enterprise is building a customer service agent for global, multichannel interactions. Which Google Cloud APIs can be integrated as tools to expand its capabilities?
+
+   - A. Translation API to translate user queries and responses across languages
+   - B. Speech-to-Text API to convert incoming call audio into text
+   - C. Compute Engine API to modify the model architecture during active chat sessions
+   - D. Document Translation API to translate formatted documents, such as user manuals, while preserving much of their layout
+
+9. A DevOps engineer wants AI assistance to generate infrastructure code, debug GKE deployment errors, and optimize BigQuery SQL. Which product provides these capabilities across Google Cloud?
+
+   - A. Agent Search
+   - B. Contact Center as a Service (CCaaS)
+   - C. Gemini Enterprise for Customer Experience
+   - D. Gemini for Google Cloud
+
+10. **Select all that apply.** How does Google Cloud's AI-optimized infrastructure support enterprise generative AI workloads?
+
+   - A. It offers custom-designed Tensor Processing Units (TPUs) optimized for training and serving AI models.
+   - B. Its global infrastructure supports reliable, scalable deployments and low-latency access for users in different regions.
+   - C. Its AI Hypercomputer brings hardware, software, and high-speed networking together for large-scale training and serving.
+   - D. It requires all generative AI outputs to use single-threaded CPUs to guarantee security.
+
+11. An engineer provides three examples of support tickets paired with their correct categories, then asks a language model to classify a new ticket. Which prompting technique is being used?
+
+   - A. ReAct prompting
+   - B. Role prompting
+   - C. Few-shot prompting
+   - D. Zero-shot prompting
+
+12. **Select all that apply.** Which Google Cloud-recommended practices can help address hallucinations or knowledge cutoffs in foundation models?
+
+   - A. Use retrieval-augmented generation (RAG) to add relevant information from external sources to the model context.
+   - B. Maximize temperature so facts are retrieved from the model's parameters.
+   - C. Ground responses with Google Search or enterprise data repositories.
+   - D. Use human review to validate outputs for sensitive decisions or edge cases.
+
+13. A financial extraction service must return consistent JSON with little variation in phrasing. Which temperature setting is the best starting point?
+
+   - A. Disable the context window parameter
+   - B. Maximize top-p and remove safety thresholds
+   - C. Set temperature near 0
+   - D. Set temperature near 1.0 or higher
+
+14. A CISO is establishing controls to defend AI/ML pipelines from threats and unauthorized access across the machine learning lifecycle. Which Google-recommended framework provides structure for managing these risks?
+
+   - A. Risk and Compliance as Code (RCaC)
+   - B. Open Banking APIx Standard
+   - C. Rapid Migration and Modernization Program (RaMP)
+   - D. Secure AI Framework (SAIF)
+
+15. **Select all that apply.** Which actions reflect a strategy that combines leadership direction with employee input?
+
+   - A. Prioritize focused implementations with measurable business impact over unguided experimentation.
+   - B. Wait until after deployment to establish responsible AI guidelines.
+   - C. Encourage employees across business functions to identify practical use cases and share feedback.
+   - D. Have leadership set a strategic vision, governance guidelines, and prioritized business goals.
+
+### Answers and explanations
+
+1. **D.** The prompt combines clinical text and radiology images, so the model must support the needed modalities and enough context for long histories.
+2. **D.** Foundation models learn broad capabilities through large-scale pretraining; supervised models are commonly trained on labeled examples for a defined task.
+3. **A and D.** Enterprise content includes unstructured material, and structured versus unstructured describes data organization. Labeling is a separate distinction, so statement C is false.
+4. **C.** Gemma is an open model family that supports deployment on local hardware and devices. See Google's [Gemma documentation](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/open-models/use-gemma).
+5. **A, B, and C.** Agents, models, and infrastructure map to the described roles. Platforms provide managed tools and services; they are not just physical networking equipment.
+6. **A.** Gemini Notebook is designed to work with supplied source material for research and synthesis. Its responses can be grounded in the uploaded sources; Speech-to-Text handles audio transcription, while the other options do not match this document-centered workflow. See Google's [Gemini Notebook documentation](https://docs.cloud.google.com/gemini/enterprise/notebooklm-enterprise/docs/overview).
+7. **B.** Google AI Studio supports rapid experimentation; Agent Studio is the production-oriented environment in this exam-level distinction.
+8. **A, B, and D.** Translation APIs can translate text and formatted documents, and Speech-to-Text can transcribe audio. Compute Engine does not modify a model's architecture during a conversation. Google's [Document Translation API](https://docs.cloud.google.com/translate/docs/advanced/translate-documents) preserves much of a document's layout, although results vary by format and complexity.
+9. **D.** Gemini for Google Cloud includes assistance across developer, infrastructure, and data workflows, including code generation and BigQuery SQL. See the [Gemini for Google Cloud overview](https://docs.cloud.google.com/gemini/docs/overview).
+10. **A, B, and C.** TPUs, Google's global infrastructure, and AI Hypercomputer support large-scale AI workloads. The platform does not require single-threaded CPU processing for security.
+11. **C.** Few-shot prompting supplies multiple examples to guide the model's response to a new case.
+12. **A, C, and D.** RAG and grounding add relevant, verifiable context, while human review provides oversight. Raising temperature does not retrieve facts or correct a model's knowledge.
+13. **C.** Near-zero temperature reduces variation in token selection. It is a useful starting point for consistent extraction, but temperature alone does not guarantee identical results on every run.
+14. **D.** Google's Secure AI Framework (SAIF) provides guidance for managing security risks across AI systems and their lifecycle.
+15. **A, C, and D.** Effective adoption pairs leadership goals and governance with focused implementation and feedback from employees who know the workflows.
+
 The exam rewards leaders who can connect an AI capability to a real business need, choose an appropriate Google Cloud approach, and account for data, risk, and outcomes. Use that sequence to reason through the scenarios, and treat product facts as supporting evidence for your decision.
+
+---
+
+_I hope you enjoyed this article, feel free to leave a comment or reach out on twitter [@bachiirc](https://twitter.com/bachiirc)._
