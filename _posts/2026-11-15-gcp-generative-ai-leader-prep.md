@@ -60,18 +60,18 @@ Know the difference between structured data, such as rows in a business database
 
 ### Choose a model for the use case
 
-Start with the task and constraints, then select the model capability. Avoid memorizing model rankings or fixed context-window figures; model availability and specifications change.
+Start with the task and constraints, then select the model capability. The product examples below are starting points, not fixed recommendations; model availability and specifications change.
 
-| Need | Selection question |
-| - | - |
-| Text, code, image, audio, or video | Which input and output modalities does the task require? |
-| High-volume, low-latency responses | What performance and cost targets must the solution meet? |
-| Complex reasoning or long documents | What capability and context does the workflow require? |
-| Sensitive or regulated information | What security, privacy, residency, and access requirements apply? |
-| A specialized task or output format | Can prompting or grounding solve it, or is model customization justified? |
-| Production use | How will availability, evaluation, monitoring, and model updates be managed? |
+| Need | Selection question | Example Google Cloud product |
+| - | - | - |
+| Text, code, image, audio, or video | Which input and output modalities does the task require? | [Gemini models on Gemini Enterprise Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/google-models) |
+| High-volume, low-latency responses | What performance and cost targets must the solution meet? | Gemini Flash models on Gemini Enterprise Agent Platform |
+| Complex reasoning or long documents | What capability and context does the workflow require? | Gemini Pro models on Gemini Enterprise Agent Platform |
+| Sensitive or regulated information | What security, privacy, residency, and access requirements apply? | Gemini Enterprise Agent Platform; assess the controls and model-specific data handling |
+| A specialized task or output format | Can prompting or grounding solve it, or is model customization justified? | [Gemma models in Model Garden](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/open-models/use-gemma) |
+| Production use | How will availability, evaluation, monitoring, and model updates be managed? | Gemini Enterprise Agent Platform's managed model APIs and monitoring |
 
-The official study material uses Google model families as examples of different capabilities, including Gemini for multimodal tasks, Gemma for open models, Imagen for image generation, and Veo for video generation. Treat these as a starting vocabulary, then check current product documentation for specific features.
+The official study material uses Google model families as examples of different capabilities, including Gemini for multimodal tasks, Gemma for open models, Imagen for image generation, and Veo for video generation. Treat these as a starting vocabulary, then check current product documentation and model cards for specific features, availability, and limits.
 
 ## Google Cloud offerings: match the tool to the job
 
