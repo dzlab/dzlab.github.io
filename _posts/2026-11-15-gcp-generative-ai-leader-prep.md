@@ -128,15 +128,6 @@ Responsible AI is part of the solution design. Consider privacy, security, fairn
 
 Choose a small set of measures tied to the use case. Examples include task completion rate, time saved per workflow, answer quality, customer satisfaction, escalation rate, cost per task, and error rate. A productivity use case might need both time saved and quality checks; a customer support agent might need resolution rate and safe escalation measures. Define a baseline before rollout so you can compare results.
 
-## A practical study plan
-
-1. **Start with the exam guide.** Map each objective to a topic you know well and one you need to review. Spend extra time on Google Cloud's gen AI offerings, the largest domain.
-2. **Work through the official learning path and study guide.** Use the [Generative AI Leader learning path](https://www.skills.google/paths/1951) and the [official study guide](https://services.google.com/fh/files/misc/generative_ai_leader_study_guide_english.pdf) to fill gaps.
-3. **Make decision notes, not a glossary.** For each product or technique, write down the business problem it fits, the data it needs, and the tradeoff or risk it introduces.
-4. **Practice scenario reasoning.** For each use case, connect the business goal to model capability, data, platform choice, safeguards, and a measurable outcome.
-5. **Use sample questions to learn the format.** The official questions are untimed and can be repeated, but Google notes they do not represent the full range or difficulty of the exam and should not be used to predict your result. Your progress is not saved if you close the questions before finishing.
-6. **Review current product names before exam day.** Use Google's [certification page](https://cloud.google.com/learn/certification/generative-ai-leader) and [product naming reference](https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes) for the latest details.
-
 ## Practice questions
 
 Try to answer each question before reading the explanations. Questions marked **Select all that apply** may have more than one correct answer. Use these for additional review alongside Google's official exam guide and sample questions.
