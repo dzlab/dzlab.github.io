@@ -77,11 +77,13 @@ The exam expects familiarity with Google's gen AI ecosystem and the role differe
 
 | Requirement | Direction to consider | Why |
 | - | - | - |
-| Help employees with everyday work | Gemini and Gemini features in Google Workspace | Bring AI assistance into user workflows |
+| Help employees with everyday work | Gemini app and Gemini for Google Workspace | Bring AI assistance into familiar user workflows |
+| Give employees enterprise search, assistance, and agents | [Gemini Enterprise app](https://docs.cloud.google.com/gemini/enterprise/docs) | Employee-facing access to enterprise information, assistants, and agents |
 | Experiment with prompts and model behavior | Google AI Studio | A quick environment for prototyping with Google's AI models |
-| Build and manage production applications or agents | Gemini Enterprise Agent Platform and Agent Studio | Tools for developing and operating enterprise AI solutions |
+| Build custom production applications and agents | [Gemini Enterprise Agent Platform](https://cloud.google.com/gemini-enterprise/faq) and Agent Studio | Developer platform for building, scaling, and governing AI solutions; Agent Studio was formerly Vertex AI Studio |
 | Search private enterprise content | Agent Search or RAG capabilities | Retrieve relevant information to ground responses in business data |
 | Use public, current web information | Grounding with Google Search | Connect responses to current public sources |
+| Serve customers and support contact center teams | [Gemini Enterprise for Customer Experience (GECX)](https://docs.cloud.google.com/gemini-enterprise-cx): [Customer Experience Agent Studio](https://cloud.google.com/gemini-enterprise-cx/cx-agent-studio), [Agent Assist](https://cloud.google.com/gemini-enterprise-cx/agent-assist), and [Customer Experience Insights](https://cloud.google.com/gemini-enterprise-cx/cx-insights) | Build customer self-service agents, assist human representatives, and analyze customer interactions; older exam material calls this Customer Engagement Suite |
 
 Google Cloud has renamed several products. The current [naming reference](https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes) maps Vertex AI Platform to Gemini Enterprise Agent Platform, Vertex AI Studio to Agent Studio, and Vertex AI Search to Agent Search. Some study materials or older articles may use the previous Vertex AI names, so recognize both while preparing and use current names when checking product details.
 
