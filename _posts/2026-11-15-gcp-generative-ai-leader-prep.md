@@ -9,6 +9,8 @@ toc: true
 img_excerpt:
 ---
 
+<center><img alt="Generative AI Leader Certification" src='https://images.credly.com/size/340x340/images/ec23e41a-0f32-4a98-9c00-28925621b281/blob' width='300' height='300'></center>
+
 The Google Cloud Generative AI Leader exam is about making sound business decisions with generative AI. It is intended for people across business and technical roles, with or without hands-on experience. The exam tests whether you can recognize useful opportunities, understand Google Cloud's offerings, and guide responsible adoption. It does not ask you to implement a model or build an application.
 
 This guide is a final-review companion to the [official exam guide](https://services.google.com/fh/files/misc/generative_ai_leader_exam_guide_english.pdf) and the [Google Cloud certification page](https://cloud.google.com/learn/certification/generative-ai-leader). Use it to organize the material around decisions and tradeoffs rather than memorize a product catalog.
